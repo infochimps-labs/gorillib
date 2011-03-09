@@ -1,0 +1,60 @@
+h2. Gorillib: infochimps' lightweight subset of ruby convenience methods
+
+* No creep: include only what you need
+* No dependencies
+
+* NO COMMITS UNLESS JACOB SAYS OK
+
+h4. yes
+
+* *blank*
+* *tap*
+
+---------------------------------------------------------------------------
+
+h4. Maybe
+
+The following are under consideration:
+
+Class           cattr_reader, cattr_writer, cattr_accessor
+Class           class_inheritable_accessor
+
+Array           extract_options!
+
+Hash            slice, slice!, reverse_merge, Hash.zip
+Hash            deep_merge, deep_merge!
+Hash            compact, compact!, compact_blank, compact_blank!
+Hash            symbolize_keys, symbolize_keys!
+
+Enumerable      sum 
+
+Many            to_flat
+
+Time, Date      parse_safely
+
+String          camelize, underscore, classify, constantize
+
+Symbol          to_proc
+
+extlib/object
+extlib/module
+
+String          xml_encode, url_encode
+
+---------------------------------------------------------------------------
+
+h3. Contributing to gorillib
+
+* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
+* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
+* Fork the project
+* Start a feature/bugfix branch
+* Commit and push until you are happy with your contribution
+* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
+* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+
+h3. Copyright
+
+Copyright (c) 2011 Infochimps. See LICENSE.txt for
+further details.
+
