@@ -5,41 +5,67 @@ h2. Gorillib: infochimps' lightweight subset of ruby convenience methods
 
 * NO COMMITS UNLESS JACOB SAYS OK
 
-h4. yes
+* gorillib
+* gorillib/some -- base plus class; camelize etc; slice/compact etc
+* gorillib/logger
+* gorillib/delegation
+* gorillib/hash/deep_merge
+* gorillib/string/escaping
 
-* *blank*
-* *tap*
+h4. require 'gorillib'
 
----------------------------------------------------------------------------
+* blank?
+* tap
+* Symbol#to_proc
+* Array           extract_options!
+* Hash.zip
+* Hash.slice, slice!, reverse_merge, compact, compact!, compact_blank, compact_blank!
 
-h4. Maybe
-
-The following are under consideration:
-
-Class           cattr_reader, cattr_writer, cattr_accessor
-Class           class_inheritable_accessor
-
-Array           extract_options!
-
-Hash            slice, slice!, reverse_merge, Hash.zip
-Hash            deep_merge, deep_merge!
-Hash            compact, compact!, compact_blank, compact_blank!
-Hash            symbolize_keys, symbolize_keys!
+h4. require 'gorillib/some'
 
 Enumerable      sum 
+Hash            symbolize_keys, symbolize_keys!
+String          camelize, underscore, classify, constantize, snake_case, demodulize
+Class           class_attribute (module/remove_method.rb, kernel/singleton_class.rb)
+Class           cattr_reader, cattr_writer, cattr_accessor
+Time, Date      to_flat, parse_safely
 
-Many            to_flat
+h4. require 'gorillib/logger'
 
-Time, Date      parse_safely
+Defines Log if no log has been set
 
-String          camelize, underscore, classify, constantize
+h4. require 'gorillib/hash/deep_merge'
 
-Symbol          to_proc
+Hash            deep_merge, deep_merge!
 
-extlib/object
-extlib/module
+h4. require 'gorillib/metaprogramming
 
-String          xml_encode, url_encode
+* try (send, but on NoMethodError returns nil
+* Module    find_const 
+* Delegation module/delegation
+* alias_method_chain
+* alias_attribute
+
+h4. require 'gorillib/string/escaping'
+
+String          xml_escape, url_escape, escape_regexp, unescape_regexp
+                'htmlentities' 'addressable/uri'
+
+h4. require 'gorillib/string/human'
+
+String          truncate, as_sentence
+
+h3. Maybe
+
+* *Mash*
+* *Receiver*
+* *Struct*
+
+h4. No
+
+* to_flat (on anything but Time and Date)
+* #returning is deprecated in favor of #tap
+
 
 ---------------------------------------------------------------------------
 
