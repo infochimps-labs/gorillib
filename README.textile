@@ -1,86 +1,153 @@
 h2. Gorillib: infochimps' lightweight subset of ruby convenience methods
 
 * No creep: include only what you need
-* No dependencies
-
+* No dependencies unless audaciously advertised.
+* Compatibile with active_record and extlib
 * NO COMMITS UNLESS JACOB SAYS OK
 
-* gorillib
-* gorillib/some -- base plus class; camelize etc; slice/compact etc
-* gorillib/logger
-* gorillib/delegation
-* gorillib/hash/deep_merge
-* gorillib/string/escaping
+h3. require 'gorillib'
 
-h4. require 'gorillib'
+* require 'gorrillib/base'
 
-* blank?
-* tap
-* Symbol#to_proc
-* Array           extract_options!
-* Hash.zip
-* Hash.slice, slice!, reverse_merge, compact, compact!, compact_blank, compact_blank!
+h3. require 'gorillib/base'
 
-h4. require 'gorillib/some'
+requires the following libraries:
 
-Enumerable      sum 
-Hash            symbolize_keys, symbolize_keys!
-String          camelize, underscore, classify, constantize, snake_case, demodulize
-Class           class_attribute (module/remove_method.rb, kernel/singleton_class.rb)
-Class           cattr_reader, cattr_writer, cattr_accessor
-Time, Date      to_flat, parse_safely
+* gorillib/object/blank
+* gorillib/array/extract_options
+* gorillib/hash/reverse_merge
+* gorillib/hash/compact
+* gorillib/array/compact
 
-h4. require 'gorillib/logger'
+h3. require 'gorillib/some'
 
-Defines Log if no log has been set
+requires @gorillib/base@ and the following additional libraries:
 
-h4. require 'gorillib/hash/deep_merge'
+* set
+* time
+* date
+* gorillib/enumerable/sum
+* gorillib/datetime/flat
+* gorillib/datetime/parse_safely
+* gorillib/hash/zip
+* gorillib/hash/slice
+* gorillib/hash/keys
+* gorillib/metaprogramming/singleton_class
+* gorillib/metaprogramming/remove_method
+* gorillib/metaprogramming/class_attribute
+* gorillib/metaprogramming/cattr_accessor
 
-Hash            deep_merge, deep_merge!
+---------------------------------------------------------------------------
 
-h4. require 'gorillib/metaprogramming
+h3. gorillib/array
 
-* try (send, but on NoMethodError returns nil
-* Module    find_const 
-* Delegation module/delegation
-* alias_method_chain
-* alias_attribute
+* *gorrillib/array/extract_options*
+  - Array       extract_options!
+  - Hash        extractable_options? (helper method)
+* *gorrillib/array/compact_blank*
+  - Array       compact_blank, compact_blank!
 
-h4. require 'gorillib/string/escaping'
+h3. gorillib/datetime
 
-String          xml_escape, url_escape, escape_regexp, unescape_regexp
-                'htmlentities' 'addressable/uri'
+* *gorillib/datetime/flat*
+  - Date, Time	to_flat
+* *gorillib/datetime/parse*
+  - Date, Time  parse_safely
 
-h4. require 'gorillib/string/human'
+h3. gorillib/enumerable
 
-String          truncate, as_sentence
+* *gorillib/enumerable/sum*
+  - Enumerable  sum
+  
+h3. gorillib/hash
 
-h3. Maybe
+* *gorillib/hash/compact*
+  - Hash        compact, compact!, compact_blank, compact_blank!
+* *gorrilib/hash/deep_merge*
+  - Hash        deep_merge, deep_merge!
+* *gorillib/hash/keys*
+  - Hash        stringify_keys, stringify_keys!, symbolize_keys, symbolize_keys!
+  - Hash        assert_valid_keys
+* *gorillib/hash/reverse_merge*
+  - Hash        reverse_merge, reverse_merge!
+* *gorillib/hash/slice*
+  - Hash        slice, slice!, extract!
+* *gorillib/hash/zip*
+  - Hash        Hash.zip
+
+h3. gorillib/logger
+
+* *gorillib/logger/log*
+  - Unless the top-level constant ::Log has been defined, opens a new Logger to STDERR and assigns it to ::Log
+
+h3. gorillib/metaprogramming
+
+* *gorillib/metaprogramming/aliasing*
+  - alias_method_chain
+* *gorillib/metaprogramming/class_attribute*
+  - Class       class_attribute
+* *gorillib/metaprogramming/remove_method* _required with class_attribute_
+  - Module      remove_possible_method, redefine_method
+* *gorillib/metaprogramming/singleton_class* _required with class_attribute_
+  - Kernel      singleton_class
+* *gorillib/metaprogramming/cattr_accessor*
+  - Class#      cattr_reader, cattr_writer, cattr_accessor
+* *gorillib/metaprogramming/mattr_accessor*
+  - Class#      mattr_reader, mattr_writer, mattr_accessor
+* *gorillib/metaprogramming/delegation*
+  - Module#     delegate
+
+h3. gorillib/object
+
+* *gorillib/object/blank*
+  - Object      blank?  (and specialized for all other classes)
+
+h3. gorillib/string
+
+* *gorillib/string/constantize*
+  - String	constantize
+* *gorillib/string/inflections*:
+  - String	camelize
+  - String	snakeize
+  - String	underscore
+  - String	demodulize
+* *gorillib/string/human*
+  - String	titleize
+  - String	humainze
+  - Array	as_sentence
+* *gorillib/string/truncate*
+  - String	truncate
+
+---------------------------------------------------------------------------
+
+h2. Maybe and No
+
+h4. Maybe
 
 * *Mash*
 * *Receiver*
 * *Struct*
+* *gorillib/string/escaping*: _DEPENDENCIES_: htmlentities, addressable/uri
+  - String	 xml_escape
+  - String	 url_escape
+  - String	 escape_regexp, unescape_regexp
+* *extlib/module/find_const*
+  - Module      find_const
 
 h4. No
 
-* to_flat (on anything but Time and Date)
-* #returning is deprecated in favor of #tap
-
+* String        classify -- this singularizes. You want camelize unless you're in ActiveSupport
+* Object        tap     isn't necessary -- included in 1.8.7+
+* Symbol        to_proc isn't necessary -- included in 1.8.7+
+* Class         class_inheritable_attribute -- use class_attribute instead
+* Object        to_flat on anything but Time and Date -- poorly-defined
+* Object        returning -- deprecated in favor of #tap
 
 ---------------------------------------------------------------------------
 
-h3. Contributing to gorillib
+h2. Credits & Copyright
 
-* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
-* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
-* Fork the project
-* Start a feature/bugfix branch
-* Commit and push until you are happy with your contribution
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
-
-h3. Copyright
-
-Copyright (c) 2011 Infochimps. See LICENSE.txt for
-further details.
+Most of this code is ripped from active_support and extlib -- their license
+carries over. Everything else is Copyright (c) 2011 Infochimps. See LICENSE.txt
+for further details.
 
