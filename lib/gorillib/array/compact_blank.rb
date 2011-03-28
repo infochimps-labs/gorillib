@@ -1,9 +1,11 @@
+require 'gorillib/object/blank'
+
 class Array
   #
   # remove all key-value pairs where the value is blank
   #
   def compact_blank
-    reject{|key,val| val.blank? }
+    reject{|val| val.blank? }
   end unless method_defined?(:compact_blank)
 
   #

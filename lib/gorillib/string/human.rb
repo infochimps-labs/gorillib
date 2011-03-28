@@ -1,3 +1,6 @@
+require 'gorillib/string/inflections'
+require 'gorillib/array/extract_options'
+
 class String
 
   # Capitalizes the first word and turns underscores into spaces and strips a
@@ -18,7 +21,7 @@ class String
   #   "man from the boondocks".titleize # => "Man From The Boondocks"
   #   "x-men: the last stand".titleize  # => "X Men: The Last Stand"
   def titleize
-    humanize(underscore).gsub(/\b('?[a-z])/){ $1.capitalize }
+    self.underscore.humanize.gsub(/\b('?[a-z])/){ $1.capitalize }
   end unless method_defined?(:titleize)
 end
 

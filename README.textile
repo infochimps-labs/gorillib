@@ -100,7 +100,7 @@ h3. gorillib/metaprogramming
 h3. gorillib/object
 
 * *gorillib/object/blank*
-  - Object      blank?  (and specialized for all other classes)
+  - Object      blank?, present?  (and specialized for all other classes)
 
 h3. gorillib/string
 

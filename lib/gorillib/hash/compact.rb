@@ -1,3 +1,5 @@
+require 'gorillib/object/blank'
+
 class Hash
   #
   # remove all key-value pairs where the value is nil
