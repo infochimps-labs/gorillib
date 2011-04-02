@@ -8,9 +8,21 @@ class Object
   #
   # @return [TrueClass, FalseClass]
   #
-  # @api public
   def blank?
     nil? || (respond_to?(:empty?) && empty?)
+  end
+
+  ##
+  # Returns true if the object is NOT nil or empty
+  #
+  #   [].present?         #=>  false
+  #   [1].present?        #=>  true
+  #   [nil].present?      #=>  true
+  #
+  # @return [TrueClass, FalseClass]
+  #
+  def present?
+    not blank?
   end
 end # class Object
 
@@ -24,7 +36,6 @@ class Numeric
   #
   # @return [FalseClass]
   #
-  # @api public
   def blank?
     false
   end
@@ -38,7 +49,6 @@ class NilClass
   #
   # @return [TrueClass]
   #
-  # @api public
   def blank?
     true
   end
@@ -52,7 +62,6 @@ class TrueClass
   #
   # @return [FalseClass]
   #
-  # @api public
   def blank?
     false
   end
@@ -66,7 +75,6 @@ class FalseClass
   #
   # @return [TrueClass]
   #
-  # @api public
   def blank?
     true
   end
@@ -82,7 +90,6 @@ class String
   #
   # @return [TrueClass, FalseClass]
   #
-  # @api public
   def blank?
     strip.empty?
   end
