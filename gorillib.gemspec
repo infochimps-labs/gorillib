@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = %q{2011-04-01}
+  s.date = %q{2011-04-02}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "fiddle/hubahuba.rb",
+    "gorillib.gemspec",
     "lib/gorillib.rb",
     "lib/gorillib/array/compact_blank.rb",
     "lib/gorillib/array/extract_options.rb",
