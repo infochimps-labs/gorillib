@@ -1,4 +1,3 @@
-
 require 'gorillib/object/blank'
 require 'gorillib/array/extract_options'
 require 'gorillib/hash/reverse_merge'
