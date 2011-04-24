@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorillib}
-  s.version = "0.0.4"
+  s.version = "0.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = %q{2011-04-18}
+  s.date = %q{2011-04-24}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
@@ -46,6 +46,7 @@ Gem::Specification.new do |s|
     "lib/gorillib/metaprogramming/mattr_accessor.rb",
     "lib/gorillib/metaprogramming/remove_method.rb",
     "lib/gorillib/metaprogramming/singleton_class.rb",
+    "lib/gorillib/numeric/clamp.rb",
     "lib/gorillib/object/blank.rb",
     "lib/gorillib/some.rb",
     "lib/gorillib/string/constantize.rb",
@@ -54,6 +55,7 @@ Gem::Specification.new do |s|
     "lib/gorillib/string/truncate.rb",
     "spec/blank_spec.rb",
     "spec/gorillib_spec.rb",
+    "spec/numeric_spec.rb",
     "spec/rcov.opts",
     "spec/spec.opts",
     "spec/spec_helper.rb",
@@ -92,6 +94,7 @@ Gem::Specification.new do |s|
   s.test_files = [
     "spec/blank_spec.rb",
     "spec/gorillib_spec.rb",
+    "spec/numeric_spec.rb",
     "spec/spec_helper.rb",
     "test/abstract_unit.rb",
     "test/array/compact_blank_test.rb",
