@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'extlib/blank'
+require 'gorillib/object/blank'
 
 describe Object do
   it 'should provide blank?' do
