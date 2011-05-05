@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = %q{2011-04-24}
+  s.date = %q{2011-05-05}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
@@ -27,12 +27,14 @@ Gem::Specification.new do |s|
     "gorillib.gemspec",
     "lib/gorillib.rb",
     "lib/gorillib/array/compact_blank.rb",
+    "lib/gorillib/array/deep_compact.rb",
     "lib/gorillib/array/extract_options.rb",
     "lib/gorillib/base.rb",
     "lib/gorillib/datetime/flat.rb",
     "lib/gorillib/datetime/parse.rb",
     "lib/gorillib/enumerable/sum.rb",
     "lib/gorillib/hash/compact.rb",
+    "lib/gorillib/hash/deep_compact.rb",
     "lib/gorillib/hash/deep_merge.rb",
     "lib/gorillib/hash/keys.rb",
     "lib/gorillib/hash/reverse_merge.rb",
@@ -54,6 +56,7 @@ Gem::Specification.new do |s|
     "lib/gorillib/string/inflections.rb",
     "lib/gorillib/string/truncate.rb",
     "spec/blank_spec.rb",
+    "spec/deep_compact_spec.rb",
     "spec/gorillib_spec.rb",
     "spec/numeric_spec.rb",
     "spec/rcov.opts",
@@ -89,10 +92,11 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://infochimps.com/labs}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.5.0}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{include only what you need. No dependencies, no creep}
   s.test_files = [
     "spec/blank_spec.rb",
+    "spec/deep_compact_spec.rb",
     "spec/gorillib_spec.rb",
     "spec/numeric_spec.rb",
     "spec/spec_helper.rb",
@@ -124,6 +128,7 @@ Gem::Specification.new do |s|
   ]
 
   if s.respond_to? :specification_version then
+    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
