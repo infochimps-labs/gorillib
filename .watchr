@@ -15,6 +15,6 @@ watch("spec/.*/*_spec\.rb") do |match|
   run_spec match[0]
 end
 
-watch("app/(.*)\.rb") do |match|
+watch("lib/(.*)\.rb") do |match|
   run_spec %{spec/#{match[1]}_spec.rb}
 end
