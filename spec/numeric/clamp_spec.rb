@@ -1,8 +1,8 @@
-require 'spec_helper'
+require File.dirname(__FILE__)+'/../spec_helper'
 require 'gorillib/numeric/clamp'
 
-describe 'numeric/clamp' do
-  describe Numeric do
+describe Numeric do
+  describe '#clamp' do
     it 'should return self if neither min nor max are given' do
       5.clamp().should == 5
     end
