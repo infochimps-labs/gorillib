@@ -16,13 +16,13 @@ class String
   #   # => "And they f... (continued)"
   def truncate(length, options = {})
     text = self.dup
-    chars        = text.respond_to?(:mb_chars)      ? text.mb_chars            : text.chars
+    chars        = text.respond_to?(:mb_chars)      ? text.mb_chars            : text
     omission     = options[:omission] || "..."
     omission_len = omission.respond_to?(:mb_chars)  ? omission.mb_chars.length : omission.length
     length_with_room_for_omission = length - omission_len
 
     if (separator = options[:separator])
-      separator_chars = separator.respond_to?(:mb_chars) ? separator.to_s.mb_chars  : separator.to_s.chars
+      separator_chars = separator.respond_to?(:mb_chars) ? separator.to_s.mb_chars  : separator.to_s
       stop = chars.rindex(separator_chars, length_with_room_for_omission) || length_with_room_for_omission
     else
       stop = length_with_room_for_omission
