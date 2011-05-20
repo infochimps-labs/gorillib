@@ -6,17 +6,8 @@ require 'gorillib/object/blank'
 class Array
   def deep_compact!
     self.map! do |val|
-      case val
-      when Hash
-        val = val.deep_compact!
-      when Array
-        val = val.deep_compact!
-      when String
-        val = nil if val.blank?
-      end
-      val
-    end
-    self.compact!
-    self.blank? ? nil : self
+      val.deep_compact! if val.respond_to?(:deep_compact!)
+      val unless val.blank?
+    end.compact!
   end
 end

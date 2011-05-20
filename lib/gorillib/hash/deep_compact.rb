@@ -6,19 +6,9 @@ require 'gorillib/object/blank'
 class Hash
   def deep_compact!
     self.each do |key, val|
-      case val
-      when Hash
-        val = val.deep_compact!
-        self.delete(key) if val.blank?
-      when Array
-        val = val.deep_compact!
-        self.delete(key) if val.blank?
-      when String
-        self.delete(key) if val.blank?
-      when nil
-        self.delete(key)
-      end
+      val.deep_compact! if val.respond_to?(:deep_compact!)
+      self.delete(key) if val.blank?
     end
-    self.blank? ? nil : self
+    self
   end
 end

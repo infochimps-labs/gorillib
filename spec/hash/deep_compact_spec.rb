@@ -9,11 +9,11 @@ describe Hash do
     end
 
     it "should return nil if all values evaluate as blank" do
-      { :a=>nil, :b=>"", :c=>[] }.deep_compact!.should be nil
+      { :a => nil, :b => "", :c => [], :d => {} }.deep_compact!.should == {}
     end
 
     it "should return a hash with all blank values removed recursively" do
-      @test_hash = {:e=>["",nil,[],{},"foo",{:a=>[nil,{:c=>["","",[]]}],:b=>nil }]}
+      @test_hash = {:e=>["", nil, [], {}, "foo", { :a=> [nil, {}, { :c=> ["","",[]] } ], :b => nil }]}
       @test_hash.deep_compact!.should == {:e=>["foo"]}
     end
   end
@@ -26,12 +26,12 @@ describe Array do
     end
 
     it "should return nil if all values evaluate as blank" do
-      [nil, '', { }].deep_compact!.should be nil
+      [nil, '', { }, []].deep_compact!.should == []
     end
 
     it "should return a hash with all blank values removed recursively" do
-      @test_hash = ["",nil,[],{},"foo",{:a=>[nil,{:c=>["","",[]]}],:b=>nil }]
-      @test_hash.deep_compact!.should == ["foo"]
+      @test_arr = ["", nil, [], {}, "foo", { :a=> [nil, {}, { :c=> ["","",[]] } ], :b => nil }]
+      @test_arr.deep_compact!.should == ["foo"]
     end
   end
 end

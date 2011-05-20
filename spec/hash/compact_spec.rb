@@ -2,6 +2,44 @@ require File.dirname(__FILE__)+'/../spec_helper'
 require 'gorillib/hash/compact'
 
 describe Hash do
+  describe '#compact' do
+    it 'scrubs nil' do
+      hsh = { 1 => nil }
+      hsh.compact.should == {}
+      hsh.length.should == 1
+    end
+
+    it 'does not scrub false, {} or ""' do
+      hsh       = { 1 => nil, 2 => false, 3 => {}, 4 => "" }
+      hsh.compact.should == { 2 => false, 3 => {}, 4 => "" }
+      hsh.length.should == 4
+    end
+
+    it 'with values' do
+      { 1 => nil, nil => 2 }.compact.should == { nil => 2 }
+      { 1 => nil, 2 => :val_2, 3 => {}, 4 => :val_4}.compact.should == { 2 => :val_2, 3 => {}, 4 => :val_4 }
+    end
+  end
+
+  describe '#compact!' do
+    it 'scrubs nil' do
+      hsh = { 1 => nil }
+      hsh.compact!.should == {}
+      hsh.length.should == 0
+    end
+
+    it 'does not scrub false, {} or ""' do
+      hsh        = { 1 => nil, 2 => false, 3 => {}, 4 => "" }
+      hsh.compact!.should == { 2 => false, 3 => {}, 4 => "" }
+      hsh.length.should == 3
+    end
+
+    it 'with values' do
+      { 1 => nil, nil => 2 }.compact!.should == { nil => 2 }
+      { 1 => nil, 2 => :val_2, 3 => {}, 4 => :val_4}.compact!.should == { 2 => :val_2, 3 => {}, 4 => :val_4 }
+    end
+  end
+
   describe '#compact_blank' do
     it 'when empty' do
       [ { 1 => nil}, { 1 => nil, 2 => false, 3 => {}, 4 => ""} ].each do |hsh|
