@@ -3,7 +3,12 @@ h2. Gorillib: infochimps' lightweight subset of ruby convenience methods
 * No creep: include only what you need
 * No dependencies unless audaciously advertised.
 * Compatibile with active_record and extlib
-* NO COMMITS UNLESS JACOB SAYS OK
+
+
+h3. TODO:
+
+* Gorillib.demands(:cattr_accessor) -- raises if not included and recommends what to include
+
 
 h3. require 'gorillib'
 

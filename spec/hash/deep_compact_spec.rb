@@ -1,10 +1,9 @@
-require 'spec_helper'
+require File.dirname(__FILE__)+'/../spec_helper'
 require 'gorillib/hash/deep_compact'
 require 'gorillib/array/deep_compact'
 
-describe 'array/deep_compact and hash/deep_compact' do
-  describe Hash do
-
+describe Hash do
+  describe 'array/deep_compact and hash/deep_compact' do
     it "should respond to the method deep_compact!" do
       { }.should respond_to :deep_compact!
     end
@@ -17,11 +16,11 @@ describe 'array/deep_compact and hash/deep_compact' do
       @test_hash = {:e=>["",nil,[],{},"foo",{:a=>[nil,{:c=>["","",[]]}],:b=>nil }]}
       @test_hash.deep_compact!.should == {:e=>["foo"]}
     end
-
   end
+end
 
-  describe Array do
-
+describe Array do
+  describe 'array/deep_compact and hash/deep_compact' do
     it "should respond to the method deep_compact!" do
       [ ].should respond_to :deep_compact!
     end

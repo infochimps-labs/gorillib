@@ -19,14 +19,14 @@ describe String do
 
     if RUBY_VERSION < '1.9.0'
       it 'works with unicode when kcode=none' do
-        Gorillib::TestHelper.with_kcode('none') do
+        Gorillib::KcodeTestHelper.with_kcode('none') do
           "\354\225\210\353\205\225\355\225\230\354\204\270\354\232\224".truncate(10).
             should == "\354\225\210\353\205\225\355..."
         end
       end
 
       it 'works with unicode when kcode=u' do
-        Gorillib::TestHelper.with_kcode('u') do
+        Gorillib::KcodeTestHelper.with_kcode('u') do
           "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 \354\225\204\353\235\274\353\246\254\354\230\244".truncate(10).
             should == "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 ..."
         end
