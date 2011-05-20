@@ -1,15 +1,14 @@
 h2. Gorillib: infochimps' lightweight subset of ruby convenience methods
 
+We love the conveniences provided by active_support and extlib, we just don't love them at the same time and on top of each other. active_support is slow to load, has many dependencies, and is all intertwingled. We had too many collisions between active_support 2.x and 3.x and extlib. 
+
+What gorillib gives you is clarity over what features are brought in. If you want to *just* get <code>Object#blank?</code>, just <code>require 'gorillib/object/blank'</code>. No dependencies, no codependents.
+
 * No creep: include only what you need
 * No dependencies unless audaciously advertised.
-* Compatibile with active_record and extlib
-
-
-h3. TODO:
-
-* Gorillib.demands(:cattr_accessor) -- raises if not included and recommends what to include
-
-
+* Upwards compatible with active_record and extlib
+  - the active_support components have significantly more robust internationalization, and some functions have rich option sets in active_support vs. basic functionality in gorillib.  So the rule is if you were happy with gorillib you'll be happy with active_support, but not vice-versa.
+  
 h3. require 'gorillib'
 
 * require 'gorrillib/base'
@@ -19,28 +18,30 @@ h3. require 'gorillib/base'
 requires the following libraries:
 
 * gorillib/object/blank
-* gorillib/array/extract_options
 * gorillib/hash/reverse_merge
 * gorillib/hash/compact
-* gorillib/array/compact
+* gorillib/array/compact_blank
+* gorillib/object/try
 
 h3. require 'gorillib/some'
 
 requires @gorillib/base@ and the following additional libraries:
 
+* gorillib/logger/log.rb
 * set
 * time
 * date
+* gorillib/array/extract_options
 * gorillib/enumerable/sum
 * gorillib/datetime/flat
-* gorillib/datetime/parse_safely
+* gorillib/datetime/parse
 * gorillib/hash/zip
 * gorillib/hash/slice
 * gorillib/hash/keys
-* gorillib/metaprogramming/singleton_class
-* gorillib/metaprogramming/remove_method
 * gorillib/metaprogramming/class_attribute
 * gorillib/metaprogramming/cattr_accessor
+* gorillib/metaprogramming/singleton_class
+* gorillib/metaprogramming/remove_method
 
 ---------------------------------------------------------------------------
 
@@ -51,13 +52,15 @@ h3. gorillib/array
   - Hash        extractable_options? (helper method)
 * *gorrillib/array/compact_blank*
   - Array       compact_blank, compact_blank!
+* *gorrillib/array/deep_compact*
+  - Array       deep_compact, deep_compact!
 
 h3. gorillib/datetime
 
 * *gorillib/datetime/flat*
   - Date, Time	to_flat
 * *gorillib/datetime/parse*
-  - Date, Time  parse_safely
+  - Time        parse_safely
 
 h3. gorillib/enumerable
 
@@ -68,6 +71,8 @@ h3. gorillib/hash
 
 * *gorillib/hash/compact*
   - Hash        compact, compact!, compact_blank, compact_blank!
+* *gorrilib/hash/deep_compact*
+  - Hash        deep_compact, deep_compact!
 * *gorrilib/hash/deep_merge*
   - Hash        deep_merge, deep_merge!
 * *gorillib/hash/keys*
@@ -102,10 +107,19 @@ h3. gorillib/metaprogramming
 * *gorillib/metaprogramming/delegation*
   - Module#     delegate
 
+h3. gorillib/numeric
+
+* *gorillib/numeric/clamp*
+  - Numeric     clamp -- coerce a number to lie within a certain min/max
+
 h3. gorillib/object
 
 * *gorillib/object/blank*
   - Object      blank?, present?  (and specialized for all other classes)
+* *gorillib/object/try*
+  - Object      try
+* *gorillib/object/try_dup*
+  - Object      try_dup
 
 h3. gorillib/string
 
