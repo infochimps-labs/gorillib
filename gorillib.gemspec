@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorillib}
-  s.version = "0.0.7"
+  s.version = "0.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = %q{2011-05-05}
+  s.date = %q{2011-05-20}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
@@ -17,19 +17,198 @@ Gem::Specification.new do |s|
     "README.textile"
   ]
   s.files = [
-    ".document",
+    ".gitignore",
     ".rspec",
+    "CHANGELOG.textile",
+    "Gemfile",
+    "Gemfile.lock",
     "LICENSE.textile",
     "README.textile",
     "Rakefile",
     "VERSION",
-    "fiddle/hubahuba.rb",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-diff-lcs-1_1_2-lib-diff-lcs-block_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-diff-lcs-1_1_2-lib-diff-lcs-callbacks_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-diff-lcs-1_1_2-lib-diff-lcs-change_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-diff-lcs-1_1_2-lib-diff-lcs-hunk_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-diff-lcs-1_1_2-lib-diff-lcs_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rcov-0_9_9-lib-rcov-code_coverage_analyzer_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rcov-0_9_9-lib-rcov-differential_analyzer_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-2_5_0-lib-rspec-version_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-2_5_0-lib-rspec_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-backward_compatibility_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-command_line_configuration_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-command_line_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-configuration_options_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-configuration_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-deprecation_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-drb_command_line_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-errors_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-example_group_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-example_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-expecting-with_rspec_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-extensions-instance_eval_with_args_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-extensions-kernel_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-extensions-module_eval_with_args_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-extensions-object_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-extensions_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-formatters-base_formatter_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-formatters-base_text_formatter_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-formatters-documentation_formatter_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-formatters-helpers_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-hooks_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-let_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-load_path_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-metadata_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-mocking-with_rspec_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-option_parser_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-pending_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-reporter_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-ruby_project_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-runner_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-shared_context_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-shared_example_group_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-subject_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-version_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core-world_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-core_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-monkey-spork-test_framework-rspec_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-core-2_5_2-lib-rspec-monkey_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-backward_compatibility_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-deprecation_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-differ_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-errors_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-extensions-array_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-extensions-kernel_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-extensions_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-fail_with_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-handler_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations-version_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-expectations_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-be_close_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-be_instance_of_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-be_kind_of_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-be_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-be_within_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-block_aliases_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-change_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-compatibility_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-dsl_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-eq_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-eql_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-equal_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-errors_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-exist_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-extensions-instance_exec_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-generated_descriptions_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-has_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-have_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-include_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-match_array_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-match_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-matcher_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-method_missing_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-operator_matcher_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-pretty_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-raise_error_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-respond_to_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-satisfy_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers-throw_symbol_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-expectations-2_5_0-lib-rspec-matchers_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-argument_expectation_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-argument_matchers_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-error_generator_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-errors_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-extensions-instance_exec_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-extensions-marshal_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-framework_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-message_expectation_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-method_double_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-methods_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-mock_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-order_group_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-proxy_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-serialization_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-space_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-spec_methods_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks-version_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-rspec-mocks-2_5_0-lib-rspec-mocks_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-spork-0_9_0_rc7-lib-spork-gem_helpers_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-spork-0_9_0_rc7-lib-spork-test_framework-cucumber_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-spork-0_9_0_rc7-lib-spork-test_framework-rspec_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-spork-0_9_0_rc7-lib-spork-test_framework_rb.html",
+    "coverage/-Users-flip-_rvm-gems-ruby-1_8_7-p330-gems-spork-0_9_0_rc7-lib-spork_rb.html",
+    "coverage/index.html",
+    "coverage/jquery-1.3.2.min.js",
+    "coverage/jquery.tablesorter.min.js",
+    "coverage/lib-gorillib-array-compact_blank_rb.html",
+    "coverage/lib-gorillib-array-deep_compact_rb.html",
+    "coverage/lib-gorillib-array-extract_options_rb.html",
+    "coverage/lib-gorillib-datetime-flat_rb.html",
+    "coverage/lib-gorillib-datetime-parse_rb.html",
+    "coverage/lib-gorillib-enumerable-sum_rb.html",
+    "coverage/lib-gorillib-hash-compact_rb.html",
+    "coverage/lib-gorillib-hash-deep_compact_rb.html",
+    "coverage/lib-gorillib-hash-deep_merge_rb.html",
+    "coverage/lib-gorillib-hash-keys_rb.html",
+    "coverage/lib-gorillib-hash-reverse_merge_rb.html",
+    "coverage/lib-gorillib-hash-slice_rb.html",
+    "coverage/lib-gorillib-hash-zip_rb.html",
+    "coverage/lib-gorillib-logger-log_rb.html",
+    "coverage/lib-gorillib-metaprogramming-aliasing_rb.html",
+    "coverage/lib-gorillib-metaprogramming-cattr_accessor_rb.html",
+    "coverage/lib-gorillib-metaprogramming-class_attribute_rb.html",
+    "coverage/lib-gorillib-metaprogramming-delegation_rb.html",
+    "coverage/lib-gorillib-metaprogramming-mattr_accessor_rb.html",
+    "coverage/lib-gorillib-metaprogramming-remove_method_rb.html",
+    "coverage/lib-gorillib-metaprogramming-singleton_class_rb.html",
+    "coverage/lib-gorillib-numeric-clamp_rb.html",
+    "coverage/lib-gorillib-object-blank_rb.html",
+    "coverage/lib-gorillib-object-try_dup_rb.html",
+    "coverage/lib-gorillib-object-try_rb.html",
+    "coverage/lib-gorillib-string-constantize_rb.html",
+    "coverage/lib-gorillib-string-human_rb.html",
+    "coverage/lib-gorillib-string-inflections_rb.html",
+    "coverage/lib-gorillib-string-truncate_rb.html",
+    "coverage/print.css",
+    "coverage/rcov.js",
+    "coverage/screen.css",
+    "coverage/spec-array-compact_blank_spec_rb.html",
+    "coverage/spec-array-extract_options_spec_rb.html",
+    "coverage/spec-datetime-flat_spec_rb.html",
+    "coverage/spec-datetime-parse_spec_rb.html",
+    "coverage/spec-enumerable-sum_spec_rb.html",
+    "coverage/spec-hash-compact_spec_rb.html",
+    "coverage/spec-hash-deep_compact_spec_rb.html",
+    "coverage/spec-hash-deep_merge_spec_rb.html",
+    "coverage/spec-hash-keys_spec_rb.html",
+    "coverage/spec-hash-reverse_merge_spec_rb.html",
+    "coverage/spec-hash-slice_spec_rb.html",
+    "coverage/spec-hash-zip_spec_rb.html",
+    "coverage/spec-logger-log_spec_rb.html",
+    "coverage/spec-metaprogramming-aliasing_spec_rb.html",
+    "coverage/spec-metaprogramming-cattr_accessor_spec_rb.html",
+    "coverage/spec-metaprogramming-class_attribute_spec_rb.html",
+    "coverage/spec-metaprogramming-delegation_spec_rb.html",
+    "coverage/spec-metaprogramming-mattr_accessor_spec_rb.html",
+    "coverage/spec-metaprogramming-singleton_class_spec_rb.html",
+    "coverage/spec-numeric-clamp_spec_rb.html",
+    "coverage/spec-object-blank_spec_rb.html",
+    "coverage/spec-object-try_dup_spec_rb.html",
+    "coverage/spec-object-try_spec_rb.html",
+    "coverage/spec-spec_helper_rb.html",
+    "coverage/spec-string-constantize_spec_rb.html",
+    "coverage/spec-string-human_spec_rb.html",
+    "coverage/spec-string-inflections_spec_rb.html",
+    "coverage/spec-string-inflector_test_cases_rb.html",
+    "coverage/spec-string-truncate_spec_rb.html",
+    "coverage/spec-support-kcode_test_helper_rb.html",
     "gorillib.gemspec",
     "lib/gorillib.rb",
     "lib/gorillib/array/compact_blank.rb",
     "lib/gorillib/array/deep_compact.rb",
     "lib/gorillib/array/extract_options.rb",
     "lib/gorillib/base.rb",
+    "lib/gorillib/datetime/#flat.rb#",
     "lib/gorillib/datetime/flat.rb",
     "lib/gorillib/datetime/parse.rb",
     "lib/gorillib/enumerable/sum.rb",
@@ -50,19 +229,43 @@ Gem::Specification.new do |s|
     "lib/gorillib/metaprogramming/singleton_class.rb",
     "lib/gorillib/numeric/clamp.rb",
     "lib/gorillib/object/blank.rb",
+    "lib/gorillib/object/try.rb",
+    "lib/gorillib/object/try_dup.rb",
     "lib/gorillib/some.rb",
     "lib/gorillib/string/constantize.rb",
     "lib/gorillib/string/human.rb",
     "lib/gorillib/string/inflections.rb",
     "lib/gorillib/string/truncate.rb",
-    "spec/blank_spec.rb",
-    "spec/deep_compact_spec.rb",
-    "spec/gorillib_spec.rb",
-    "spec/numeric_spec.rb",
-    "spec/rcov.opts",
-    "spec/spec.opts",
+    "spec/array/compact_blank_spec.rb",
+    "spec/array/extract_options_spec.rb",
+    "spec/datetime/flat_spec.rb",
+    "spec/datetime/parse_spec.rb",
+    "spec/enumerable/sum_spec.rb",
+    "spec/hash/compact_spec.rb",
+    "spec/hash/deep_compact_spec.rb",
+    "spec/hash/deep_merge_spec.rb",
+    "spec/hash/keys_spec.rb",
+    "spec/hash/reverse_merge_spec.rb",
+    "spec/hash/slice_spec.rb",
+    "spec/hash/zip_spec.rb",
+    "spec/logger/log_spec.rb",
+    "spec/metaprogramming/aliasing_spec.rb",
+    "spec/metaprogramming/cattr_accessor_spec.rb",
+    "spec/metaprogramming/class_attribute_spec.rb",
+    "spec/metaprogramming/delegation_spec.rb",
+    "spec/metaprogramming/mattr_accessor_spec.rb",
+    "spec/metaprogramming/singleton_class_spec.rb",
+    "spec/numeric/clamp_spec.rb",
+    "spec/object/blank_spec.rb",
+    "spec/object/try_dup_spec.rb",
+    "spec/object/try_spec.rb",
     "spec/spec_helper.rb",
-    "spec/spec_tasks.rake",
+    "spec/string/constantize_spec.rb",
+    "spec/string/human_spec.rb",
+    "spec/string/inflections_spec.rb",
+    "spec/string/inflector_test_cases.rb",
+    "spec/string/truncate_spec.rb",
+    "spec/support/kcode_test_helper.rb",
     "test/abstract_unit.rb",
     "test/array/compact_blank_test.rb",
     "test/array/extract_options_test.rb",
@@ -92,58 +295,93 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://infochimps.com/labs}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.5.0}
   s.summary = %q{include only what you need. No dependencies, no creep}
   s.test_files = [
-    "spec/blank_spec.rb",
-    "spec/deep_compact_spec.rb",
-    "spec/gorillib_spec.rb",
-    "spec/numeric_spec.rb",
+    "spec/array/compact_blank_spec.rb",
+    "spec/array/extract_options_spec.rb",
+    "spec/datetime/flat_spec.rb",
+    "spec/datetime/parse_spec.rb",
+    "spec/enumerable/sum_spec.rb",
+    "spec/hash/compact_spec.rb",
+    "spec/hash/deep_compact_spec.rb",
+    "spec/hash/deep_merge_spec.rb",
+    "spec/hash/keys_spec.rb",
+    "spec/hash/reverse_merge_spec.rb",
+    "spec/hash/slice_spec.rb",
+    "spec/hash/zip_spec.rb",
+    "spec/logger/log_spec.rb",
+    "spec/metaprogramming/aliasing_spec.rb",
+    "spec/metaprogramming/cattr_accessor_spec.rb",
+    "spec/metaprogramming/class_attribute_spec.rb",
+    "spec/metaprogramming/delegation_spec.rb",
+    "spec/metaprogramming/mattr_accessor_spec.rb",
+    "spec/metaprogramming/singleton_class_spec.rb",
+    "spec/numeric/clamp_spec.rb",
+    "spec/object/blank_spec.rb",
+    "spec/object/try_dup_spec.rb",
+    "spec/object/try_spec.rb",
     "spec/spec_helper.rb",
-    "test/abstract_unit.rb",
-    "test/array/compact_blank_test.rb",
-    "test/array/extract_options_test.rb",
-    "test/datetime/flat_test.rb",
-    "test/datetime/parse_test.rb",
-    "test/enumerable/sum_test.rb",
-    "test/hash/compact_test.rb",
-    "test/hash/deep_merge_test.rb",
-    "test/hash/keys_test.rb",
-    "test/hash/reverse_merge_test.rb",
-    "test/hash/slice_test.rb",
-    "test/hash/zip_test.rb",
-    "test/logger/log_test.rb",
-    "test/metaprogramming/aliasing_test.rb",
-    "test/metaprogramming/cattr_accessor_test.rb",
-    "test/metaprogramming/class_attribute_test.rb",
-    "test/metaprogramming/delegation_test.rb",
-    "test/metaprogramming/mattr_accessor_test.rb",
-    "test/metaprogramming/singleton_class_test.rb",
-    "test/object/blank_test.rb",
-    "test/string/constantize_test.rb",
-    "test/string/human_test.rb",
-    "test/string/inflections_test.rb",
-    "test/string/inflector_test_cases.rb",
-    "test/string/truncate_test.rb"
+    "spec/string/constantize_spec.rb",
+    "spec/string/human_spec.rb",
+    "spec/string/inflections_spec.rb",
+    "spec/string/inflector_test_cases.rb",
+    "spec/string/truncate_spec.rb",
+    "spec/support/kcode_test_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<yard>, ["~> 0.6.0"])
+      s.add_development_dependency(%q<bundler>, ["~> 1.0.12"])
+      s.add_development_dependency(%q<yard>, ["~> 0.6.7"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
-      s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.5.0"])
+      s.add_development_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_development_dependency(%q<RedCloth>, [">= 0"])
+      s.add_development_dependency(%q<rcov>, [">= 0.9.9"])
+      s.add_development_dependency(%q<watchr>, [">= 0"])
+      s.add_development_dependency(%q<bundler>, ["~> 1.0.12"])
+      s.add_development_dependency(%q<yard>, ["~> 0.6.7"])
+      s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.5.0"])
+      s.add_development_dependency(%q<rcov>, [">= 0.9.9"])
+      s.add_development_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_development_dependency(%q<watchr>, [">= 0"])
     else
-      s.add_dependency(%q<yard>, ["~> 0.6.0"])
+      s.add_dependency(%q<bundler>, ["~> 1.0.12"])
+      s.add_dependency(%q<yard>, ["~> 0.6.7"])
       s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
-      s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["~> 2.5.0"])
+      s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_dependency(%q<RedCloth>, [">= 0"])
+      s.add_dependency(%q<rcov>, [">= 0.9.9"])
+      s.add_dependency(%q<watchr>, [">= 0"])
+      s.add_dependency(%q<bundler>, ["~> 1.0.12"])
+      s.add_dependency(%q<yard>, ["~> 0.6.7"])
+      s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
+      s.add_dependency(%q<rspec>, ["~> 2.5.0"])
+      s.add_dependency(%q<rcov>, [">= 0.9.9"])
+      s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_dependency(%q<watchr>, [">= 0"])
     end
   else
-    s.add_dependency(%q<yard>, ["~> 0.6.0"])
+    s.add_dependency(%q<bundler>, ["~> 1.0.12"])
+    s.add_dependency(%q<yard>, ["~> 0.6.7"])
     s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
-    s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["~> 2.5.0"])
+    s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+    s.add_dependency(%q<RedCloth>, [">= 0"])
+    s.add_dependency(%q<rcov>, [">= 0.9.9"])
+    s.add_dependency(%q<watchr>, [">= 0"])
+    s.add_dependency(%q<bundler>, ["~> 1.0.12"])
+    s.add_dependency(%q<yard>, ["~> 0.6.7"])
+    s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
+    s.add_dependency(%q<rspec>, ["~> 2.5.0"])
+    s.add_dependency(%q<rcov>, [">= 0.9.9"])
+    s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+    s.add_dependency(%q<watchr>, [">= 0"])
   end
 end
 
