@@ -1,0 +1,49 @@
+
+h3. Version 0.0.7: full test coverage!
+
+<pre>
+        lib/
+        |-- gorillib.rb
+        `-- gorillib
+            |-- array
+            |   |-- compact_blank.rb
+            |   |-- deep_compact.rb
+            |   `-- extract_options.rb
+            |-- base.rb
+            |-- datetime
+            |   |-- #flat.rb#
+            |   |-- flat.rb
+            |   `-- parse.rb
+            |-- enumerable
+            |   `-- sum.rb
+            |-- hash
+            |   |-- compact.rb
+            |   |-- deep_compact.rb
+            |   |-- deep_merge.rb
+            |   |-- keys.rb
+            |   |-- reverse_merge.rb
+            |   |-- slice.rb
+            |   `-- zip.rb
+            |-- logger
+            |   `-- log.rb
+            |-- metaprogramming
+            |   |-- aliasing.rb
+            |   |-- cattr_accessor.rb
+            |   |-- class_attribute.rb
+            |   |-- delegation.rb
+            |   |-- mattr_accessor.rb
+            |   |-- remove_method.rb
+            |   `-- singleton_class.rb
+            |-- numeric
+            |   `-- clamp.rb
+            |-- object
+            |   |-- blank.rb
+            |   |-- try.rb
+            |   `-- try_dup.rb
+            |-- some.rb
+            `-- string
+                |-- constantize.rb
+                |-- human.rb
+                |-- inflections.rb
+                `-- truncate.rb
+</pre>
