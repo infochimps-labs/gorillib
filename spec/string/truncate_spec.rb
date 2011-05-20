@@ -25,6 +25,7 @@ describe String do
         end
       end
 
+      # # FIXME: breaks on ruby 1.8
       # it 'works with unicode when kcode=u' do
       #   Gorillib::KcodeTestHelper.with_kcode('u') do
       #     "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 \354\225\204\353\235\274\353\246\254\354\230\244".truncate(10).
