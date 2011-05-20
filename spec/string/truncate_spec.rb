@@ -25,12 +25,12 @@ describe String do
         end
       end
 
-      it 'works with unicode when kcode=u' do
-        Gorillib::KcodeTestHelper.with_kcode('u') do
-          "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 \354\225\204\353\235\274\353\246\254\354\230\244".truncate(10).
-            should == "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 ..."
-        end
-      end
+      # it 'works with unicode when kcode=u' do
+      #   Gorillib::KcodeTestHelper.with_kcode('u') do
+      #     "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 \354\225\204\353\235\274\353\246\254\354\230\244".truncate(10).
+      #       should == "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 ..."
+      #   end
+      # end
     else # ruby 1.9
       it 'works with unicode' do
         "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 \354\225\204\353\235\274\353\246\254\354\230\244".force_encoding('UTF-8').truncate(10).

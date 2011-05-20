@@ -1,3 +1,5 @@
+require 'time'
+require 'date'
 class Time
   #
   # Parses the time but never fails.
@@ -7,7 +9,7 @@ class Time
   # time zone by parsing it as YYYYmmddHHMMMSSZ <- 'Z' at end
   #
   def self.parse_safely dt
-    return nil if dt.blank?
+    return nil if dt.nil? || (dt.respond_to?(:empty) && dt.empty?)
     begin
       case
       when dt.is_a?(Time)               then dt.utc

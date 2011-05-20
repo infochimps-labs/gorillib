@@ -5,11 +5,11 @@ require 'gorillib/datetime/parse'
 describe DateTime do
   describe '#parse_safely' do
     before do
-      @time_utc     = Time.new(2011, 2, 3,  4, 5, 6, 0)
-      @time_cst     = Time.new(2011, 2, 3, 10, 5, 6, '+06:00')
+      @time_utc  = Time.parse("2011-02-03T04:05:06 UTC")
+      @time_cst  = Time.parse("2011-02-02T22:05:06-06:00")
       @time_flat    = "20110203040506"
       @time_iso_utc = "2011-02-03T04:05:06+00:00"
-      @time_iso_cst = "2011-02-03T10:05:06+06:00"
+      @time_iso_cst = "2011-02-02T22:05:06-06:00"
     end
 
     it 'with a Time, passes it through.' do
