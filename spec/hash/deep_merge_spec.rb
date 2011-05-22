@@ -96,8 +96,6 @@ describe Hash do
     end
   end
 
-
-
   describe '#deep_dup' do
     # def test_deep_dup
     #   hash = { :a => { :b => 'b' } }

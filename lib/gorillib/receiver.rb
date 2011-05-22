@@ -76,16 +76,16 @@ class Boolean ; end unless defined?(Boolean)
 module Receiver
 
   RECEIVER_BODIES           = {} unless defined?(RECEIVER_BODIES)
-  RECEIVER_BODIES[Symbol]   = %q{ v.nil? ? nil : v.to_sym }
+  RECEIVER_BODIES[Symbol]   = %q{ v.blank? ? nil : v.to_sym }
+  RECEIVER_BODIES[Integer]  = %q{ v.blank? ? nil : v.to_i }
+  RECEIVER_BODIES[Float]    = %q{ v.blank? ? nil : v.to_f }
   RECEIVER_BODIES[String]   = %q{ v.to_s }
-  RECEIVER_BODIES[Integer]  = %q{ v.nil? ? nil : v.to_i }
-  RECEIVER_BODIES[Float]    = %q{ v.nil? ? nil : v.to_f }
-  RECEIVER_BODIES[Time]     = %q{ v.nil? ? nil : Time.parse(v.to_s).utc }
-  RECEIVER_BODIES[Date]     = %q{ v.nil? ? nil : Date.parse(v.to_s) }
-  RECEIVER_BODIES[Array]    = %q{ v.nil? ? nil : v }
-  RECEIVER_BODIES[Hash]     = %q{ v.nil? ? nil : v }
-  RECEIVER_BODIES[Boolean]  = %q{ v.nil? ? nil : (v.to_s.strip != "false") }
-  RECEIVER_BODIES[NilClass] = %q{ raise "This field must be nil, but #{v} was given" unless (v.nil?) ; nil }
+  RECEIVER_BODIES[Time]     = %q{ v.nil?   ? nil : Time.parse(v.to_s).utc rescue nil }
+  RECEIVER_BODIES[Date]     = %q{ v.nil?   ? nil : Date.parse(v.to_s)     rescue nil }
+  RECEIVER_BODIES[Array]    = %q{ case when v.nil? then nil when v.blank? then [] else Array(v) end }
+  RECEIVER_BODIES[Hash]     = %q{ case when v.nil? then nil when v.blank? then {} else v end }
+  RECEIVER_BODIES[Boolean]  = %q{ case when v.nil? then nil when v.to_s.strip.blank? then false else v.to_s.strip != "false" end }
+  RECEIVER_BODIES[NilClass] = %q{ raise ArgumentError, "This field must be nil, but {#{v}} was given" unless (v.nil?) ; nil }
   RECEIVER_BODIES[Object]   = %q{ v } # accept and love the object just as it is
   RECEIVER_BODIES.each do |k,b|
     if k.is_a?(Class)
@@ -112,9 +112,10 @@ module Receiver
   #
   # modify object in place with new typecast values.
   #
-  def receive! hsh
-    raise "Can't receive (it isn't hashlike): #{hsh.inspect}" unless hsh.respond_to?(:[])
+  def receive! hsh={}
+    raise ArgumentError, "Can't receive (it isn't hashlike): {#{hsh.inspect}}" unless hsh.respond_to?(:[]) && hsh.respond_to?(:has_key?)
     self.class.receiver_attr_names.each do |attr|
+      next unless respond_to?("#{attr}=")
       if    hsh.has_key?(attr.to_sym) then val = hsh[attr.to_sym]
       elsif hsh.has_key?(attr.to_s)   then val = hsh[attr.to_s]
       else  next ; end
@@ -160,8 +161,11 @@ module Receiver
     #
     # All args after the first are passed to the initializer.
     #
-    def receive hsh, *args
-      hsh ||= {}
+    # @param hsh [Hash] attr-value pairs to set on the newly created object
+    # @param *args [Array] arguments to pass to the constructor
+    # @return [Object] a new instance
+    def receive *args
+      hsh = args.extract_options!
       obj = self.new(*args)
       obj.receive!(hsh)
     end
@@ -177,17 +181,15 @@ module Receiver
     def rcvr name, type, info={}
       name = name.to_sym
       type = type_to_klass(type)
-      class_eval  <<-STR, __FILE__, __LINE__ + 1
+      class_eval <<-STR, __FILE__, __LINE__ + 1
         def receive_#{name}(v)
           self.#{name} = #{receiver_body_for(type, info)}
         end
       STR
+      # careful here: need to make sure
       self.receiver_attr_names += [name] unless receiver_attr_names.include?(name)
+      self.receiver_attrs = self.receiver_attrs.dup
       self.receiver_attrs[name] = info.merge({ :name => name, :type => type })
-    end
-
-    def after_receive &block
-      self.after_receivers += [block]
     end
 
     def type_to_klass(type)
@@ -197,6 +199,11 @@ module Receiver
       # when (type.is_a?(Symbol) && type.to_s =~ /^[A-Z]/) then type.to_s.constantize
       else raise "Can\'t handle type #{type}: is it a Class or one of the TYPE_ALIASES? "
       end
+    end
+
+    # make a block to run after each time  .receive! is invoked
+    def after_receive &block
+      self.after_receivers += [block]
     end
 
     # defines a receiver attribute, an attr_reader and an attr_writer
