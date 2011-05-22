@@ -87,6 +87,10 @@ module Receiver
   RECEIVER_BODIES[Boolean]  = %q{ case when v.nil? then nil when v.to_s.strip.blank? then false else v.to_s.strip != "false" end }
   RECEIVER_BODIES[NilClass] = %q{ raise ArgumentError, "This field must be nil, but {#{v}} was given" unless (v.nil?) ; nil }
   RECEIVER_BODIES[Object]   = %q{ v } # accept and love the object just as it is
+
+  #
+  # Give each base class a receive method
+  #
   RECEIVER_BODIES.each do |k,b|
     if k.is_a?(Class)
       k.class_eval <<-STR, __FILE__, __LINE__ + 1
@@ -115,7 +119,6 @@ module Receiver
   def receive! hsh={}
     raise ArgumentError, "Can't receive (it isn't hashlike): {#{hsh.inspect}}" unless hsh.respond_to?(:[]) && hsh.respond_to?(:has_key?)
     self.class.receiver_attr_names.each do |attr|
-      next unless respond_to?("#{attr}=")
       if    hsh.has_key?(attr.to_sym) then val = hsh[attr.to_sym]
       elsif hsh.has_key?(attr.to_s)   then val = hsh[attr.to_s]
       else  next ; end
@@ -126,16 +129,17 @@ module Receiver
     self
   end
 
-  def unset!(attr)
-    self.send(:remove_instance_variable, "@#{attr}") if self.instance_variable_defined?("@#{attr}")
-  end
-
   # true if the attr is a receiver variable and it has been set
   def attr_set?(attr)
     receiver_attrs.has_key?(attr) && self.instance_variable_defined?("@#{attr}")
   end
 
-  protected
+protected
+
+  def unset!(attr)
+    self.send(:remove_instance_variable, "@#{attr}") if self.instance_variable_defined?("@#{attr}")
+  end
+
   def _receive_attr attr, val
     self.send("receive_#{attr}", val)
   end
@@ -152,7 +156,8 @@ module Receiver
       self.instance_exec(hsh, &after_receiver)
     end
   end
-  public
+
+public
 
   module ClassMethods
 
@@ -166,6 +171,7 @@ module Receiver
     # @return [Object] a new instance
     def receive *args
       hsh = args.extract_options!
+      raise ArgumentError, "Can't receive (it isn't hashlike): {#{hsh.inspect}} -- the hsh should be the *last* arg" unless hsh.respond_to?(:[]) && hsh.respond_to?(:has_key?)
       obj = self.new(*args)
       obj.receive!(hsh)
     end
@@ -183,22 +189,14 @@ module Receiver
       type = type_to_klass(type)
       class_eval <<-STR, __FILE__, __LINE__ + 1
         def receive_#{name}(v)
-          self.#{name} = #{receiver_body_for(type, info)}
+          v = (#{receiver_body_for(type, info)}) ;
+          self.instance_variable_set("@#{name}", v)
         end
       STR
-      # careful here: need to make sure
-      self.receiver_attr_names += [name] unless receiver_attr_names.include?(name)
+      # careful here: don't modify parent's class_attribute in-place
       self.receiver_attrs = self.receiver_attrs.dup
+      self.receiver_attr_names += [name] unless receiver_attr_names.include?(name)
       self.receiver_attrs[name] = info.merge({ :name => name, :type => type })
-    end
-
-    def type_to_klass(type)
-      case
-      when type.is_a?(Class)                             then return type
-      when TYPE_ALIASES.has_key?(type)                   then TYPE_ALIASES[type]
-      # when (type.is_a?(Symbol) && type.to_s =~ /^[A-Z]/) then type.to_s.constantize
-      else raise "Can\'t handle type #{type}: is it a Class or one of the TYPE_ALIASES? "
-      end
     end
 
     # make a block to run after each time  .receive! is invoked
@@ -242,7 +240,7 @@ module Receiver
     def rcvr_remaining name, info={}
       rcvr_reader name, Hash, info
       after_receive do |hsh|
-        remaining_vals_hsh = hsh.except(* keys).reject!{|k,v| k.to_s =~ /^_/}
+        remaining_vals_hsh = hsh.reject{|k,v| (receiver_attrs.include?(k)) || (k.to_s =~ /^_/) }
         self._receive_attr name, remaining_vals_hsh
       end
     end
@@ -256,7 +254,7 @@ module Receiver
       defs
     end
 
-  private
+  protected
     def receiver_body_for type, info
       type = type_to_klass(type)
       # Note that Array and Hash only need (and only get) special treatment when
@@ -275,6 +273,15 @@ module Receiver
       #   %Q{v.blank? ? nil : #{type}.receive(v) }
       else
         raise("Can't receive #{type} #{info}")
+      end
+    end
+
+    def type_to_klass(type)
+      case
+      when type.is_a?(Class)                             then return type
+      when TYPE_ALIASES.has_key?(type)                   then TYPE_ALIASES[type]
+      # when (type.is_a?(Symbol) && type.to_s =~ /^[A-Z]/) then type.to_s.constantize
+      else raise ArgumentError, "Can\'t handle type #{type}: is it a Class or one of the TYPE_ALIASES?"
       end
     end
   end

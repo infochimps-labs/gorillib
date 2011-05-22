@@ -91,6 +91,17 @@ describe Receiver do
       old_receiver_attrs.should_not equal(@klass.receiver_attrs)
       old_receiver_attr_names.should_not equal(@klass.receiver_attr_names)
     end
+
+    it 'accepts a type alias but uses the aliased class' do
+      @klass.rcvr_accessor :my_symbol, :symbol
+      @klass.rcvr_accessor :my_bytes,  :bytes
+      @klass.receiver_attrs[:my_symbol][:type].should == Symbol
+      @klass.receiver_attrs[:my_bytes ][:type].should == String
+    end
+
+    it 'does not accept an unknown type' do
+      lambda{ @klass.rcvr_accessor :my_symbol, :oxnard }.should raise_error(ArgumentError, "Can\'t handle type oxnard: is it a Class or one of the TYPE_ALIASES?")
+    end
   end
 
   describe '.rcvr_accessor, .rcvr_reader, .rcvr_writer' do
@@ -132,17 +143,142 @@ describe Receiver do
     end
   end
 
-  describe '.rcvr_remaining'
+  describe 'default values' do
+    it 'rcvr accepts a default for an attribute' do
+      @klass.rcvr_reader :will_get_a_value, Integer, :default => 12
+      @klass.rcvr_reader :has_a_default, Integer, :default => 5
+      obj = @klass.receive(:my_int => 3, :will_get_a_value => 9)
+      obj.my_int.should == 3
+      obj.has_a_default.should == 5
+      obj.will_get_a_value.should == 9
+    end
 
-  describe '.type_to_klass'
+    it 'does not use default if value is set-but-nil' do
+      @klass.rcvr_reader :has_a_default, Integer, :default => 5
+      obj = @klass.receive(:my_int => 3, :has_a_default => nil)
+      obj.has_a_default.should be_nil
+    end
+  end
 
-  describe '#unset'
+  describe 'required attributes' do
+    it 'rcvr accepts required attributes'
+  end
 
-  describe 'attr_set?'
+  describe 'typed collections' do
+    it 'sets a type for an array with :of => Type' do
+      @klass.rcvr_accessor :array_of_symbol, Array, :of => Symbol
+      obj = @klass.receive(:array_of_symbol => [:a, 'b', 'c'])
+      obj.array_of_symbol.should == [:a, :b, :c]
+    end
 
-  describe '#impose_defaults!'
+    it 'accepts nil if value is nil' do
+      @klass.rcvr_accessor :array_of_symbol, Array, :of => Symbol
+      obj = @klass.receive(:array_of_symbol => nil)
+      obj.array_of_symbol.should == nil
+    end
 
-  describe '#run_after_receivers'
+    it 'accepts complex class as :of => Type' do
+      class Foo ; include Receiver ; rcvr_accessor(:foo, Integer) ; end
+      @klass.rcvr_accessor :array_of_obj, Array, :of => Foo
+      obj = @klass.receive( :array_of_obj => [ {:foo => 3}, {:foo => 5} ] )
+      p obj
+      obj.array_of_obj.first.foo.should == 3
+      obj.array_of_obj.last.foo.should == 5
+    end
+
+    it 'sets a type for a hash with :of => Type' do
+      @klass.rcvr_accessor :hash_of_symbol, Hash, :of => Symbol
+      obj = @klass.receive(:hash_of_symbol => { :a => 'val_a', 'b' => :val_b , 'c' => 'val_c' })
+      obj.hash_of_symbol.should == { :a => :val_a, 'b' => :val_b , 'c' => :val_c }
+    end
+  end
+
+  describe '.rcvr_remaining' do
+    it 'creates a dummy receiver for the extra params' do
+      @klass.should_receive(:rcvr_reader).with(:bob, Hash, {:foo => :bar})
+      @klass.rcvr_remaining :bob, :foo => :bar
+    end
+    it 'does not get params that go with defined attrs (even if there is no writer)' do
+      @klass.rcvr_remaining :bob
+      hsh = {:my_int => 3, :foo => :bar, :width => 5}
+      obj = @klass.receive(hsh)
+      obj.bob.should == {:foo => :bar, :width => 5}
+      hsh.should == {:my_int => 3, :foo => :bar, :width => 5}
+    end
+    it 'does not get params whose key starts with "_"' do
+      @klass.rcvr_remaining :bob
+      hsh = {:my_int => 3, :foo => :bar, :width => 5, :_ignored => 9}
+      obj = @klass.receive(hsh)
+      obj.bob.should == {:foo => :bar, :width => 5}
+    end
+    it 'stores them, replacing a previous value' do
+      @klass.rcvr_remaining :bob
+      obj = @klass.new
+      obj.instance_variable_set("@bob", {:foo => 9, :width => 333, :extra => :will_be_gone})
+      obj.receive!({ :my_int => 3, :foo => :bar, :width => 5 })
+      obj.bob.should == {:foo => :bar, :width => 5}
+    end
+  end
+
+  describe '.after_receive, #run_after_receivers' do
+    it 'calls each block in order' do
+      @klass.after_receive{|hsh| hsh.i_am_calling_you_first }
+      @klass.after_receive{|hsh| hsh.i_am_calling_you_second }
+      @klass.after_receive{|hsh| hsh.i_am_calling_you_third }
+      hsh = {:my_int => 3}
+      hsh.should_receive(:i_am_calling_you_first).ordered
+      hsh.should_receive(:i_am_calling_you_second).ordered
+      hsh.should_receive(:i_am_calling_you_third).ordered
+      @klass.receive(hsh)
+    end
+
+    it 'calls the block with the full receive hash' do
+      @klass.after_receive{|hsh| hsh.i_am_calling_you }
+      hsh = {}
+      hsh.should_receive(:i_am_calling_you)
+      @klass.receive(hsh)
+    end
+  end
+
+  describe '#unset' do
+    it 'nukes any existing instance_variable' do
+      obj = @klass.new
+      obj.my_int = 3
+      obj.instance_variable_get('@my_int').should == 3
+      obj.send(:unset!, :my_int)
+      obj.instance_variable_get('@my_int').should be_nil
+      obj.instance_variables.should == []
+    end
+
+    it 'succeeds even if instance_variable never set' do
+      obj = @klass.new
+      obj.send(:unset!, :my_int)
+      obj.instance_variable_get('@my_int').should be_nil
+      obj.instance_variables.should == []
+    end
+
+  end
+
+  describe 'attr_set?' do
+    it 'is set if the corresponding instance_variable exists' do
+      obj = @klass.new
+      obj.attr_set?(:my_int).should == false
+      obj.instance_variable_set('@my_int', 3)
+      obj.attr_set?(:my_int).should == true
+    end
+
+    it 'can be set but nil or false' do
+      @klass.rcvr_accessor :bool_field, Boolean
+      @klass.rcvr_accessor :str_field,  String
+      obj = @klass.new
+      obj.attr_set?(:bool_field).should == false
+      obj.attr_set?(:str_field).should == false
+      obj.instance_variable_set('@bool_field', false)
+      obj.instance_variable_set('@str_field',  nil)
+      obj.attr_set?(:bool_field).should == true
+      obj.attr_set?(:str_field).should == true
+    end
+  end
 
   describe '#receive!' do
     before do
@@ -199,17 +335,15 @@ describe Receiver do
       @obj.receive!(:my_int => 7, :bob => 12).should equal(@obj)
     end
 
-    it 'only receives when there is a setter' do
-      Wide.rcvr_reader :a, Integer
-      p Wide.receiver_attrs
-      obj = Wide.receive :my_int => 3, :a => 5
+    it 'receives even if there is no setter' do
+      @klass.rcvr_reader :a, Integer
+      @klass.rcvr        :b, Integer
+      obj = @klass.receive :my_int => 3, :a => 5, :b => 7
+      obj.should_not respond_to(:a=)
+      obj.should_not respond_to(:b=)
       obj.my_int.should == 3
-      obj.a.should be_nil
-      # make a setter for a
-      def obj.a= val ; @a = val ; end
-      obj.receive! :my_int => 20, :a => 25
-      obj.my_int.should == 20
-      obj.a.should      == 25
+      obj.a.should == 5
+      obj.instance_variable_get("@b").should == 7
     end
   end
 
@@ -229,31 +363,51 @@ describe Receiver do
     end
     (RECEIVABLES - [String]).each do |receivable|
       it "#{receivable} accepts nil as nil" do
-        Wide.rcvr_accessor :nil_field, receivable
-        obj = Wide.receive(:nil_field => nil)
+        @klass.rcvr_accessor :nil_field, receivable
+        obj = @klass.receive(:nil_field => nil)
         obj.nil_field.should be_nil
       end
     end
     [String].each do |receivable|
       it "#{receivable} accepts nil as empty string" do
-        Wide.rcvr_accessor :nil_field, receivable
-        obj = Wide.receive(:nil_field => nil)
+        @klass.rcvr_accessor :nil_field, receivable
+        obj = @klass.receive(:nil_field => nil)
         obj.nil_field.should == ""
       end
     end
 
-    it 'accepts a type alias but uses the aliased class' do
-      Wide.rcvr_accessor :my_symbol, :symbol
-      Wide.rcvr_accessor :my_bytes,  :bytes
-      Wide.receiver_attrs[:my_symbol][:type].should == Symbol
-      Wide.receiver_attrs[:my_bytes ][:type].should == String
+    it 'keeps values across a receive!' do
+      @klass.rcvr_accessor :repeated,    Integer
+      @klass.rcvr_accessor :just_second, Integer
+      obj = @klass.receive( :my_int => 1, :repeated => 3)
+      [obj.my_int, obj.repeated, obj.just_second].should == [1, 3, nil]
+      obj.receive!(:repeated => 20, :just_second => 30)
+      [obj.my_int, obj.repeated, obj.just_second].should == [1, 20, 30]
     end
+
+    # ---------------------------------------------------------------------------
+
+    describe 'core class .receive method' do
+      Symbol.receive('hi').should == :hi
+      Integer.receive(3.4).should == 3
+      Float.receive("4.5").should == 4.5
+      String.receive(4.5).should == "4.5"
+      Time.receive('1985-11-05T04:03:02Z').should == Time.parse('1985-11-05T04:03:02Z')
+      Date.receive('1985-11-05T04:03:02Z').should == Date.parse('1985-11-05')
+      Array.receive('hi').should == ['hi']
+      Hash.receive({:hi => :there}).should == {:hi => :there}
+      Boolean.receive("false").should == false
+      NilClass.receive(nil).should == nil
+      Object.receive(:fnord).should == :fnord
+    end
+
+    # ---------------------------------------------------------------------------
 
     def self.it_correctly_converts(type, orig, desired)
       it "for #{type} converts #{orig.inspect} to #{desired.inspect}" do
         field = "#{type}_field".to_sym
-        Wide.rcvr_accessor field, type
-        obj = Wide.receive( field => orig )
+        @klass.rcvr_accessor field, type
+        obj = @klass.receive( field => orig )
         obj.send(field).should == desired
       end
     end
@@ -300,10 +454,12 @@ describe Receiver do
 
       describe 'NilClass' do
         it 'only accepts nil' do
-          Wide.rcvr_accessor :nil_field, NilClass
-          lambda{ Wide.receive( :nil_field => 'hello' ) }.should raise_error(ArgumentError, "This field must be nil, but {hello} was given")
+          @klass.rcvr_accessor :nil_field, NilClass
+          lambda{ @klass.receive( :nil_field => 'hello' ) }.should raise_error(ArgumentError, "This field must be nil, but {hello} was given")
         end
       end
     end
+
   end
 end
+
