@@ -14,7 +14,7 @@ h3. require 'gorillib/receiver'
 Gorillib has at least one powerful addition to the canon: the receiver mixin.
 
 * lightweight
-* gives you weak type safety but doesn't jack around with setters/getters
+* gives you weak type safety but doesn't jack around with setters/getters.
 * object/hash semantics
   
 h3. require 'gorillib'

@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 require 'enumerator'
-module Receiver
+module Gorillib
   #
   # Makes a Receiver thingie behave mostly like a hash.
   #
@@ -18,21 +17,17 @@ module Receiver
   #
   # in addition to the below, by including Enumerable, this also adds
   #
-  #    #all?, #any?, #chunk, #collect, #collect_concat, #count, #cycle, #detect,
-  #    #drop, #drop_while, #each_cons, #each_entry, #each_slice,
-  #    #each_with_index, #each_with_object, #entries, #find, #find_all,
-  #    #find_index, #first, #flat_map, #grep, #group_by, #inject, #map, #max,
-  #    #max_by, #min, #min_by, #minmax, #minmax_by, #none?, #one?, #partition,
-  #    #reduce, #reverse_each, #slice_before, #sort, #sort_by, #take,
-  #    #take_while, #zip
+  #     :each_cons, :each_entry, :each_slice, :each_with_index, :each_with_object,
+  #     :map, :collect, :collect_concat, :entries, :to_a, :flat_map, :inject, :reduce,
+  #     :group_by, :chunk, :cycle, :partition, :reverse_each, :slice_before, :drop,
+  #     :drop_while, :take, :take_while, :detect, :find, :find_all, :find_index, :grep,
+  #     :all?, :any?, :none?, :one?, :first, :count, :zip :max, :max_by, :min, :min_by,
+  #     :minmax, :minmax_by, :sort, :sort_by
   #
   # As opposed to hash, does *not* define
   #
-  #   default, default=, default_proc, default_proc=, shift
-  #   length, size, empty?, flatten, replace, keep_if, key(value)
-  #   compare_by_identity compare_by_identity? rehash, select!
-  #
-  #   assoc rassoc
+  #   default, default=, default_proc, default_proc=, shift, flatten, compare_by_identity
+  #   compare_by_identity? rehash
   #
   module ActsAsHash
 
@@ -69,27 +64,9 @@ module Receiver
     # delegates to the class method. Typically you'll want to override that one,
     # not the instance keys
     def keys
-      # self.class.members.select{|k| attr_set?(k) }
-      instance_variables.map{|s| s[1..-1].to_sym }
+      instance_variables.map{|s| s[1..-1].to_sym if attr_set?(k) }.compact
     end
   end
 end
 
 
-    module ClassMethods
-      # By default, the hashlike methods iterate over the receiver attributes.
-      # If you want to filter our add to the keys list, override this method
-      #
-      # @example
-      #     def self.members
-      #       super + [:firstname, :lastname] - [:fullname]
-      #     end
-      #
-      def members
-        receiver_attr_names
-      end
-    end
-
-    def keys
-      super & members
-    end
