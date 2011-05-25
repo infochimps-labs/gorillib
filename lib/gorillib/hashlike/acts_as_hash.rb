@@ -61,8 +61,6 @@ module Gorillib
       val
     end
 
-    # delegates to the class method. Typically you'll want to override that one,
-    # not the instance keys
     def keys
       instance_variables.map{|s| s[1..-1].to_sym if attr_set?(k) }.compact
     end

@@ -286,6 +286,20 @@ public
     end
   end
 
+  module ClassMethods
+    # By default, the hashlike methods iterate over the receiver attributes.
+    # If you want to filter our add to the keys list, override this method
+    #
+    # @example
+    #     def self.members
+    #       super + [:firstname, :lastname] - [:fullname]
+    #     end
+    #
+    def members
+      receiver_attr_names
+    end
+  end
+
   # set up receiver attributes, and bring in methods from the ClassMethods module at class-level
   def self.included base
     base.class_eval do

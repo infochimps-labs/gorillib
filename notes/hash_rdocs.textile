@@ -1,0 +1,552 @@
+
+# Hashlike#store
+#
+# Element Assignment---Associates the value given by value with the key given
+# by key. key should not have its value changed while it is in use as a key (a
+# String passed as a key will be duplicated and frozen).
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh[:a] = 9
+#     hsh[:c] = 4
+#     hsh    # => { :a => 9, :b => 200, :c => 4 }
+#     #
+#     ------------------------------------------------------------------------
+#     hsh[key] = val                  -> val
+#     hsh.store(key, val)             -> val
+#
+# @param  key [Object] key to associate
+# @param  val [Object] value to associate it with
+# @return [Object]
+
+
+# Hashlike#delete
+#
+# Deletes and returns a key-value pair from hsh whose key is equal to key. If
+# the key is not found, returns the default value. If the optional code block
+# is given and the key is not found, pass in the key and return the result of
+# block.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.delete(:a)                            # => 100
+#     hsh.delete(:z)                            # => nil
+#     hsh.delete(:z){|el| "#{el} not found" }   # => "z not found"
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.delete(key)                   -> val
+#     hsh.delete(key){|key| block }     -> val
+#
+# @param  key [Object] key to remove
+# @return [Object]
+
+
+# Hashlike#keys
+#
+# Returns a new array populated with the keys from this hashlike. See also
+# Hashlike#values.
+#
+# @example
+#     hsh = { :a => 100, :b => 200, :c => 300, :d => 400 }
+#     hsh.keys   # => [:a, :b, :c, :d]
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.keys                          -> array
+#
+# @return [Array]
+
+
+# Hashlike#each
+#
+# Calls block once for each key in hsh, passing the key-value pair as
+# parameters.
+#
+# If no block is given, an enumerator is returned instead.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.each{|key, value| puts "#{key} is #{value}" }
+#     # produces:
+#     a is 100
+#     b is 200
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.each     {|key, val| block }  -> hsh
+#     hsh.each_pair{|key, val| block }  -> hsh
+#     hsh.each                          -> an_enumerator
+#     hsh.each_pair                     -> an_enumerator
+#
+# @return [Hashlike, Enumerator]
+
+
+# Hashlike#each_key
+#
+# Calls block once for each key in hsh, passing the key as a parameter.
+#
+# If no block is given, an enumerator is returned instead.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.each_key{|key| puts key }
+#     # produces:
+#     a
+#     b
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.each_key{|key| block }        -> hsh
+#     hsh.each_key                      -> an_enumerator
+#
+# @return [Hashlike, Enumerator]
+
+
+# Hashlike#each_value
+#
+# Calls block once for each key in hsh, passing the value as a parameter.
+#
+# If no block is given, an enumerator is returned instead.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.each_value{|value| puts value }
+#
+#     produces:
+#
+#     100
+#     200
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.each_value{|val| block }      -> hsh
+#     hsh.each_value                    -> an_enumerator
+#
+# @return [Hashlike, Enumerator]
+
+
+# Hashlike#has_key?
+#
+# Returns true if the given key is present in hsh.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.has_key?(:a)   # => true
+#     hsh.has_key?(:z)   # => false
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.has_key?(key)                 -> true or false
+#     hsh.include?(key)                 -> true or false
+#     hsh.key?(key)                     -> true or false
+#     hsh.member?(key)                  -> true or false
+#
+# @return [TrueClass, FalseClass]
+
+
+# Hashlike#include?
+#
+# Returns true if the given key is present in hsh.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.has_key?(:a)   # => true
+#     hsh.has_key?(:z)   # => false
+#     #
+#     ------------------------------------------------------------------------
+#     enum.include?(obj)                -> true or false
+#     enum.member?(obj)                 -> true or false
+#
+# @return [TrueClass, FalseClass]
+
+
+# Hashlike#key?
+#
+# Returns true if the given key is present in hsh.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.has_key?(:a)   # => true
+#     hsh.has_key?(:z)   # => false
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.has_key?(key)                 -> true or false
+#     hsh.include?(key)                 -> true or false
+#     hsh.key?(key)                     -> true or false
+#     hsh.member?(key)                  -> true or false
+#
+# @return [TrueClass, FalseClass]
+
+
+# Hashlike#member?
+#
+# Returns true if the given key is present in hsh.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.has_key?(:a)   # => true
+#     hsh.has_key?(:z)   # => false
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.has_key?(key)                 -> true or false
+#     hsh.include?(key)                 -> true or false
+#     hsh.key?(key)                     -> true or false
+#     hsh.member?(key)                  -> true or false
+#
+# @return [TrueClass, FalseClass]
+
+
+# Hashlike#has_value?
+#
+# Returns true if the given value is present for some key in hsh.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.has_value?(100)   # => true
+#     hsh.has_value?(999)   # => false
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.has_value?(val)               -> true or false
+#     hsh.value?(val)                   -> true or false
+#
+# @return [TrueClass, FalseClass]
+
+
+# Hashlike#value?
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.has_value?(val)               -> true or false
+#     hsh.value?(val)                   -> true or false
+#
+#     ------------------------------------------------------------------------
+#
+# Returns true if the given value is present for some key in hsh.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.has_value?(100)   # => true
+#     hsh.has_value?(999)   # => false
+#
+# @return [TrueClass, FalseClass]
+
+
+# Hashlike#fetch
+#
+# Returns a value from the hashlike for the given key. If the key can't be found,
+# there are several options: With no other arguments, it will raise an
+# KeyError exception; if default is given, then that will be
+# returned; if the optional code block is specified, then that will be run and
+# its result returned.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.fetch(:a)                          # => 100
+#     hsh.fetch(:z, "go fish")               # => "go fish"
+#     hsh.fetch(:z){|el| "go fish, #{el}"}   # => "go fish, z"
+#
+# The following example shows that an exception is raised if the key is not
+# found and a default value is not supplied.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.fetch(:z)
+#
+#     produces:
+#
+#     prog.rb:2:in `fetch': key not found (KeyError) from prog.rb:2
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.fetch(key [, default] )       -> obj
+#     hsh.fetch(key){|key| block }      -> obj
+#
+# @return [Object]
+
+
+# Hashlike#length
+#
+# Returns the number of key-value pairs in the hashlike.
+#
+# @example
+#     hsh = { :d => 100, :a => 200, :v => 300, :e => 400 }
+#     hsh.length       # => 4
+#     hsh.delete(:a)   # => 200
+#     hsh.length       # => 3
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.length                        ->  fixnum
+#     hsh.size                          ->  fixnum
+#
+# @return [Fixnum]
+
+
+# Hashlike#empty?
+#
+# Returns true if hsh contains no key-value pairs.
+#
+# @example
+#     {}.empty?   # => true
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.empty?                        -> true or false
+#
+# @return [TrueClass, FalseClass]
+
+
+# Hashlike#to_hash
+#
+# Returns self.
+#
+# @example
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.to_hash   => hsh
+#
+# @return [Hash]
+
+
+# Hashlike#values
+#
+# Returns a new array populated with the values from hsh. See also
+# Hashlike#keys.
+#
+# @example
+#     hsh = { :a => 100, :b => 200, :c => 300 }
+#     hsh.values   # => [100, 200, 300]
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.values                        -> array
+#
+# @return [Array]
+
+
+# Hashlike#values_at
+#
+# Return an array containing the values associated with the given keys. Also see
+# Hashlike#select.
+#
+#     hsh = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
+#     hsh.values_at("cow", "cat")  # => ["bovine", "feline"]
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.values_at(key, ...)           -> array
+#
+# @return [Array]
+
+
+
+# Hashlike#key
+#
+# Returns the key for a given value. If not found, returns nil.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh.key(200)   # => :b
+#     hsh.key(999)   # => nil
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.key(val)                      -> key
+#
+# @return [Object]
+
+# Hashlike#invert
+#
+# Returns a new hash created by using hsh's values as keys, and the keys
+# as values.
+#
+# @example
+#     hsh = { :n => 100, :m => 100, :y => 300, :d => 200, :a => 0 }
+#     hsh.invert   # => { 0 => :a, 100 => :m, 200 => :d, 300 => :y }
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.invert                        -> new_hash
+#
+# @return [Hash]
+
+
+# Hashlike#reject!
+#
+# Equivalent to Hashlike#delete_if, but returns nil if no changes were
+# made.
+#
+# @example
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.reject!{|key, val| block }    -> hsh or nil
+#     hsh.reject!                       -> an_enumerator
+#
+# @return [Hashlike, NilClass, Enumerator]
+
+
+# Hashlike#select!
+#
+# Equivalent to Hashlike#keep_if, but returns nil if no changes were
+# made.
+#
+# @example
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.select!{|key, val| block }    -> hsh or nil
+#     hsh.select!                       -> an_enumerator
+#
+# @return [Hashlike, NilClass, Enumerator]
+
+
+# Hashlike#delete_if
+#
+# Deletes every key-value pair from hsh for which block evaluates
+# to true.
+#
+# If no block is given, an enumerator is returned instead.
+#
+# @example
+#     hsh = { :a => 100, :b => 200, :c => 300 }
+#     hsh.delete_if{|key, val| key >= :b }   # => { :a => 100 }
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.delete_if{|key, val| block }  -> hsh
+#     hsh.delete_if                     -> an_enumerator
+#
+# @return [Hashlike, Enumerator]
+
+
+# Hashlike#keep_if
+#
+# Deletes every key-value pair from hsh for which block evaluates
+# to false.
+#
+# If no block is given, an enumerator is returned instead.
+#
+# @example
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.keep_if{|key, val| block }    -> hsh
+#     hsh.keep_if                       -> an_enumerator
+#
+# @return [Hashlike, Enumerator]
+
+
+# Hashlike#reject
+#
+# Same as Hashlike#delete_if, but works on (and returns) a copy of the
+# hsh. Equivalent to hsh.dup.delete_if.
+#
+# @example
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.reject{|key, val| block }     -> new_hashlike
+#
+# @return [Hashlike]
+
+
+# Hashlike#clear
+#
+# Removes all key-value pairs from hsh.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }   # => { :a => 100, :b => 200 }
+#     hsh.clear                          # => {}
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.clear                         -> hsh
+#
+# @return [Hashlike]
+
+
+# Hashlike#assoc
+#
+# Searches through the hashlike comparing obj with the key using ==.
+# Returns the key-value pair (two elements array) or nil if no match is
+# found.  See Array#assoc.
+#
+# @example
+#     hsh = { "colors"  => ["red", "blue", "green"],
+#             "letters" => [:a, :b, :c ]}
+#     hsh.assoc("letters")  # => ["letters", [:a, :b, :c]]
+#     hsh.assoc("foo")      # => nil
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.assoc(obj)                    ->  an_array  or  nil
+#
+# @return [Array, NilClass]
+
+
+# Hashlike#rassoc
+#
+# Searches through the hashlike comparing obj with the value using ==.
+# Returns the first key-value pair (two-element array) that matches. See also
+# Array#rassoc.
+#
+# @example
+#     hsh = { 1 => "one", 2 => "two", 3 => "three", "ii" => "two"}
+#     hsh.rassoc("two")    # => [2, "two"]
+#     hsh.rassoc("four")   # => nil
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.rassoc(key)                   -> an_array or nil
+#
+# @return [Array, NilClass]
+
+# Hashlike#flatten
+#
+# Returns a new array that is a one-dimensional flattening of this hashlike. That
+# is, for every key or value that is an array, extract its elements into the
+# new array.  Unlike Array#flatten, this method does not flatten recursively
+# by default.  The optional level argument determines the level of recursion
+# to flatten.
+#
+# @example
+#     hsh =  {1=> "one", 2 => [2,"two"], 3 => "three"}
+#     hsh.flatten    # => [1, "one", 2, [2, "two"], 3, "three"]
+#     hsh.flatten(2) # => [1, "one", 2, 2, "two", 3, "three"]
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.flatten                      -> an_array
+#     hsh.flatten(level)               -> an_array
+#
+# @return [Array]
+
+
+# Hashlike#update
+#
+# Adds the contents of other_hash to hsh.  If no block is
+# specified, entries with duplicate keys are overwritten with the values from
+# other_hash, otherwise the value of each duplicate key is determined by
+# calling the block with the key, its value in hsh and its value in
+# other_hash.
+#
+# @example
+#     h1 = { :a => 100, :b => 200 }
+#     h2 = { :b => 254, :c => 300 }
+#     h1.merge!(h2)
+#     # => { :a => 100, :b => 254, :c => 300 }
+#     #
+#     h1 = { :a => 100, :b => 200 }
+#     h2 = { :b => 254, :c => 300 }
+#     h1.merge!(h2){|key, v1, v2| v1 }
+#     # => { :a => 100, :b => 200, :c => 300 }
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.update(other_hash)                                 -> hsh
+#     hsh.update(other_hash){|key, oldval, newval| block}    -> hsh
+#
+# @return [Hashlike]
+
+
+# Hashlike#merge
+#
+# Returns a new hashlike containing the contents of other_hash and the
+# contents of hsh. If no block is specified, the value for entries with
+# duplicate keys will be that of other_hash. Otherwise the value for each
+# duplicate key is determined by calling the block with the key, its value in
+# hsh and its value in other_hash.
+#
+# @example
+#     h1 = { :a => 100, :b => 200 }
+#     h2 = { :b => 254, :c => 300 }
+#     h1.merge(h2)
+#     # => { :a=>100, :b=>254, :c=>300 }
+#     h1.merge(h2){|key, oldval, newval| newval - oldval}
+#     # => { :a => 100, :b => 54,  :c => 300 }
+#     h1
+#     # => { :a => 100, :b => 200 }
+#     #
+#     ------------------------------------------------------------------------
+#     hsh.merge(other_hash)                              -> new_hashlike
+#     hsh.merge(other_hash){|key, oldval, newval| block} -> new_hashlike
+#
+# @return [Hashlike]
