@@ -1,10 +1,45 @@
-# -*- coding: utf-8 -*-
+# Hashlike#==
+#
+# Equality -- Two hashes are equal if they have the same default value, they
+# contain the same number of keys, and the value corresponding to each key in
+# the first hash is equal (using ==) to the value for the same key in the
+# second. If obj is not a hash, attempt to convert it using to_hash and return
+# obj == +hsh+.
+#
+# @example
+#     h1 = { :a => 1, :c => 2 }
+#     h2 = { 7 => 35, :c => 2, :a => 1 }
+#     h3 = { :a => 1, :c => 2, 7 => 35 }
+#     h4 = { :a => 1, :d => 2, :f => 35 }
+#     h1 == h2 # => false
+#     h2 == h3 # => true
+#     h3 == h4 # => false
+#
 
+# Hashlike#[]
+#
+# Element Reference -- Retrieves the value stored for +key+.
+#
+# In a normal hash, a default value can be set; none is provided here.
+#
+# @example
+#     hsh = { :a => 100, :b => 200 }
+#     hsh[:a] # => 100
+#     hsh[:c] # => nil
+#
+# @param  key [Object] key to retrieve
+# @return [Object] the value stored for key, nil if missing
+#
+
+# Hashlike#[]=
 # Hashlike#store
 #
-# Element Assignment---Associates the value given by value with the key given
-# by key. key should not have its value changed while it is in use as a key (a
-# String passed as a key will be duplicated and frozen).
+# Element Assignment -- Associates the value given by value with the key given
+# by +key+.
+#
+# key should not have its value changed while it is in use as a key. In a
+# normal hash, a String passed as a key will be duplicated and frozen. No such
+# guarantee is provided here
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -18,14 +53,16 @@
 # @param  key [Object] key to associate
 # @param  val [Object] value to associate it with
 # @return [Object]
+#
 
 
 # Hashlike#delete
 #
-# Deletes and returns a key-value pair from hsh whose key is equal to key. If
-# the key is not found, returns the default value. If the optional code block
-# is given and the key is not found, pass in the key and return the result of
-# block.
+# Deletes and returns the value from +hsh+ whose key is equal to +key+. If the
+# optional code block is given and the key is not found, pass in the key and
+# return the result of +block+.
+#
+# In a normal hash, a default value can be set; none is provided here.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -43,6 +80,7 @@
 #   @yieldparam key
 #   @return [Object, Nil] the removed object, or if missing, the return value
 #     of the block
+#
 
 
 # Hashlike#keys
@@ -56,11 +94,12 @@
 #     hsh.keys   # => [:a, :b, :c, :d]
 #
 # @return [Array] list of keys
+#
 
 
 # Hashlike#each
 #
-# Calls block once for each key in hsh, passing the key-value pair as
+# Calls +block+ once for each key in +hsh+, passing the key-value pair as
 # parameters.
 #
 # If no block is given, an enumerator is returned instead.
@@ -73,7 +112,7 @@
 #     b is 200
 #
 # @overload hsh.each{|key, val| block }      -> hsh
-#   Calls block once for each key in hsh
+#   Calls block once for each key in +hsh+
 #   @yield [key, val] in order, each key and its associated value
 #   @return [Hashlike]
 #
@@ -82,9 +121,10 @@
 #   @return [Enumerator]
 #
 
+
 # Hashlike#each_key
 #
-# Calls block once for each key in hsh, passing the key as a parameter.
+# Calls +block+ once for each key in +hsh+, passing the key as a parameter.
 #
 # If no block is given, an enumerator is returned instead.
 #
@@ -96,7 +136,7 @@
 #     b
 #
 # @overload hsh.each_key{|key| block }       -> hsh
-#   Calls block once for each key in hsh
+#   Calls +block+ once for each key in +hsh+
 #   @yield [key] in order, each key
 #   @return [Hashlike]
 #
@@ -108,21 +148,19 @@
 
 # Hashlike#each_value
 #
-# Calls block once for each key in hsh, passing the value as a parameter.
+# Calls +block+ once for each key in +hsh+, passing the value as a parameter.
 #
 # If no block is given, an enumerator is returned instead.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
 #     hsh.each_value{|value| puts value }
-#
-#     produces:
-#
+#     # produces:
 #     100
 #     200
 #
 # @overload hsh.each_value{|val| block }     -> hsh
-#   Calls block once for each value in hsh
+#   Calls +block+ once for each value in +hsh+
 #   @yield [val] in order by its key, each value
 #   @return [Hashlike]
 #
@@ -134,7 +172,7 @@
 
 # Hashlike#has_key?
 #
-# Returns true if the given key is present in hsh.
+# Returns true if the given key is present in +hsh+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -143,11 +181,12 @@
 #
 # @param key [Object] the key to query
 # @return [true, false] true if the key is present, false otherwise
+#
 
 
 # Hashlike#include?
 #
-# Returns true if the given key is present in hsh.
+# Returns true if the given key is present in +hsh+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -156,11 +195,12 @@
 #
 # @param key [Object] the key to query
 # @return [true, false] true if the key is present, false otherwise
+#
 
 
 # Hashlike#key?
 #
-# Returns true if the given key is present in hsh.
+# Returns true if the given key is present in +hsh+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -169,11 +209,12 @@
 #
 # @param key [Object] the key to query
 # @return [true, false] true if the key is present, false otherwise
+#
 
 
 # Hashlike#member?
 #
-# Returns true if the given key is present in hsh.
+# Returns true if the given key is present in +hsh+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -182,11 +223,12 @@
 #
 # @param key [Object] the key to query
 # @return [true, false] true if the key is present, false otherwise
+#
 
 
 # Hashlike#has_value?
 #
-# Returns true if the given value is present for some key in hsh.
+# Returns true if the given value is present for some key in +hsh+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -195,11 +237,12 @@
 #
 # @param  val [Object] the value to query
 # @return [true, false] true if the value is present, false otherwise
+#
 
 
 # Hashlike#value?
 #
-# Returns true if the given value is present for some key in hsh.
+# Returns true if the given value is present for some key in +hsh+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -208,15 +251,16 @@
 #
 # @param  val [Object] the value to query
 # @return [true, false] true if the value is present, false otherwise
+#
 
 
 # Hashlike#fetch
 #
-# Returns a value from the hashlike for the given key. If the key can't be found,
-# there are several options: With no other arguments, it will raise an
-# KeyError exception; if default is given, then that will be
-# returned; if the optional code block is specified, then that will be run and
-# its result returned.
+# Returns a value from the hashlike for the given key. If the key can't be
+# found, there are several options:
+# * With no other arguments, it will raise a +KeyError+ exception;
+# * if default is given, then that will be returned;
+# * if the optional code block is specified, then that will be run and its result returned.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -224,10 +268,7 @@
 #     hsh.fetch(:z, "go fish")               # => "go fish"
 #     hsh.fetch(:z){|el| "go fish, #{el}"}   # => "go fish, z"
 #
-# The following example shows that an exception is raised if the key is not
-# found and a default value is not supplied.
-#
-# @example
+# @example An exception is raised if the key is not found and a default value is not supplied.
 #     hsh = { :a => 100, :b => 200 }
 #     hsh.fetch(:z)
 #     # produces:
@@ -239,11 +280,13 @@
 #     hsh.fetch(:z){|key| key.to_s * 5 }
 #     # => "zzzzz"
 #
-# @param key     [Object] the key to query
-# @param default [Object] the value to use if the key is missing
-# @yield         [key]    if missing, block called with the key requested
-# @return        [Object] the value; if missing, the default; if missing, the
-#                         block's return value
+# @param key     [Object]   the key to query
+# @param default [Object]   the value to use if the key is missing
+# @raise         [KeyError] raised if missing, and neither +default+ nor +block+ is supplied
+# @yield         [key]      if missing, block called with the key requested
+# @return        [Object]   the value; if missing, the default; if missing, the
+#                           block's return value
+#
 
 
 # Hashlike#length
@@ -262,13 +305,14 @@
 
 # Hashlike#empty?
 #
-# Returns true if hsh contains no key-value pairs.
+# Returns true if the hashlike contains no key-value pairs.
 #
 # @example
 #     {}.empty?   # => true
 #
-# @return [true, false] true if hsh contains no key-value pairs, false otherwise
+# @return [true, false] true if +hsh+ contains no key-value pairs, false otherwise
 #
+
 
 # Hashlike#to_hash
 #
@@ -279,13 +323,13 @@
 #    my_hshlike[:a] = 100; my_hshlike[:b] = 200
 #    my_hshlike.to_hash # => { :a => 100, :b => 200 }
 #
-# @return [Hash]
+# @return [Hash] a new Hash instance, with each key set to its associated value.
 #
 
 
 # Hashlike#values
 #
-# Returns a new array populated with the values from hsh.
+# Returns a new array populated with the values from +hsh+.
 #
 # @see Hashlike#keys.
 #
@@ -293,7 +337,7 @@
 #     hsh = { :a => 100, :b => 200, :c => 300 }
 #     hsh.values   # => [100, 200, 300]
 #
-# @return [Array] the values, in order by their key
+# @return [Array] the values, in order by their key.
 #
 
 
@@ -307,13 +351,21 @@
 #     hsh = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
 #     hsh.values_at("cow", "cat")  # => ["bovine", "feline"]
 #
-# @param  *allowed_keys [Object] the keys to retrieve
-# @return [Array] the values, in order according to allowed_keys
+# @example
+#     hsh = { :a => 100, :b => 200, :c => 300 }
+#     hsh.values_at(:c, :a, :c, :z, :a)
+#     # => [300, 100, 300, nil, 100]
 #
+# @param  *allowed_keys [Object] the keys to retrieve.
+# @return [Array] the values, in order according to allowed_keys.
+#
+
 
 # Hashlike#key
 #
-# Returns the key for a given value. If not found, returns nil.
+# Searches the hash for an entry whose value == value, returning the
+# corresponding key. If multiple entries has this value, the key returned will
+# be that of one of the entries (unpredictably). If not found, returns +nil+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }
@@ -324,10 +376,11 @@
 # @return [Object, nil] the key for the given val, or nil if missing
 #
 
+
 # Hashlike#invert
 #
-# Returns a new hash created by using hsh's values as keys, and the keys as
-# values. If hsh has duplicate values, the result will contain only one of
+# Returns a new hash created by using +hsh+'s values as keys, and the keys as
+# values. If +hsh+ has duplicate values, the result will contain only one of
 # them as a key -- which one is not predictable.
 #
 # @example
@@ -340,7 +393,7 @@
 
 # Hashlike#delete_if
 #
-# Deletes every key-value pair from hsh for which block evaluates
+# Deletes every key-value pair from +hsh+ for which +block+ evaluates
 # to true.
 #
 # If no block is given, an enumerator is returned instead.
@@ -353,7 +406,7 @@
 #     hsh.delete_if{|key, val| key.to_s >= "z" }   # => { :a => 100, :b => 200, :c => 300 }
 #
 # @overload hsh.delete_if{|key, val| block } -> hsh
-#   Deletes every key-value pair from hsh for which block evaluates to true.
+#   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
 #   @return [Hashlike]
 #
 # @overload hsh.delete_if                    -> an_enumerator
@@ -364,7 +417,7 @@
 
 # Hashlike#reject!
 #
-# Deletes every key-value pair from hsh for which block evaluates to true.
+# Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
 # (Equivalent to Hashlike#delete_if), but returns nil if no changes were made.
 #
 # @example
@@ -375,7 +428,7 @@
 #     hsh.delete_if{|key, val| key.to_s >= "z" }   # nil
 #
 # @overload hsh.reject!{|key, val| block }   -> hsh or nil
-#   Deletes every key-value pair from hsh for which block evaluates to true.
+#   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
 #   @return [Hashlike, nil]
 #
 # @overload hsh.reject!                      -> an_enumerator
@@ -387,7 +440,7 @@
 # Hashlike#reject
 #
 # Same as Hashlike#delete_if, but works on (and returns) a copy of the
-# hsh. Equivalent to hsh.dup.delete_if.
+# +hsh+. Equivalent to <tt>hsh.dup.delete_if<tt>.
 #
 # @example
 #     hsh = { :a => 100, :b => 200, :c => 300 }
@@ -399,7 +452,7 @@
 #     hsh # => { :a => 100, :b => 200, :c => 300 }
 #
 # @overload hsh.reject{|key, val| block }    -> new_hashlike
-#   Deletes every key-value pair from hsh for which block evaluates to true.
+#   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
 #   @return [Hashlike]
 #
 # @overload hsh.reject                       -> an_enumerator
@@ -407,9 +460,10 @@
 #   @return [Enumerator]
 #
 
+
 # Hashlike#keep_if
 #
-# Deletes every key-value pair from hsh for which block evaluates to false.
+# Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
 #
 # If no block is given, an enumerator is returned instead.
 #
@@ -421,7 +475,7 @@
 #     hsh.keep_if{|key, val| key.to_s >= "a" }   # => { :a => 100, :b => 200, :c => 300 }
 #
 # @overload hsh.keep_if{|key, val| block }   -> hsh
-#   Deletes every key-value pair from hsh for which block evaluates to false.
+#   Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
 #   @return [Hashlike]
 #
 # @overload hsh.keep_if                      -> an_enumerator
@@ -443,7 +497,7 @@
 #     hsh.select!{|key, val| key.to_s >= "a" }   # => { :a => 100, :b => 200, :c => 300 }
 #
 # @overload hsh.select!{|key, val| block }   -> hsh or nil
-#   Deletes every key-value pair from hsh for which block evaluates to false.
+#   Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
 #   @return [Hashlike]
 #
 # @overload hsh.select!                      -> an_enumerator
@@ -454,7 +508,7 @@
 
 # Hashlike#clear
 #
-# Removes all key-value pairs from hsh.
+# Removes all key-value pairs from +hsh+.
 #
 # @example
 #     hsh = { :a => 100, :b => 200 }   # => { :a => 100, :b => 200 }
@@ -535,11 +589,11 @@
 
 # Hashlike#update
 #
-# Adds the contents of other_hash to hsh.  If no block is
+# Adds the contents of +other_hash+ to +hsh+.  If no block is
 # specified, entries with duplicate keys are overwritten with the values from
-# other_hash, otherwise the value of each duplicate key is determined by
-# calling the block with the key, its value in hsh and its value in
-# other_hash.
+# +other_hash+, otherwise the value of each duplicate key is determined by
+# calling the block with the key, its value in +hsh+ and its value in
+# +other_hash+.
 #
 # @example
 #     h1 = { :a => 100, :b => 200 }
@@ -553,28 +607,28 @@
 #     # => { :a => 100, :b => 200, :c => 300 }
 #
 # @overload hsh.update(other_hash)                               -> hsh
-#   Adds the contents of other_hash to hsh.  Entries with duplicate keys are
-#   overwritten with the values from other_hash
+#   Adds the contents of +other_hash+ to +hsh+.  Entries with duplicate keys are
+#   overwritten with the values from +other_hash+
 #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
 #   @return [Hashlike] this hashlike, updated
 #
 # @overload hsh.update(other_hash){|key, oldval, newval| block}  -> hsh
-#   Adds the contents of other_hash to hsh.  The value of each duplicate key
-#   is determined by calling the block with the key, its value in hsh and its
-#   value in other_hash.
+#   Adds the contents of +other_hash+ to +hsh+.  The value of each duplicate key
+#   is determined by calling the block with the key, its value in +hsh+ and its
+#   value in +other_hash+.
 #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
-#   @yield  [Object, Object, Object] called if key exists in each hsh
+#   @yield  [Object, Object, Object] called if key exists in each +hsh+
 #   @return [Hashlike] this hashlike, updated
 #
 
 
 # Hashlike#merge
 #
-# Returns a new hashlike containing the contents of other_hash and the
-# contents of hsh. If no block is specified, the value for entries with
-# duplicate keys will be that of other_hash. Otherwise the value for each
+# Returns a new hashlike containing the contents of +other_hash+ and the
+# contents of +hsh+. If no block is specified, the value for entries with
+# duplicate keys will be that of +other_hash+. Otherwise the value for each
 # duplicate key is determined by calling the block with the key, its value in
-# hsh and its value in other_hash.
+# +hsh+ and its value in +other_hash+.
 #
 # @example
 #     h1 = { :a => 100, :b => 200 }
@@ -587,16 +641,16 @@
 #     # => { :a => 100, :b => 200 }
 #
 # @overload hsh.merge(other_hash)                               -> hsh
-#   Adds the contents of other_hash to hsh.  Entries with duplicate keys are
-#   overwritten with the values from other_hash
+#   Adds the contents of +other_hash+ to +hsh+.  Entries with duplicate keys are
+#   overwritten with the values from +other_hash+
 #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
 #   @return [Hashlike] a new merged hashlike
 #
 # @overload hsh.merge(other_hash){|key, oldval, newval| block}  -> hsh
-#   Adds the contents of other_hash to hsh.  The value of each duplicate key
-#   is determined by calling the block with the key, its value in hsh and its
-#   value in other_hash.
+#   Adds the contents of +other_hash+ to +hsh+.  The value of each duplicate key
+#   is determined by calling the block with the key, its value in +hsh+ and its
+#   value in +other_hash+.
 #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
-#   @yield  [Object, Object, Object] called if key exists in each hsh
+#   @yield  [Object, Object, Object] called if key exists in each +hsh+
 #   @return [Hashlike] a new merged hashlike
 #
