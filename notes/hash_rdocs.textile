@@ -1,10 +1,62 @@
+
+# == Hashlike ==
+#
+# If your class provides
+# * :[]
+# * :[]=
+# * :delete
+# * :keys
+#
+# then hashlike will provide the rest:
+#
+#     :store, :delete, :keys, :each, :each_key, :each_value, :has_key?,
+#     :include?, :key?, :member?, :has_value?, :value?, :fetch, :length,
+#     :empty?, :to_hash, :values, :values_at, :merge, :update, :index,
+#     :invert, :reject!, :select!, :delete_if, :keep_if, :reject, :clear,
+#     :assoc, :rassoc, :flatten
+#
+# via Enumerable, it provides in addition:
+#
+#     :each_cons, :each_entry, :each_slice, :each_with_index, :each_with_object,
+#     :map, :collect, :collect_concat, :entries, :to_a, :flat_map, :inject, :reduce,
+#     :group_by, :chunk, :cycle, :partition, :reverse_each, :slice_before, :drop,
+#     :drop_while, :take, :take_while, :detect, :find, :find_all, :find_index, :grep,
+#     :all?, :any?, :none?, :one?, :first, :count, :zip :max, :max_by, :min, :min_by,
+#     :minmax, :minmax_by, :sort, :sort_by
+#
+#
+# === caveats ===
+#
+#  does not define default, default=, default_proc, default_proc=, replace, rehash, compare_by_identity, compare_by_identity?, shift
+#
+#
+# == ActsAsHash ==
+#
+# Uses accessors and instance variables to provide
+# * :[key]        calls the getter <tt>send(key)</tt>
+# * :[key]= val   calls the setter <tt>send("key=", val)</tt>
+# * :delete       removes the instance variable, calls unset!
+# * :keys         all instance variables
+#
+# == Hashlike::Slice        ==
+# == Hashlike::Keys         ==
+# == Hashlike::Compact      ==
+# == Hashlike::DeepCompact  ==
+# == Hashlike::DeepMerge    ==
+# == Hashlike::TreeMerge    ==
+# == Hashlike::ReverseMerge ==
+# == Hashlike::Zip          ==
+# == Hashlike::DeepKeys     ==
+
 # Hashlike#==
 #
-# Equality -- Two hashes are equal if they have the same default value, they
-# contain the same number of keys, and the value corresponding to each key in
-# the first hash is equal (using ==) to the value for the same key in the
-# second. If obj is not a hash, attempt to convert it using to_hash and return
-# obj == +hsh+.
+# Equality -- Two hashes are equal if they contain the same number of keys,
+# and the value corresponding to each key in the first hash is equal (using
+# <tt>==</tt>) to the value for the same key in the second. If +obj+ is not a
+# Hashlike, attempt to convert it using +to_hash+ and return <tt>obj ==
+# hsh</tt>.
+#
+# Does not take a default value comparion into account.
 #
 # @example
 #     h1 = { :a => 1, :c => 2 }
@@ -34,8 +86,8 @@
 # Hashlike#[]=
 # Hashlike#store
 #
-# Element Assignment -- Associates the value given by value with the key given
-# by +key+.
+# Element Assignment -- Associates the value given by +val+ with the key
+# given by +key+.
 #
 # key should not have its value changed while it is in use as a key. In a
 # normal hash, a String passed as a key will be duplicated and frozen. No such
@@ -440,7 +492,7 @@
 # Hashlike#reject
 #
 # Same as Hashlike#delete_if, but works on (and returns) a copy of the
-# +hsh+. Equivalent to <tt>hsh.dup.delete_if<tt>.
+# +hsh+. Equivalent to <tt>hsh.dup.delete_if</tt>.
 #
 # @example
 #     hsh = { :a => 100, :b => 200, :c => 300 }

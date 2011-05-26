@@ -99,7 +99,7 @@ module Gorillib
 
     # Returns true if has_key? is false for all attributes in #keys
     def empty?
-      keys.empty?
+      length == 0
     end
 
     #
@@ -110,11 +110,6 @@ module Gorillib
     def to_hash
       {}.tap{|hsh| each{|key, val| hsh[key] = val } }
     end
-
-    # # a nested array of [ key, value ] pairs. Delegates to to_hash.to_a
-    # def to_a
-    #   [].tap{|arr| each{|key, val| arr << [key, val] } }
-    # end
 
     # Returns an array consisting of the value for each attribute in
     # #keys, guaranteed in same order

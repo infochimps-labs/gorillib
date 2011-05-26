@@ -36,7 +36,7 @@ module Gorillib
     # Note: indifferent access -- either of :foo or "foo" will work
     #
     def [](name)
-      self.send(name) if members.include?(name.to_sym)
+      self.send(name)
     end
 
     # Fake hash writer semantics: delegates to self.send("key=", val)
@@ -45,7 +45,7 @@ module Gorillib
     # NOTE: indifferent access -- either of :foo or "foo" will work
     #
     def []=(name, val)
-      self.send("#{name}=", val) if members.include?(name.to_sym)
+      self.send("#{name}=", val)
     end
     alias_method(:store, :[]=)
 
@@ -56,13 +56,18 @@ module Gorillib
     #   If there is a corresponding instance_variable, it is subsequently removed.
     def delete(key)
       val = self[key]
-      self[key] = nil
-      unset!(key)
+      self.send(:remove_instance_variable, "@#{attr}") if self.instance_variable_defined?("@#{attr}")
       val
     end
 
-    def keys
-      instance_variables.map{|s| s[1..-1].to_sym if attr_set?(k) }.compact
+    if RUBY_VERSION < '1.9.0'
+      def keys
+        instance_variables.map{|s| s.to_s.gsub(/^@/, "").to_sym  }
+      end
+    else
+      def keys
+        instance_variables
+      end
     end
   end
 end
