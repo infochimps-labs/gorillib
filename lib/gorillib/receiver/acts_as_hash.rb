@@ -31,29 +31,104 @@ module Receiver
   #
   module ActsAsHash
 
-    # Fake hash reader semantics: delegates to self.send(key)
+    # Hashlike#==
     #
-    # Note: indifferent access -- either of :foo or "foo" will work
+    # Equality -- Two hashes are equal if they contain the same number of keys,
+    # and the value corresponding to each key in the first hash is equal (using
+    # <tt>==</tt>) to the value for the same key in the second. If +obj+ is not a
+    # Hashlike, attempt to convert it using +to_hash+ and return <tt>obj ==
+    # hsh</tt>.
+    #
+    # Does not take a default value comparion into account.
+    #
+    # @example
+    #     h1 = { :a => 1, :c => 2 }
+    #     h2 = { 7 => 35, :c => 2, :a => 1 }
+    #     h3 = { :a => 1, :c => 2, 7 => 35 }
+    #     h4 = { :a => 1, :d => 2, :f => 35 }
+    #     h1 == h2 # => false
+    #     h2 == h3 # => true
+    #     h3 == h4 # => false
+    #
+    def ==(name)
+      raise 'hell'
+    end
+
+    # Hashlike#[]
+    #
+    # Element Reference -- Retrieves the value stored for +key+.
+    #
+    # In a normal hash, a default value can be set; none is provided here.
+    #
+    # Delegates to self.send(key)
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh[:a] # => 100
+    #     hsh[:c] # => nil
+    #
+    # @param  key [Object] key to retrieve
+    # @return [Object] the value stored for key, nil if missing
     #
     def [](name)
       self.send(name) if members.include?(name.to_sym)
     end
 
-    # Fake hash writer semantics: delegates to self.send("key=", val)
+
+    # Hashlike#[]=
+    # Hashlike#store
     #
-    # NOTE: this calls self.foo= 5, not self.receive_foo(5)
-    # NOTE: indifferent access -- either of :foo or "foo" will work
+    # Element Assignment -- Associates the value given by +val+ with the key
+    # given by +key+.
+    #
+    # key should not have its value changed while it is in use as a key. In a
+    # normal hash, a String passed as a key will be duplicated and frozen. No such
+    # guarantee is provided here
+    #
+    # Delegates to self.send("key=", val)
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh[:a] = 9
+    #     hsh[:c] = 4
+    #     hsh    # => { :a => 9, :b => 200, :c => 4 }
+    #
+    #     hsh[key] = val                         -> val
+    #     hsh.store(key, val)                    -> val
+    #
+    # @param  key [Object] key to associate
+    # @param  val [Object] value to associate it with
+    # @return [Object]
     #
     def []=(name, val)
       self.send("#{name}=", val) if members.include?(name.to_sym)
     end
-    alias_method(:store, :[]=)
 
-    # @param key<Object> The key to remove
+    # Hashlike#delete
     #
-    # @return [Object]
-    #   returns the value of the given attribute, and sets its new value to nil.
-    #   If there is a corresponding instance_variable, it is subsequently removed.
+    # Deletes and returns the value from +hsh+ whose key is equal to +key+. If the
+    # optional code block is given and the key is not found, pass in the key and
+    # return the result of +block+.
+    #
+    # In a normal hash, a default value can be set; none is provided here.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.delete(:a)                            # => 100
+    #     hsh.delete(:z)                            # => nil
+    #     hsh.delete(:z){|el| "#{el} not found" }   # => "z not found"
+    #
+    # @overload hsh.delete(key)                  -> val
+    #   @param  key [Object] key to remove
+    #   @return [Object, Nil] the removed object, nil if missing
+    #
+    # @overload hsh.delete(key){|key| block }    -> val
+    #   @param  key [Object] key to remove
+    #   @yield  [Object] called (with key) if key is missing
+    #   @yieldparam key
+    #   @return [Object, Nil] the removed object, or if missing, the return value
+    #     of the block
+    #
     def delete(key)
       val = self[key]
       unset!(key)
@@ -61,14 +136,37 @@ module Receiver
     end
 
     if RUBY_VERSION < '1.9.0'
+      # Hashlike#keys
+      #
+      # Returns a new array populated with the keys from this hashlike.
+      #
+      # @see Hashlike#values.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200, :c => 300, :d => 400 }
+      #     hsh.keys   # => [:a, :b, :c, :d]
+      #
+      # @return [Array] list of keys
+      #
       def keys
         members & instance_variables.map{|s| s.gsub(/^@/, "").to_sym  }
       end
     else
+      # Hashlike#keys
+      #
+      # Returns a new array populated with the keys from this hashlike.
+      #
+      # @see Hashlike#values.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200, :c => 300, :d => 400 }
+      #     hsh.keys   # => [:a, :b, :c, :d]
+      #
+      # @return [Array] list of keys
+      #
       def keys
         members & instance_variables
       end
     end
   end
 end
-

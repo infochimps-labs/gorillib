@@ -1,12 +1,65 @@
 module Gorillib
+  #
+  # Your class must provide
+  #
+  # * hsh[key]             Element Reference  -- Retrieves the value stored for +key+.
+  # * hsh[key] = val       Element Assignment -- Associates +val+ with +key+.
+  # * hsh.delete(key)      Deletes & returns the value whose key is equal to +key+.
+  # * hsh.keys             Returns a new array populated with the keys.
+  #
+  # See Hashlike::ActsAsHash for an implementation using instance variables with
+  # detailed documentation.
+  #
+  # then hashlike will provide the rest:
+  #
+  #     :store, :delete, :keys, :each, :each_key, :each_value, :has_key?,
+  #     :include?, :key?, :member?, :has_value?, :value?, :fetch, :length,
+  #     :empty?, :to_hash, :values, :values_at, :merge, :update, :index,
+  #     :invert, :reject!, :select!, :delete_if, :keep_if, :reject, :clear,
+  #     :assoc, :rassoc, :flatten
+  #
+  # via Enumerable, it provides in addition:
+  #
+  #     :each_cons, :each_entry, :each_slice, :each_with_index,
+  #     :each_with_object, :map, :collect, :collect_concat, :entries, :to_a,
+  #     :flat_map, :inject, :reduce, :group_by, :chunk, :cycle, :partition,
+  #     :reverse_each, :slice_before, :drop, :drop_while, :take, :take_while,
+  #     :detect, :find, :find_all, :find_index, :grep, :all?, :any?, :none?,
+  #     :one?, :first, :count, :zip :max, :max_by, :min, :min_by, :minmax,
+  #     :minmax_by, :sort, :sort_by
+  #
+  # It does not define:
+  #
+  #     :default, :default=, :default_proc, :default_proc=, :replace, :rehash,
+  #     :compare_by_identity, :compare_by_identity?, :shift
+  #
+  #
   module Hashlike
 
-    # ===========================================================================
-    #
-    # The below methods are natural extensions of the above
-    #
+    alias_method(:store, :[]=)
 
-    # Calls block once for each key in #keys in order, passing the key and value as parameters.
+    #
+    # Calls +block+ once for each key in +hsh+, passing the key-value pair as
+    # parameters.
+    #
+    # If no block is given, an enumerator is returned instead.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.each{|key, value| puts "#{key} is #{value}" }
+    #     # produces:
+    #     a is 100
+    #     b is 200
+    #
+    # @overload hsh.each{|key, val| block }      -> hsh
+    #   Calls block once for each key in +hsh+
+    #   @yield [key, val] in order, each key and its associated value
+    #   @return [Hashlike]
+    #
+    # @overload hsh.each                         -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def each
       return enum_for(:each) unless block_given?
       keys.each do |key|
@@ -16,48 +69,87 @@ module Gorillib
     end
     alias_method :each_pair, :each
 
-    # Calls block once for each key in #keys in order, passing the key as parameter.
+    # Hashlike#each_key
+    #
+    # Calls +block+ once for each key in +hsh+, passing the key as a parameter.
+    #
+    # If no block is given, an enumerator is returned instead.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.each_key{|key| puts key }
+    #     # produces:
+    #     a
+    #     b
+    #
+    # @overload hsh.each_key{|key| block }       -> hsh
+    #   Calls +block+ once for each key in +hsh+
+    #   @yield [key] in order, each key
+    #   @return [Hashlike]
+    #
+    # @overload hsh.each_key                     -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def each_key
       return enum_for(:each_key) unless block_given?
       keys.each{|k| yield k }
       self
     end
 
-    # Calls block once for each key in #keys in order, passing the value as parameter.
+    #
+    # Calls +block+ once for each key in +hsh+, passing the value as a parameter.
+    #
+    # If no block is given, an enumerator is returned instead.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.each_value{|value| puts value }
+    #     # produces:
+    #     100
+    #     200
+    #
+    # @overload hsh.each_value{|val| block }     -> hsh
+    #   Calls +block+ once for each value in +hsh+
+    #   @yield [val] in order by its key, each value
+    #   @return [Hashlike]
+    #
+    # @overload hsh.each_value                   -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def each_value &block
       return enum_for(:each_value) unless block_given?
       each{|k,v| yield v }
       self
     end
 
-    # @param key<Object> The key to check for.
     #
-    # @return [Boolean] True if
-    #   * the attribute is one of this object's keys, and
-    #   * its value is non-nil OR the corresponding instance_variable is defined.
-    #
-    # For attributes that are virtual accessors, if its value is explicitly set
-    # to nil then has_key? is true.
+    # Returns true if the given key is present in +hsh+.
     #
     # @example
-    #    class Foo
-    #      include Receiver
-    #      include Receiver::ActsAsHash
-    #      rcvr_accessor :a, Integer
-    #      rcvr_accessor :b, String
-    #    end
-    #    foo = Foo.receive({:a => 1})
-    #    foo.has_key?(:b)               # false
-    #    foo[:b]                        # nil
-    #    foo.b = nil
-    #    foo.has_key?(:b)               # true
-    #    foo[:b]                        # nil
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.has_key?(:a)   # => true
+    #     hsh.has_key?(:z)   # => false
+    #
+    # @param key [Object] the key to check for.
+    # @return [true, false] true if the key is present, false otherwise
     #
     def has_key?(key)
       keys.include?(key)
     end
 
-    # Returns true if the given value is present for some attribute in #keys
+    #
+    # Returns true if the given value is present for some key in +hsh+.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.has_value?(100)   # => true
+    #     hsh.has_value?(999)   # => false
+    #
+    # @param  val [Object] the value to query
+    # @return [true, false] true if the value is present, false otherwise
+    #
     def has_value? val
       !! key(val)
     end
@@ -68,21 +160,38 @@ module Gorillib
     alias_method :key?,     :has_key?
     alias_method :member?,  :has_key?
 
-    # @param key<Object> The key to fetch.
-    # @param *extras<Array> Default value.
     #
-    # Returns a value for the given key. If the object doesn't has_key?(key),
-    # several options exist:
-    #
-    # * With no other arguments, it will raise a KeyError exception;
+    # Returns a value from the hashlike for the given key. If the key can't be
+    # found, there are several options:
+    # * With no other arguments, it will raise a +KeyError+ exception;
     # * if default is given, then that will be returned;
-    # * if the optional code block is specified, then that will be run and its
-    #   result returned.
+    # * if the optional code block is specified, then that will be run and its result returned.
     #
-    # fetch does not evaluate any default values supplied when
-    # the hash was created -- it only looks for keys in the hash.
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.fetch(:a)                          # => 100
+    #     hsh.fetch(:z, "go fish")               # => "go fish"
+    #     hsh.fetch(:z){|el| "go fish, #{el}"}   # => "go fish, z"
     #
-    # @return [Object] The value at key or the default value.
+    # @example An exception is raised if the key is not found and a default value is not supplied.
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.fetch(:z)
+    #     # produces:
+    #     prog.rb:2:in `fetch': key not found (KeyError) from prog.rb:2
+    #
+    #     hsh.fetch(:z, 3)
+    #     # => 3
+    #
+    #     hsh.fetch(:z){|key| key.to_s * 5 }
+    #     # => "zzzzz"
+    #
+    # @param key     [Object]   the key to query
+    # @param default [Object]   the value to use if the key is missing
+    # @raise         [KeyError] raised if missing, and neither +default+ nor +block+ is supplied
+    # @yield         [key]      if missing, block called with the key requested
+    # @return        [Object]   the value; if missing, the default; if missing, the
+    #                           block's return value
+    #
     def fetch(key, default=nil, &block)
       if    has_key?(key) then self[key]
       elsif default       then default
@@ -91,66 +200,150 @@ module Gorillib
       end
     end
 
-    # The number of keys where #has_key is true
+    #
+    # Returns the number of key-value pairs in the hashlike.
+    #
+    # @example
+    #     hsh = { :d => 100, :a => 200, :v => 300, :e => 400 }
+    #     hsh.length       # => 4
+    #     hsh.delete(:a)   # => 200
+    #     hsh.length       # => 3
+    #
+    # @return [Fixnum] number of key-value pairs
+    #
     def length
       keys.length
     end
     alias_method :size, :length
 
-    # Returns true if has_key? is false for all attributes in #keys
+    #
+    # Returns true if the hashlike contains no key-value pairs.
+    #
+    # @example
+    #     {}.empty?   # => true
+    #
+    # @return [true, false] true if +hsh+ contains no key-value pairs, false otherwise
+    #
     def empty?
       length == 0
     end
 
     #
-    # Convert to a hash
+    # Returns a hash with each key set to its associated value.
     #
-    # Each key in #keys becomes an element in the new array if the value of its
-    # attribute is non-nil OR the corresponding instance_variable is defined.
+    # @example
+    #    my_hshlike = MyHashlike.new
+    #    my_hshlike[:a] = 100; my_hshlike[:b] = 200
+    #    my_hshlike.to_hash # => { :a => 100, :b => 200 }
+    #
+    # @return [Hash] a new Hash instance, with each key set to its associated value.
+    #
     def to_hash
       {}.tap{|hsh| each{|key, val| hsh[key] = val } }
     end
 
-    # Returns an array consisting of the value for each attribute in
-    # #keys, guaranteed in same order
+    #
+    # Returns a new array populated with the values from +hsh+.
+    #
+    # @see Hashlike#keys.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.values   # => [100, 200, 300]
+    #
+    # @return [Array] the values, in order by their key.
+    #
     def values
       [].tap{|arr| each{|key, val| arr << val } }
     end unless method_defined?(:values)
 
-    # Returns an array consisting of the value for each attribute in
-    # allowed_keys, guaranteed in same order
+    #
+    # Return an array containing the values associated with the given keys.
+    #
+    # @see Hashlike#select.
+    #
+    # @example
+    #     hsh = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
+    #     hsh.values_at("cow", "cat")  # => ["bovine", "feline"]
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.values_at(:c, :a, :c, :z, :a)
+    #     # => [300, 100, 300, nil, 100]
+    #
+    # @param  *allowed_keys [Object] the keys to retrieve.
+    # @return [Array] the values, in order according to allowed_keys.
+    #
     def values_at *allowed_keys
       allowed_keys.map{|key| self[key] if has_key?(key) }
     end
 
     #
-    # Analogous to Hash#merge: returns a duplicate of self where for each
-    # element of self.keys, adopts the corresponding element of hsh if that key
-    # is set in hsh.
-    #
-    # Returns a duplicate of self, but adopting the corresponding element of hsh
-    # if that key is set in hsh. Only keys in self.keys are candidates for merging.
-    #
-    # With no block parameter, overwrites entries in hsh with duplicate keys
-    # with those from other_hash.
-    #
-    # The block parameter semantics aren't implemented yet. If a block is
-    # specified, it is called with each duplicate key and the values from the
-    # two hashes. The value returned by the block is stored in the new hash.
+    # Returns a new hashlike containing the contents of +other_hash+ and the
+    # contents of +hsh+. If no block is specified, the value for entries with
+    # duplicate keys will be that of +other_hash+. Otherwise the value for each
+    # duplicate key is determined by calling the block with the key, its value in
+    # +hsh+ and its value in +other_hash+.
     #
     # @example
-    #   h1 = { "a" => 100, "b" => 200 }
-    #   h2 = { "b" => 254, "c" => 300 }
-    #   h1.merge(h2)                 -> {"a"=>100, "b"=>254, "c"=>300}
-    #   h1.merge(h2){|k,o,n| o}      -> {"a"=>100, "b"=>200, "c"=>300}
-    #   h1                           -> {"a"=>100, "b"=>200}
+    #     h1 = { :a => 100, :b => 200 }
+    #     h2 = { :b => 254, :c => 300 }
+    #     h1.merge(h2)
+    #     # => { :a=>100, :b=>254, :c=>300 }
+    #     h1.merge(h2){|key, oldval, newval| newval - oldval}
+    #     # => { :a => 100, :b => 54,  :c => 300 }
+    #     h1
+    #     # => { :a => 100, :b => 200 }
+    #
+    # @overload hsh.merge(other_hash)                               -> hsh
+    #   Adds the contents of +other_hash+ to +hsh+.  Entries with duplicate keys are
+    #   overwritten with the values from +other_hash+
+    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
+    #   @return [Hashlike] a new merged hashlike
+    #
+    # @overload hsh.merge(other_hash){|key, oldval, newval| block}  -> hsh
+    #   Adds the contents of +other_hash+ to +hsh+.  The value of each duplicate key
+    #   is determined by calling the block with the key, its value in +hsh+ and its
+    #   value in +other_hash+.
+    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
+    #   @yield  [Object, Object, Object] called if key exists in each +hsh+
+    #   @return [Hashlike] a new merged hashlike
     #
     def merge *args, &block
       self.dup.merge!(*args, &block)
     end
 
-    # For all keys that are in self.keys *and* other_hash.has_key?(key),
-    # sets the value to that from other_hash
+    #
+    # Adds the contents of +other_hash+ to +hsh+.  If no block is
+    # specified, entries with duplicate keys are overwritten with the values from
+    # +other_hash+, otherwise the value of each duplicate key is determined by
+    # calling the block with the key, its value in +hsh+ and its value in
+    # +other_hash+.
+    #
+    # @example
+    #     h1 = { :a => 100, :b => 200 }
+    #     h2 = { :b => 254, :c => 300 }
+    #     h1.merge!(h2)
+    #     # => { :a => 100, :b => 254, :c => 300 }
+    #
+    #     h1 = { :a => 100, :b => 200 }
+    #     h2 = { :b => 254, :c => 300 }
+    #     h1.merge!(h2){|key, v1, v2| v1 }
+    #     # => { :a => 100, :b => 200, :c => 300 }
+    #
+    # @overload hsh.update(other_hash)                               -> hsh
+    #   Adds the contents of +other_hash+ to +hsh+.  Entries with duplicate keys are
+    #   overwritten with the values from +other_hash+
+    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
+    #   @return [Hashlike] this hashlike, updated
+    #
+    # @overload hsh.update(other_hash){|key, oldval, newval| block}  -> hsh
+    #   Adds the contents of +other_hash+ to +hsh+.  The value of each duplicate key
+    #   is determined by calling the block with the key, its value in +hsh+ and its
+    #   value in +other_hash+.
+    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
+    #   @yield  [Object, Object, Object] called if key exists in each +hsh+
+    #   @return [Hashlike] this hashlike, updated
     #
     def update other_hash, &block
       other_hash.each do |key, val|
@@ -163,64 +356,98 @@ module Gorillib
     end
     alias_method :merge!, :update
 
+    #
     # Searches the hash for an entry whose value == value, returning the
-    # corresponding key. If multiple entries has this value, the key returned
-    # will be that on one of the entries. If not found,returns nil.
+    # corresponding key. If not found, returns +nil+.
     #
     # You are guaranteed that the first matching key in #keys will be the one
     # returned.
     #
     # @example
-    #   foo = Foo.receive( "a" => 100, "b" => 200, "c" => 100 )
-    #   foo.key(100) -> "a"
-    #   foo.key(999) -> nil
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.key(200)   # => :b
+    #     hsh.key(999)   # => nil
+    #
+    # @param  val [Object] the value to look up
+    # @return [Object, nil] the key for the given val, or nil if missing
     #
     def key val
       keys.find{|key| self[key] == val }
     end
 
-    # Searches through the hash comparing obj with the key using ==.
-    # Returns the key-value pair (two elements array) or nil if no match is
-    # found.  See Array#assoc.
     #
-    # @param  obj [Object] object to look up
-    # @return [Array, nil]
+    # Searches through the hashlike comparing obj with the key using ==.
+    # Returns the key-value pair (two elements array) or nil if no match is
+    # found.
+    #
+    # @see Array#assoc.
     #
     # @example
-    #     h = {"colors"  => ["red", "blue", "green"],
-    #          "letters" => ["a", "b", "c" ]}
-    #     h.assoc("letters")  #=> ["letters", ["a", "b", "c"]]
-    #     h.assoc("foo")      #=> nil
+    #     hsh = { "colors"  => ["red", "blue", "green"],
+    #             "letters" => [:a, :b, :c ]}
+    #     hsh.assoc("letters")  # => ["letters", [:a, :b, :c]]
+    #     hsh.assoc("foo")      # => nil
+    #
+    # @return [Array, nil] the key-value pair (two elements array) or nil if no
+    #   match is found.
     #
     def assoc key
       [key, self[key]]
     end
 
-    # Searches through the hash comparing obj with the value using ==.
-    # Returns the first key-value pair (two-element array) that
-    # matches. See also Array#rassoc.
     #
-    # @param  obj [Object] object to look up
-    # @return [Array, nil]
+    # Searches through the hashlike comparing obj with the value using ==.
+    # Returns the first key-value pair (two-element array) that matches.
+    #
+    # @see Array#rassoc.
     #
     # @example
-    #     a = {1=> "one", 2 => "two", 3 => "three", "ii" => "two"}
-    #     a.rassoc("two")    #=> [2, "two"]
-    #     a.rassoc("four")   #=> nil
+    #     hsh = { 1 => "one", 2 => "two", 3 => "three", "ii" => "two"}
+    #     hsh.rassoc("two")    # => [2, "two"]
+    #     hsh.rassoc("four")   # => nil
+    #
+    # @return [Array, nil] The first key-value pair (two-element array) that
+    #   matches, or nil if no match is found
+    #
     def rassoc val
       key = key(val)
       [key, self[key]]
     end
 
-    # Returns a new hash created by inverting self.to_hash. If this new hash has
-    # duplicate values, the result will contain only one of them as a key --
-    # which one is not predictable.
+    #
+    # Returns a new hash created by using +hsh+'s values as keys, and the keys as
+    # values. If +hsh+ has duplicate values, the result will contain only one of
+    # them as a key -- which one is not predictable.
+    #
+    # @example
+    #     hsh = { :n => 100, :m => 100, :y => 300, :d => 200, :a => 0 }
+    #     hsh.invert # => { 0 => :a, 100 => :m, 200 => :d, 300 => :y }
+    #
+    # @return [Hash] a new hash, with values for keys and vice-versa
+    #
     def invert
       to_hash.invert
     end
 
-    # Deletes every attribute for which block is true.
-    # Returns nil if no changes were made, self otherwise.
+    #
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to true
+    # (equivalent to Hashlike#delete_if), but returns nil if no changes were made.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.delete_if{|key, val| key.to_s >= "b" }   # => { :a => 100 }
+    #
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.delete_if{|key, val| key.to_s >= "z" }   # nil
+    #
+    # @overload hsh.reject!{|key, val| block }   -> hsh or nil
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+    #   @return [Hashlike, nil]
+    #
+    # @overload hsh.reject!                      -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def reject!
       return enum_for(:reject!) unless block_given?
       changed = false
@@ -233,8 +460,25 @@ module Gorillib
       changed ? self : nil
     end
 
-    # Deletes every attribute for which block is false.
-    # Returns nil if no changes were made, self otherwise.
+    #
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to false
+    # (equivalent to Hashlike#keep_if), but returns nil if no changes were made.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.select!{|key, val| key.to_s >= "b" }   # => { :b => 200, :c => 300 }
+    #
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.select!{|key, val| key.to_s >= "a" }   # => { :a => 100, :b => 200, :c => 300 }
+    #
+    # @overload hsh.select!{|key, val| block }   -> hsh or nil
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
+    #   @return [Hashlike]
+    #
+    # @overload hsh.select!                      -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def select!
       return enum_for(:select!) unless block_given?
       changed = false
@@ -247,31 +491,128 @@ module Gorillib
       changed ? self : nil
     end
 
-    # Deletes every attribute for which block is true.
-    # Similar to reject! but returns self.
+    #
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+    #
+    # If no block is given, an enumerator is returned instead.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.delete_if{|key, val| key.to_s >= "b" }   # => { :a => 100 }
+    #
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.delete_if{|key, val| key.to_s >= "z" }   # => { :a => 100, :b => 200, :c => 300 }
+    #
+    # @overload hsh.delete_if{|key, val| block } -> hsh
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+    #   @return [Hashlike]
+    #
+    # @overload hsh.delete_if                    -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def delete_if(&block)
       return enum_for(:delete_if) unless block_given?
       reject!(&block)
       self
     end
 
-    # Deletes every attribute for which block is false.
-    # Similar to select! but returns self.
+    #
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
+    #
+    # If no block is given, an enumerator is returned instead.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.keep_if{|key, val| key.to_s >= "b" }   # => { :b => 200, :c => 300 }
+    #
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.keep_if{|key, val| key.to_s >= "a" }   # => { :a => 100, :b => 200, :c => 300 }
+    #
+    # @overload hsh.keep_if{|key, val| block }   -> hsh
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
+    #   @return [Hashlike]
+    #
+    # @overload hsh.keep_if                      -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def keep_if(&block)
       return enum_for(:keep_if) unless block_given?
       select!(&block)
       self
     end
 
-    # Deletes every attribute for which block is true.
-    # Equivalent to self.dup.delete_if.
+    #
+    # Same as Hashlike#delete_if, but works on (and returns) a copy of the
+    # +hsh+. Equivalent to <tt>hsh.dup.delete_if</tt>.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.reject{|key, val| key.to_s >= "b" }   # => { :a => 100 }
+    #     hsh # => { :a => 100, :b => 200, :c => 300 }
+    #
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.reject{|key, val| key.to_s >= "z" }   # => { :a => 100, :b => 200, :c => 300 }
+    #     hsh # => { :a => 100, :b => 200, :c => 300 }
+    #
+    # @overload hsh.reject{|key, val| block }    -> new_hashlike
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+    #   @return [Hashlike]
+    #
+    # @overload hsh.reject                       -> an_enumerator
+    #   with no block, returns a raw enumerator
+    #   @return [Enumerator]
+    #
     def reject(&block)
       self.dup.delete_if(&block)
     end
 
-    # deletes all attributes
+    #
+    # Removes all key-value pairs from +hsh+.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }   # => { :a => 100, :b => 200 }
+    #     hsh.clear                        # => {}
+    #
+    # @return [Hashlike] this hashlike, emptied
+    #
     def clear
       each_key{|k| delete(k) }
+    end
+
+    #
+    # Returns a new array that is a one-dimensional flattening of this hashlike. That
+    # is, for every key or value that is an array, extract its elements into the
+    # new array.  Unlike Array#flatten, this method does not flatten recursively
+    # by default.  The optional level argument determines the level of recursion
+    # to flatten.
+    #
+    # @example
+    #     hsh =  {1=> "one", 2 => [2,"two"], 3 => "three"}
+    #     hsh.flatten    # => [1, "one", 2, [2, "two"], 3, "three"]
+    #     hsh.flatten(2) # => [1, "one", 2, 2, "two", 3, "three"]
+    #
+    # @example
+    #     hsh = { [1, 2, [3, 4]] => [1, [2, 3, [4, 5, 6]]] }
+    #     hsh.flatten
+    #     # =>   [[1, 2, [3, 4]],   [1, [2, 3, [4, 5, 6]]]]
+    #     hsh.flatten(0)
+    #     # =>  [[[1, 2, [3, 4]],   [1, [2, 3, [4, 5, 6]]]]]
+    #     hsh.flatten(1)
+    #     # =>   [[1, 2, [3, 4]],   [1, [2, 3, [4, 5, 6]]]]
+    #     hsh.flatten(2)
+    #     # =>    [1, 2, [3, 4],     1, [2, 3, [4, 5, 6]]]
+    #     hsh.flatten(3)
+    #     # =>    [1, 2,  3, 4,      1,  2, 3, [4, 5, 6]]
+    #     hsh.flatten(4)
+    #     # =>    [1, 2,  3, 4,      1,  2, 3,  4, 5, 6]
+    #
+    # @param  level [Integer] the level of recursion to flatten, 0 by default.
+    # @return [Array] the flattened key-value array.
+    #
+    def flatten
+      raise 'hell'
     end
 
     def self.included base
