@@ -6,7 +6,7 @@
     # Return a Hash containing only values for the given keys where self.has_key?(k)
     #
     def slice *allowed_keys
-      allowed_keys.inject({}){|h,k| h[k] = self[k] if self.has_key?(k) ; h }
+      allowed_keys.inject(self.class.new){|h,k| h[k] = self[k] if self.has_key?(k) ; h }
     end
 
     # delete all attributes where the value is blank?, and return self. Contrast with compact!
