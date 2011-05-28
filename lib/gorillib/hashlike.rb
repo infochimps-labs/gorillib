@@ -33,41 +33,99 @@ module Gorillib
   #     :default, :default=, :default_proc, :default_proc=, :replace, :rehash,
   #     :compare_by_identity, :compare_by_identity?, :shift
   #
-  #
   module Hashlike
-
-    alias_method(:store, :[]=)
-
-    #
-    # Calls +block+ once for each key in +hsh+, passing the key-value pair as
-    # parameters.
-    #
-    # If no block is given, an enumerator is returned instead.
-    #
-    # @example
-    #     hsh = { :a => 100, :b => 200 }
-    #     hsh.each{|key, value| puts "#{key} is #{value}" }
-    #     # produces:
-    #     a is 100
-    #     b is 200
-    #
-    # @overload hsh.each{|key, val| block }      -> hsh
-    #   Calls block once for each key in +hsh+
-    #   @yield [key, val] in order, each key and its associated value
-    #   @return [Hashlike]
-    #
-    # @overload hsh.each                         -> an_enumerator
-    #   with no block, returns a raw enumerator
-    #   @return [Enumerator]
-    #
-    def each
-      return enum_for(:each) unless block_given?
-      keys.each do |key|
-        yield(key, self[key])
+    module EnumerateFromKeys
+      #
+      # Calls +block+ once for each key in +hsh+, passing the key-value pair as
+      # parameters.
+      #
+      # If no block is given, an enumerator is returned instead.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200 }
+      #     hsh.each{|key, value| puts "#{key} is #{value}" }
+      #     # produces:
+      #     a is 100
+      #     b is 200
+      #
+      # @overload hsh.each{|key, val| block }      -> hsh
+      #   Calls block once for each key in +hsh+
+      #   @yield [key, val] in order, each key and its associated value
+      #   @return [Hashlike]
+      #
+      # @overload hsh.each                         -> an_enumerator
+      #   with no block, returns a raw enumerator
+      #   @return [Enumerator]
+      #
+      def each
+        return enum_for(:each) unless block_given?
+        keys.each do |key|
+          yield([key, self[key]])
+        end
+        self
       end
-      self
+      def each_pair(&block)
+        return enum_for(:each_pair) unless block_given?
+        each(&block)
+      end
+
+      #
+      # Returns the number of key-value pairs in the hashlike.
+      #
+      # @example
+      #     hsh = { :d => 100, :a => 200, :v => 300, :e => 400 }
+      #     hsh.length       # => 4
+      #     hsh.delete(:a)   # => 200
+      #     hsh.length       # => 3
+      #
+      # @return [Fixnum] number of key-value pairs
+      #
+      def length
+        keys.length
+      end
+
+      #
+      # Returns a new array populated with the values from +hsh+.
+      #
+      # @see Hashlike#keys.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200, :c => 300 }
+      #     hsh.values   # => [100, 200, 300]
+      #
+      # @return [Array] the values, in order by their key.
+      #
+      def values
+        [].tap{|arr| each{|key, val| arr << val } }
+      end
+
+      #
+      # Return an array containing the values associated with the given keys.
+      #
+      # @see Hashlike#select.
+      #
+      # @example
+      #     hsh = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
+      #     hsh.values_at("cow", "cat")  # => ["bovine", "feline"]
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200, :c => 300 }
+      #     hsh.values_at(:c, :a, :c, :z, :a)
+      #     # => [300, 100, 300, nil, 100]
+      #
+      # @param  *allowed_keys [Object] the keys to retrieve.
+      # @return [Array] the values, in order according to allowed_keys.
+      #
+      def values_at *allowed_keys
+        allowed_keys.map{|key| self[key] if has_key?(key) }
+      end
+
+      # def to_a
+      #   [].tap{|arr|
+      #     each_pair{|key,val| arr << [key, val] }
+      #   }
+      # end
     end
-    alias_method :each_pair, :each
 
     # Hashlike#each_key
     #
@@ -93,7 +151,7 @@ module Gorillib
     #
     def each_key
       return enum_for(:each_key) unless block_given?
-      keys.each{|k| yield k }
+      each_pair{|k,v| yield k }
       self
     end
 
@@ -120,7 +178,7 @@ module Gorillib
     #
     def each_value &block
       return enum_for(:each_value) unless block_given?
-      each{|k,v| yield v }
+      each_pair{|k,v| yield v }
       self
     end
 
@@ -136,6 +194,7 @@ module Gorillib
     # @return [true, false] true if the key is present, false otherwise
     #
     def has_key?(key)
+      key = convert_key(key) if respond_to?(:convert_key)
       keys.include?(key)
     end
 
@@ -153,12 +212,7 @@ module Gorillib
     def has_value? val
       !! key(val)
     end
-    alias_method :value?, :has_value?
 
-    # def include? def key? def member?
-    alias_method :include?, :has_key?
-    alias_method :key?,     :has_key?
-    alias_method :member?,  :has_key?
 
     #
     # Returns a value from the hashlike for the given key. If the key can't be
@@ -201,22 +255,6 @@ module Gorillib
     end
 
     #
-    # Returns the number of key-value pairs in the hashlike.
-    #
-    # @example
-    #     hsh = { :d => 100, :a => 200, :v => 300, :e => 400 }
-    #     hsh.length       # => 4
-    #     hsh.delete(:a)   # => 200
-    #     hsh.length       # => 3
-    #
-    # @return [Fixnum] number of key-value pairs
-    #
-    def length
-      keys.length
-    end
-    alias_method :size, :length
-
-    #
     # Returns true if the hashlike contains no key-value pairs.
     #
     # @example
@@ -239,43 +277,7 @@ module Gorillib
     # @return [Hash] a new Hash instance, with each key set to its associated value.
     #
     def to_hash
-      {}.tap{|hsh| each{|key, val| hsh[key] = val } }
-    end
-
-    #
-    # Returns a new array populated with the values from +hsh+.
-    #
-    # @see Hashlike#keys.
-    #
-    # @example
-    #     hsh = { :a => 100, :b => 200, :c => 300 }
-    #     hsh.values   # => [100, 200, 300]
-    #
-    # @return [Array] the values, in order by their key.
-    #
-    def values
-      [].tap{|arr| each{|key, val| arr << val } }
-    end unless method_defined?(:values)
-
-    #
-    # Return an array containing the values associated with the given keys.
-    #
-    # @see Hashlike#select.
-    #
-    # @example
-    #     hsh = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
-    #     hsh.values_at("cow", "cat")  # => ["bovine", "feline"]
-    #
-    # @example
-    #     hsh = { :a => 100, :b => 200, :c => 300 }
-    #     hsh.values_at(:c, :a, :c, :z, :a)
-    #     # => [300, 100, 300, nil, 100]
-    #
-    # @param  *allowed_keys [Object] the keys to retrieve.
-    # @return [Array] the values, in order according to allowed_keys.
-    #
-    def values_at *allowed_keys
-      allowed_keys.map{|key| self[key] if has_key?(key) }
+      {}.tap{|hsh| each_pair{|key, val| hsh[key] = val } }
     end
 
     #
@@ -346,15 +348,15 @@ module Gorillib
     #   @return [Hashlike] this hashlike, updated
     #
     def update other_hash, &block
-      other_hash.each do |key, val|
+      raise TypeError, "can't convert #{other_hash.nil? ? 'nil' : other_hash.class} into Hash" unless other_hash.respond_to?(:each_pair)
+      other_hash.each_pair do |key, val|
         if block_given? && has_key?(key)
           val = yield(key, val, self[key])
         end
-        self[other_key] = val
+        self[key] = val
       end
       self
     end
-    alias_method :merge!, :update
 
     #
     # Searches the hash for an entry whose value == value, returning the
@@ -392,6 +394,7 @@ module Gorillib
     #   match is found.
     #
     def assoc key
+      return unless has_key?(key)
       [key, self[key]]
     end
 
@@ -410,7 +413,7 @@ module Gorillib
     #   matches, or nil if no match is found
     #
     def rassoc val
-      key = key(val)
+      key = key(val) or return
       [key, self[key]]
     end
 
@@ -448,11 +451,11 @@ module Gorillib
     #   with no block, returns a raw enumerator
     #   @return [Enumerator]
     #
-    def reject!
+    def reject! &block
       return enum_for(:reject!) unless block_given?
       changed = false
-      each do |key, val|
-        if yield(key, val)
+      each_pair do |key, val|
+        if yield(*[key, val].take(block.arity))
           changed = true
           delete(key)
         end
@@ -479,11 +482,11 @@ module Gorillib
     #   with no block, returns a raw enumerator
     #   @return [Enumerator]
     #
-    def select!
+    def select! &block
       return enum_for(:select!) unless block_given?
       changed = false
-      each do |key, val|
-        if not yield(key, val)
+      each_pair do |key, val|
+        if not yield(*[key, val].take(block.arity))
           changed = true
           delete(key)
         end
@@ -513,6 +516,7 @@ module Gorillib
     #
     def delete_if(&block)
       return enum_for(:delete_if) unless block_given?
+      p ['in delete_if', self]
       reject!(&block)
       self
     end
@@ -565,7 +569,14 @@ module Gorillib
     #   @return [Enumerator]
     #
     def reject(&block)
+      return enum_for(:reject) unless block_given?
       self.dup.delete_if(&block)
+    end
+
+    def select(&block)
+      return enum_for(:select) unless block_given?
+      p ['select', block]
+      self.dup.keep_if(&block)
     end
 
     #
@@ -611,16 +622,27 @@ module Gorillib
     # @param  level [Integer] the level of recursion to flatten, 0 by default.
     # @return [Array] the flattened key-value array.
     #
-    def flatten
-      raise 'hell'
+    def flatten *args
+      to_a.flatten(*args)
+    end
+
+    module ClassMethods
     end
 
     def self.included base
       base.class_eval do
         extend  ClassMethods
-        include Enumerable
+        include EnumerateFromKeys # unless method_defined?(:each)
+
+        alias_method :store,    :[]=
+        alias_method :include?, :has_key?
+        alias_method :key?,     :has_key?
+        alias_method :member?,  :has_key?
+        alias_method :value?,   :has_value?
+        alias_method :size,     :length
+        alias_method :merge!,   :update
+
       end
     end
-
   end
 end
