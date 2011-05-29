@@ -1,4 +1,13 @@
 
+* gorillib/hashlike
+* gorillib/hashlike/slice
+* gorillib/hashlike/deep_dup
+* gorillib/hashlike/
+* gorillib/hashlike/hashlike_via_accessors
+* gorillib/struct/acts_as_hash
+* gorillib/struct/iterates_as_hash
+
+
 
 h4. acts_as_hash
 
