@@ -14,7 +14,7 @@ METHODS_TO_TEST = [
   :fetch, :length, :size, :empty?,
   :to_hash,
   :values,
-  # :values_at, 
+  # :values_at,
   :merge,
   :update, :merge!,
   :key,
@@ -36,9 +36,7 @@ METHODS_TO_TEST = [
   :detect, :find, :find_all, :select, :find_index, :grep,
   :all?, :any?, :none?, :one?,
   :first, :count, :zip,
-  #
   :max, :max_by, :min, :min_by, :minmax, :minmax_by, :sort, :sort_by,
-
 ]
 
 STRING_5X_PROC   = Proc.new{|k|   k.to_s * 5 }
@@ -64,7 +62,7 @@ def behaves_the_same obj_1, obj_2, method_to_test, input
   rescue Exception => e
     expected = e
   end
-  
+
   case expected
   when Exception
     # workaround: some errors have different spacing before ( than others
@@ -81,7 +79,7 @@ def behaves_the_same obj_1, obj_2, method_to_test, input
   else
     actual = send_to(obj_2, method_to_test, input)
     expected.should == actual
-  end 
+  end
 end
 
 class Foo
@@ -124,7 +122,7 @@ describe Gorillib::Hashlike do
     @hsh_strk = {} ; hsh.each{|k,v| @hsh_strk[k.to_s] = v }
     @hsh_wia   = hsh.with_indifferent_access
     @hshlike  = Foo.new.merge(@hsh_strk)
-    # @hshlike = MyStruct.new(3, 4, nil, nil, false, nil) 
+    # @hshlike = MyStruct.new(3, 4, nil, nil, false, nil)
   end
 
   METHODS_TO_TEST.each do |method_to_test|
@@ -165,16 +163,16 @@ describe Gorillib::Hashlike do
         [:a, 'b', :z],
       ].each do |input|
         it "on #{input.inspect}" do
-          
+
           # behaves_the_same(@hsh_wia, @hshlike, method_to_test, input)
-          
+
           # p ['reject', @hsh_symk, @hsh_symk.reject{|pr| p pr ; true }]
           # p ['reject', @hsh_wia, @hsh_wia.reject{|pr| p pr ; true }]
           # p ['reject', @hshlike, @hshlike.reject{|pr| p pr ; true }]
         end
       end
     end
-  end 
+  end
 
   # it 'compares all methods with Hash' do
   #   (@hsh_symk.methods.sort - (Object.new.methods + METHODS_TO_TEST + [:clear, :cycle, :partition, :values_at])).should == [
@@ -185,7 +183,7 @@ describe Gorillib::Hashlike do
   #     :with_indifferent_access
   #   ]
   # end
-  # 
+  #
   # it 'does everything a hash can do' do
   #   (@hsh_symk.methods.sort - @hshlike.methods).should == [
   #     :assert_valid_keys, :compare_by_identity, :compare_by_identity?, :default,
