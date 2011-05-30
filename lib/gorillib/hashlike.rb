@@ -56,7 +56,7 @@ module Gorillib
     #
     module EnumerateFromKeys
       #
-      # Calls +block+ once for each key in +hsh+, passing the key-value pair as
+      # Calls +block+ once for each key in +hsh+, passing the key/value pair as
       # parameters.
       #
       # If no block is given, an enumerator is returned instead.
@@ -90,7 +90,7 @@ module Gorillib
       end
 
       #
-      # Returns the number of key-value pairs in the hashlike.
+      # Returns the number of key/value pairs in the hashlike.
       #
       # @example
       #     hsh = { :d => 100, :a => 200, :v => 300, :e => 400 }
@@ -105,7 +105,7 @@ module Gorillib
       end
 
       #
-      # Returns a new array populated with the values from +hsh+.
+      # A new array populated with the values from +hsh+.
       #
       # @see Hashlike#keys.
       #
@@ -120,7 +120,7 @@ module Gorillib
       end
 
       #
-      # Return an array containing the values associated with the given keys.
+      # Array containing the values associated with the given keys.
       #
       # @see Hashlike#select.
       #
@@ -274,7 +274,7 @@ module Gorillib
     end
 
     #
-    # Searches the hash for an entry whose value == value, returning the
+    # Searches the hash for an entry whose value == +val+, returning the
     # corresponding key. If not found, returns +nil+.
     #
     # You are guaranteed that the first matching key in #keys will be the one
@@ -315,7 +315,8 @@ module Gorillib
 
     #
     # Searches through the hashlike comparing obj with the value using ==.
-    # Returns the first key-value pair (two-element array) that matches.
+    # Returns the first key-value pair (two-element array) that matches, or nil
+    # if no match is found.
     #
     # @see Array#rassoc.
     #
@@ -333,7 +334,7 @@ module Gorillib
     end
 
     #
-    # Returns true if the hashlike contains no key-value pairs.
+    # Returns true if the hashlike contains no key-value pairs, false otherwise.
     #
     # @example
     #     {}.empty?   # => true
@@ -342,41 +343,6 @@ module Gorillib
     #
     def empty?
       length == 0
-    end
-
-    #
-    # Returns a new hashlike containing the contents of +other_hash+ and the
-    # contents of +hsh+. If no block is specified, the value for entries with
-    # duplicate keys will be that of +other_hash+. Otherwise the value for each
-    # duplicate key is determined by calling the block with the key, its value in
-    # +hsh+ and its value in +other_hash+.
-    #
-    # @example
-    #     h1 = { :a => 100, :b => 200 }
-    #     h2 = { :b => 254, :c => 300 }
-    #     h1.merge(h2)
-    #     # => { :a=>100, :b=>254, :c=>300 }
-    #     h1.merge(h2){|key, oldval, newval| newval - oldval}
-    #     # => { :a => 100, :b => 54,  :c => 300 }
-    #     h1
-    #     # => { :a => 100, :b => 200 }
-    #
-    # @overload hsh.merge(other_hash)                               -> hsh
-    #   Adds the contents of +other_hash+ to +hsh+.  Entries with duplicate keys are
-    #   overwritten with the values from +other_hash+
-    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
-    #   @return [Hashlike] a new merged hashlike
-    #
-    # @overload hsh.merge(other_hash){|key, oldval, newval| block}  -> hsh
-    #   Adds the contents of +other_hash+ to +hsh+.  The value of each duplicate key
-    #   is determined by calling the block with the key, its value in +hsh+ and its
-    #   value in +other_hash+.
-    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
-    #   @yield  [Object, Object, Object] called if key exists in each +hsh+
-    #   @return [Hashlike] a new merged hashlike
-    #
-    def merge *args, &block
-      self.dup.merge!(*args, &block)
     end
 
     #
@@ -423,7 +389,42 @@ module Gorillib
     end
 
     #
-    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to true
+    # Returns a new hashlike containing the contents of +other_hash+ and the
+    # contents of +hsh+. If no block is specified, the value for entries with
+    # duplicate keys will be that of +other_hash+. Otherwise the value for each
+    # duplicate key is determined by calling the block with the key, its value in
+    # +hsh+ and its value in +other_hash+.
+    #
+    # @example
+    #     h1 = { :a => 100, :b => 200 }
+    #     h2 = { :b => 254, :c => 300 }
+    #     h1.merge(h2)
+    #     # => { :a=>100, :b=>254, :c=>300 }
+    #     h1.merge(h2){|key, oldval, newval| newval - oldval}
+    #     # => { :a => 100, :b => 54,  :c => 300 }
+    #     h1
+    #     # => { :a => 100, :b => 200 }
+    #
+    # @overload hsh.merge(other_hash)                               -> hsh
+    #   Adds the contents of +other_hash+ to +hsh+.  Entries with duplicate keys are
+    #   overwritten with the values from +other_hash+
+    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
+    #   @return [Hashlike] a new merged hashlike
+    #
+    # @overload hsh.merge(other_hash){|key, oldval, newval| block}  -> hsh
+    #   Adds the contents of +other_hash+ to +hsh+.  The value of each duplicate key
+    #   is determined by calling the block with the key, its value in +hsh+ and its
+    #   value in +other_hash+.
+    #   @param  other_hash [Hash, Hashlike] the hash to merge (it wins)
+    #   @yield  [Object, Object, Object] called if key exists in each +hsh+
+    #   @return [Hashlike] a new merged hashlike
+    #
+    def merge *args, &block
+      self.dup.merge!(*args, &block)
+    end
+
+    #
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates truthy
     # (equivalent to Hashlike#delete_if), but returns nil if no changes were made.
     #
     # @example
@@ -434,7 +435,7 @@ module Gorillib
     #     hsh.delete_if{|key, val| key.to_s >= "z" }   # nil
     #
     # @overload hsh.reject!{|key, val| block }   -> hsh or nil
-    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates truthy.
     #   @return [Hashlike, nil]
     #
     # @overload hsh.reject!                      -> an_enumerator
@@ -454,7 +455,7 @@ module Gorillib
     end
 
     #
-    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to false
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates falsy
     # (equivalent to Hashlike#keep_if), but returns nil if no changes were made.
     #
     # @example
@@ -465,7 +466,7 @@ module Gorillib
     #     hsh.select!{|key, val| key.to_s >= "a" }   # => { :a => 100, :b => 200, :c => 300 }
     #
     # @overload hsh.select!{|key, val| block }   -> hsh or nil
-    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates falsy.
     #   @return [Hashlike]
     #
     # @overload hsh.select!                      -> an_enumerator
@@ -485,7 +486,7 @@ module Gorillib
     end
 
     #
-    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates truthy.
     #
     # If no block is given, an enumerator is returned instead.
     #
@@ -497,7 +498,7 @@ module Gorillib
     #     hsh.delete_if{|key, val| key.to_s >= "z" }   # => { :a => 100, :b => 200, :c => 300 }
     #
     # @overload hsh.delete_if{|key, val| block } -> hsh
-    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates truthy.
     #   @return [Hashlike]
     #
     # @overload hsh.delete_if                    -> an_enumerator
@@ -511,7 +512,7 @@ module Gorillib
     end
 
     #
-    # Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
+    # Deletes every key-value pair from +hsh+ for which +block+ evaluates falsy.
     #
     # If no block is given, an enumerator is returned instead.
     #
@@ -523,7 +524,7 @@ module Gorillib
     #     hsh.keep_if{|key, val| key.to_s >= "a" }   # => { :a => 100, :b => 200, :c => 300 }
     #
     # @overload hsh.keep_if{|key, val| block }   -> hsh
-    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to false.
+    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates falsy.
     #   @return [Hashlike]
     #
     # @overload hsh.keep_if                      -> an_enumerator
@@ -556,7 +557,7 @@ module Gorillib
       #     hsh # => { :a => 100, :b => 200, :c => 300 }
       #
       # @overload hsh.reject{|key, val| block }    -> new_hashlike
-      #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+      #   Deletes every key-value pair from +hsh+ for which +block+ evaluates truthy.
       #   @return [Hashlike]
       #
       # @overload hsh.reject                       -> an_enumerator
@@ -585,7 +586,7 @@ module Gorillib
       #     hsh # => { :a => 100, :b => 200, :c => 300 }
       #
       # @overload hsh.select{|key, val| block }    -> new_hashlike
-      #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+      #   Deletes every key-value pair from +hsh+ for which +block+ evaluates truthy.
       #   @return [Hashlike]
       #
       # @overload hsh.select                       -> an_enumerator

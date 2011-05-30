@@ -12,26 +12,33 @@ module HashlikeFuzzingHelper
   #
   # Methods from Hash
   #
-  METHODS_TO_TEST = [
+
+  # Test for all Hashlikes
+  HASHLIKE_METHODS = [
     # defined by class
     :[], :[]=, :delete, :keys,
     # typically defined via EnumerateFromKeys, but Struct does its own thing
     :each, :each_pair, :values, :values_at, :length,
     # defined by hashlike using above
-    :each_key, :each_value, :has_key?, :has_value?, :fetch, :key, :assoc, :rassoc,
-    :empty?, :merge, :update, :reject!, :select!, :delete_if, :keep_if, :reject,
-    :clear, :to_hash, :invert, :flatten,
+    :each_key, :each_value, :has_key?, :has_value?, :fetch, :key, :assoc,
+    :rassoc, :empty?, :update, :merge, :reject!, :reject, :select!, :select,
+    :delete_if, :keep_if, :clear, :to_hash, :invert, :flatten,
     # aliases to the appropriate method
     :store, :include?, :key?, :member?, :size, :value?, :merge!,
-    # added by Enumerable
+  ]
+  
+  # Test unless have own #each
+  ENUMERABLE_METHODS = [
     :each_cons, :each_entry, :each_slice, :each_with_index, :each_with_object,
     :entries, :to_a, :map, :collect, :collect_concat, :group_by, :flat_map,
     :inject, :reduce, :chunk, :reverse_each, :slice_before, :drop, :drop_while,
-    :take, :take_while, :detect, :find, :find_all, :select, :find_index, :grep,
+    :take, :take_while, :detect, :find, :find_all, :find_index, :grep,
     :all?, :any?, :none?, :one?, :first, :count, :zip, :max, :max_by, :min,
     :min_by, :minmax, :minmax_by, :sort, :sort_by,
     :cycle, :partition,
   ]
+
+  METHODS_TO_TEST = HASHLIKE_METHODS + ENUMERABLE_METHODS
 
   OMITTED_METHODS_FROM_HASH = [
     # not implemented in hashlike

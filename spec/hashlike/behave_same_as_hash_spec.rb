@@ -5,7 +5,7 @@ require File.dirname(__FILE__)+'/../support/hashlike_fuzzing_helper'
 require File.dirname(__FILE__)+'/../support/hashlike_via_delegation'
 
 class InternalHash
-  # Override these just to be able to compare exceptions.
+  # Override these so we can compare exceptions.
   def to_s()             @myhsh.to_s          ; end
   def ==(other_hash)     @myhsh == other_hash ; end
 end
@@ -32,7 +32,7 @@ describe Gorillib::Hashlike do
   end
 
   HashlikeFuzzingHelper::METHODS_TO_TEST.each do |method_to_test|
-    describe "##{method_to_test} same as for Hash (symbol keys)" do
+    describe "##{method_to_test} same as for Hash" do
       HashlikeFuzzingHelper::INPUTS_WHEN_FULLY_HASHLIKE.each do |input|
         it "on #{input.inspect}" do
           behaves_the_same(@hsh, @hshlike, method_to_test, input)

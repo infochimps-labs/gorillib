@@ -1,7 +1,7 @@
 module Gorillib
   module Struct
     #
-    # Makes a Receiver thingie behave mostly like a hash.
+    # Make a Struct behave mostly like a hash.
     #
     # By default, the hashlike methods iterate over the receiver attributes:
     # instance #keys delegates to self.class.keys which calls
@@ -25,6 +25,14 @@ module Gorillib
     #
     #   default, default=, default_proc, default_proc=, shift, flatten, compare_by_identity
     #   compare_by_identity? rehash
+    #
+    # @example
+    #   StructUsingHashlike = Struct.new(:a, :b, :c, :z) do
+    #     include Gorillib::Struct::ActsAsHash
+    #     include Gorillib::Hashlike
+    #   end
+    #   foo = StructUsingHashlike.new(1,2,3)
+    #   foo.to_hash  # => { :a => 1, :b => 2, :c => 3, :z => nil }
     #
     module ActsAsHash
 
