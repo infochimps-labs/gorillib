@@ -1,49 +1,60 @@
 require 'gorillib/object/blank'
+module Gorillib
+  module Hashlike
+    module Compact
 
-class Hash
-  #
-  # remove all key-value pairs where the value is nil
-  #
-  def compact
-    reject{|key,val| val.nil? }
-  end unless method_defined?(:compact)
+      # returns a compact!ed copy (contains no key/value pairs having nil? values)
+      #
+      # @example
+      #     hsh = { :a => 100, :b => nil, :c => false, :d => "" }
+      #     hsh.compact # => { :a => 100, :c => false, :d => "" }
+      #     hsh         # => { :a => 100, :b => nil, :c => false, :d => "" }
+      #
+      # @return [Hashlike]
+      #
+      def compact
+        reject{|key,val| val.nil? }
+      end
 
-  #
-  # Replace the hash with its compacted self
-  #
-  def compact!
-    replace(compact)
-  end unless method_defined?(:compact!)
+      # Removes all key/value pairs having nil? values
+      #
+      # @example
+      #     hsh = { :a => 100, :b => nil, :c => false, :d => "" }
+      #     hsh.compact # => { :a => 100, :c => false, :d => "" }
+      #     hsh         # => { :a => 100, :c => false, :d => "" }
+      #
+      # @return [Hashlike]
+      #
+      def compact!
+        delete_if{|key,val| val.nil? }
+      end
 
-  #
-  # remove all key-value pairs where the value is blank
-  #
-  def compact_blank
-    reject{|key,val| val.blank? }
-  end unless method_defined?(:compact_blank)
+      # returns a compact!ed copy (contains no key/value pairs having blank? values)
+      #
+      # @example
+      #     hsh = { :a => 100, :b => nil, :c => false, :d => "" }
+      #     hsh.compact # => { :a => 100 }
+      #     hsh         # => { :a => 100, :b => nil, :c => false, :d => "" }
+      #
+      # @return [Hashlike]
+      #
+      def compact_blank
+        reject{|key,val| val.blank? }
+      end
 
-  #
-  # Replace the hash with its compact_blank'ed self
-  #
-  def compact_blank!
-    replace(compact_blank)
-  end unless method_defined?(:compact_blank!)
+      # Removes all key/value pairs having blank? values
+      #
+      # @example
+      #     hsh = { :a => 100, :b => nil, :c => false, :d => "" }
+      #     hsh.compact # => { :a => 100 }
+      #     hsh         # => { :a => 100 }
+      #
+      # @return [Hashlike]
+      #
+      def compact_blank!
+        delete_if{|key,val| val.blank? }
+      end
+
+    end
+  end
 end
-    #
-    # # delete all attributes where the value is blank?, and return self. Contrast with compact!
-    # def compact_blank!
-    #   delete_if{|k,v| v.blank? }
-    # end
-    # # delete all attributes where the value is nil?, and return self. Contrast with compact_blank!
-    # def compact!
-    #   delete_if{|k,v| v.nil? }
-    # end
-    # # returns a hash with key/value pairs having nil? values removed
-    # def compact
-    #   to_hash.delete_if{|k,v| v.nil? }
-    # end
-    # # returns a hash with key/value pairs having blank? values removed
-    # def compact_blank
-    #   to_hash.delete_if{|k,v| v.blank? }
-    # end
-    #
