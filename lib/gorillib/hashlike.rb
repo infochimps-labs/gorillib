@@ -1,39 +1,59 @@
 module Gorillib
   #
-  # Your class must provide
+  # Your class must provide #[], #[]=, #delete, and #keys --
   #
   # * hsh[key]             Element Reference  -- Retrieves the value stored for +key+.
   # * hsh[key] = val       Element Assignment -- Associates +val+ with +key+.
   # * hsh.delete(key)      Deletes & returns the value whose key is equal to +key+.
   # * hsh.keys             Returns a new array populated with the keys.
   #
-  # See Hashlike::ActsAsHash for an implementation using instance variables with
-  # detailed documentation.
+  # Given the above, hashlike will provide the rest.  See Hashlike::ActsAsHash
+  # for an well-documented implementation using instance variables.
   #
-  # then hashlike will provide the rest:
+  # It defines these fundamental iterators by including
+  # Gorillib::Hashlike::EnumerateFromKeys. However, if the #each method already
+  # exists on the class (as it does for Struct), the class is held responsible
+  # for their implementation:
   #
-  #     :store, :delete, :keys, :each, :each_key, :each_value, :has_key?,
-  #     :include?, :key?, :member?, :has_value?, :value?, :fetch, :length,
-  #     :empty?, :to_hash, :values, :values_at, :merge, :update, :index,
-  #     :invert, :reject!, :select!, :delete_if, :keep_if, :reject, :clear,
-  #     :assoc, :rassoc, :flatten
+  #     :each, :each_pair, :values, :values_at, :length,
   #
-  # via Enumerable, it provides in addition:
+  # Including Gorillib::Hashlike defines these methods:
+  #
+  #     :each_key, :each_value, :has_key?, :has_value?, :fetch, :key, :assoc,
+  #     :rassoc, :empty?, :merge, :update, :reject!, :select!, :delete_if,
+  #     :keep_if, :reject, :clear, :to_hash, :invert, :flatten,
+  #
+  # these, as aliases to the appropriate method:
+  #
+  #     :store, :include?, :key?, :member?, :size, :value?, :merge!,
+  #
+  # and these methods added by Enumerable:
   #
   #     :each_cons, :each_entry, :each_slice, :each_with_index,
-  #     :each_with_object, :map, :collect, :collect_concat, :entries, :to_a,
-  #     :flat_map, :inject, :reduce, :group_by, :chunk, :cycle, :partition,
-  #     :reverse_each, :slice_before, :drop, :drop_while, :take, :take_while,
-  #     :detect, :find, :find_all, :find_index, :grep, :all?, :any?, :none?,
-  #     :one?, :first, :count, :zip :max, :max_by, :min, :min_by, :minmax,
-  #     :minmax_by, :sort, :sort_by
+  #     :each_with_object, :entries, :to_a, :map, :collect, :collect_concat,
+  #     :group_by, :flat_map, :inject, :reduce, :chunk, :reverse_each,
+  #     :slice_before, :drop, :drop_while, :take, :take_while, :detect, :find,
+  #     :find_all, :select, :find_index, :grep, :all?, :any?, :none?, :one?,
+  #     :first, :count, :zip, :max, :max_by, :min, :min_by, :minmax, :minmax_by,
+  #     :sort, :sort_by, :cycle, :partition,
   #
-  # It does not define:
+  # It does not define these methods that do exist on hash:
   #
-  #     :default, :default=, :default_proc, :default_proc=, :replace, :rehash,
-  #     :compare_by_identity, :compare_by_identity?, :shift
+  #     :default, :default=, :default_proc, :default_proc=,
+  #     :compare_by_identity, :compare_by_identity?,
+  #     :replace, :rehash, :shift
   #
   module Hashlike
+
+    #
+    # Provides a natural default iteration behavior by iterating over #keys.
+    # Since most classes will want this behaviour, it is included by default
+    # *unless* the class has already defined an #each method.
+    #
+    # Classes that wish to define their own iteration behavior (Struct for
+    # example, or a database facade) must define all of the methods within this
+    # module.
+    #
     module EnumerateFromKeys
       #
       # Calls +block+ once for each key in +hsh+, passing the key-value pair as
@@ -119,12 +139,11 @@ module Gorillib
       def values_at *allowed_keys
         allowed_keys.map{|key| self[key] if has_key?(key) }
       end
+    end
 
-      # def to_a
-      #   [].tap{|arr|
-      #     each_pair{|key,val| arr << [key, val] }
-      #   }
-      # end
+    # alias for #[]=
+    def store(key, val)
+      self[key] = val
     end
 
     # Hashlike#each_key
@@ -206,13 +225,12 @@ module Gorillib
     #     hsh.has_value?(100)   # => true
     #     hsh.has_value?(999)   # => false
     #
-    # @param  val [Object] the value to query
+    # @param  target [Object] the value to query
     # @return [true, false] true if the value is present, false otherwise
     #
-    def has_value? val
-      !! key(val)
+    def has_value? target
+      any?{|key, val| val == target }
     end
-
 
     #
     # Returns a value from the hashlike for the given key. If the key can't be
@@ -247,11 +265,71 @@ module Gorillib
     #                           block's return value
     #
     def fetch(key, default=nil, &block)
+      warn "#{caller[0]}: warning: block supersedes default value argument" if default && block_given?
       if    has_key?(key) then self[key]
       elsif default       then default
       elsif block_given?  then yield(key)
       else  raise KeyError, "key not found: #{key.inspect}"
       end
+    end
+
+    #
+    # Searches the hash for an entry whose value == value, returning the
+    # corresponding key. If not found, returns +nil+.
+    #
+    # You are guaranteed that the first matching key in #keys will be the one
+    # returned.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200 }
+    #     hsh.key(200)   # => :b
+    #     hsh.key(999)   # => nil
+    #
+    # @param  val [Object] the value to look up
+    # @return [Object, nil] the key for the given val, or nil if missing
+    #
+    def key val
+      keys.find{|key| self[key] == val }
+    end
+
+    #
+    # Searches through the hashlike comparing obj with the key using ==.
+    # Returns the key-value pair (two elements array) or nil if no match is
+    # found.
+    #
+    # @see Array#assoc.
+    #
+    # @example
+    #     hsh = { "colors"  => ["red", "blue", "green"],
+    #             "letters" => [:a, :b, :c ]}
+    #     hsh.assoc("letters")  # => ["letters", [:a, :b, :c]]
+    #     hsh.assoc("foo")      # => nil
+    #
+    # @return [Array, nil] the key-value pair (two elements array) or nil if no
+    #   match is found.
+    #
+    def assoc key
+      return unless has_key?(key)
+      [key, self[key]]
+    end
+
+    #
+    # Searches through the hashlike comparing obj with the value using ==.
+    # Returns the first key-value pair (two-element array) that matches.
+    #
+    # @see Array#rassoc.
+    #
+    # @example
+    #     hsh = { 1 => "one", 2 => "two", 3 => "three", "ii" => "two"}
+    #     hsh.rassoc("two")    # => [2, "two"]
+    #     hsh.rassoc("four")   # => nil
+    #
+    # @return [Array, nil] The first key-value pair (two-element array) that
+    #   matches, or nil if no match is found
+    #
+    def rassoc val
+      key = key(val) or return
+      [key, self[key]]
     end
 
     #
@@ -264,20 +342,6 @@ module Gorillib
     #
     def empty?
       length == 0
-    end
-
-    #
-    # Returns a hash with each key set to its associated value.
-    #
-    # @example
-    #    my_hshlike = MyHashlike.new
-    #    my_hshlike[:a] = 100; my_hshlike[:b] = 200
-    #    my_hshlike.to_hash # => { :a => 100, :b => 200 }
-    #
-    # @return [Hash] a new Hash instance, with each key set to its associated value.
-    #
-    def to_hash
-      {}.tap{|hsh| each_pair{|key, val| hsh[key] = val } }
     end
 
     #
@@ -356,80 +420,6 @@ module Gorillib
         self[key] = val
       end
       self
-    end
-
-    #
-    # Searches the hash for an entry whose value == value, returning the
-    # corresponding key. If not found, returns +nil+.
-    #
-    # You are guaranteed that the first matching key in #keys will be the one
-    # returned.
-    #
-    # @example
-    #     hsh = { :a => 100, :b => 200 }
-    #     hsh.key(200)   # => :b
-    #     hsh.key(999)   # => nil
-    #
-    # @param  val [Object] the value to look up
-    # @return [Object, nil] the key for the given val, or nil if missing
-    #
-    def key val
-      keys.find{|key| self[key] == val }
-    end
-
-    #
-    # Searches through the hashlike comparing obj with the key using ==.
-    # Returns the key-value pair (two elements array) or nil if no match is
-    # found.
-    #
-    # @see Array#assoc.
-    #
-    # @example
-    #     hsh = { "colors"  => ["red", "blue", "green"],
-    #             "letters" => [:a, :b, :c ]}
-    #     hsh.assoc("letters")  # => ["letters", [:a, :b, :c]]
-    #     hsh.assoc("foo")      # => nil
-    #
-    # @return [Array, nil] the key-value pair (two elements array) or nil if no
-    #   match is found.
-    #
-    def assoc key
-      return unless has_key?(key)
-      [key, self[key]]
-    end
-
-    #
-    # Searches through the hashlike comparing obj with the value using ==.
-    # Returns the first key-value pair (two-element array) that matches.
-    #
-    # @see Array#rassoc.
-    #
-    # @example
-    #     hsh = { 1 => "one", 2 => "two", 3 => "three", "ii" => "two"}
-    #     hsh.rassoc("two")    # => [2, "two"]
-    #     hsh.rassoc("four")   # => nil
-    #
-    # @return [Array, nil] The first key-value pair (two-element array) that
-    #   matches, or nil if no match is found
-    #
-    def rassoc val
-      key = key(val) or return
-      [key, self[key]]
-    end
-
-    #
-    # Returns a new hash created by using +hsh+'s values as keys, and the keys as
-    # values. If +hsh+ has duplicate values, the result will contain only one of
-    # them as a key -- which one is not predictable.
-    #
-    # @example
-    #     hsh = { :n => 100, :m => 100, :y => 300, :d => 200, :a => 0 }
-    #     hsh.invert # => { 0 => :a, 100 => :m, 200 => :d, 300 => :y }
-    #
-    # @return [Hash] a new hash, with values for keys and vice-versa
-    #
-    def invert
-      to_hash.invert
     end
 
     #
@@ -516,7 +506,6 @@ module Gorillib
     #
     def delete_if(&block)
       return enum_for(:delete_if) unless block_given?
-      p ['in delete_if', self]
       reject!(&block)
       self
     end
@@ -548,35 +537,67 @@ module Gorillib
     end
 
     #
-    # Same as Hashlike#delete_if, but works on (and returns) a copy of the
-    # +hsh+. Equivalent to <tt>hsh.dup.delete_if</tt>.
+    # Overrides the implementation in Enumerable, which iterates on keys, not
+    # key/value pairs
     #
-    # @example
-    #     hsh = { :a => 100, :b => 200, :c => 300 }
-    #     hsh.reject{|key, val| key.to_s >= "b" }   # => { :a => 100 }
-    #     hsh # => { :a => 100, :b => 200, :c => 300 }
-    #
-    #     hsh = { :a => 100, :b => 200, :c => 300 }
-    #     hsh.reject{|key, val| key.to_s >= "z" }   # => { :a => 100, :b => 200, :c => 300 }
-    #     hsh # => { :a => 100, :b => 200, :c => 300 }
-    #
-    # @overload hsh.reject{|key, val| block }    -> new_hashlike
-    #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
-    #   @return [Hashlike]
-    #
-    # @overload hsh.reject                       -> an_enumerator
-    #   with no block, returns a raw enumerator
-    #   @return [Enumerator]
-    #
-    def reject(&block)
-      return enum_for(:reject) unless block_given?
-      self.dup.delete_if(&block)
-    end
+    module OverrideEnumerable
+      #
+      # Deletes every key-value pair from +hsh+ for which +block+ evaluates to
+      # true (similar to Hashlike#delete_if), but works on (and returns) a copy of
+      # the +hsh+. Equivalent to <tt>hsh.dup.delete_if</tt>.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200, :c => 300 }
+      #     hsh.reject{|key, val| key.to_s >= "b" }   # => { :a => 100 }
+      #     hsh # => { :a => 100, :b => 200, :c => 300 }
+      #
+      #     hsh = { :a => 100, :b => 200, :c => 300 }
+      #     hsh.reject{|key, val| key.to_s >= "z" }   # => { :a => 100, :b => 200, :c => 300 }
+      #     hsh # => { :a => 100, :b => 200, :c => 300 }
+      #
+      # @overload hsh.reject{|key, val| block }    -> new_hashlike
+      #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+      #   @return [Hashlike]
+      #
+      # @overload hsh.reject                       -> an_enumerator
+      #   with no block, returns a raw enumerator
+      #   @return [Enumerator]
+      #
+      # Overrides the implementation in Enumerable, which does the keys wrong.
+      #
+      def reject(&block)
+        return enum_for(:reject) unless block_given?
+        self.dup.delete_if(&block)
+      end
 
-    def select(&block)
-      return enum_for(:select) unless block_given?
-      p ['select', block]
-      self.dup.keep_if(&block)
+      #
+      # Deletes every key-value pair from +hsh+ for which +block+ evaluates to
+      # false (similar to Hashlike#keep_if), but works on (and returns) a copy of
+      # the +hsh+. Equivalent to <tt>hsh.dup.keep_if</tt>.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200, :c => 300 }
+      #     hsh.select{|key, val| key.to_s >= "b" }   # => { :b => 200, :c => 300 }
+      #     hsh # => { :a => 100, :b => 200, :c => 300 }
+      #
+      #     hsh = { :a => 100, :b => 200, :c => 300 }
+      #     hsh.select{|key, val| key.to_s >= "z" }   # => { }
+      #     hsh # => { :a => 100, :b => 200, :c => 300 }
+      #
+      # @overload hsh.select{|key, val| block }    -> new_hashlike
+      #   Deletes every key-value pair from +hsh+ for which +block+ evaluates to true.
+      #   @return [Hashlike]
+      #
+      # @overload hsh.select                       -> an_enumerator
+      #   with no block, returns a raw enumerator
+      #   @return [Enumerator]
+      #
+      # Overrides the implementation in Enumerable, which does the keys wrong.
+      #
+      def select(&block)
+        return enum_for(:select) unless block_given?
+        self.dup.keep_if(&block)
+      end
     end
 
     #
@@ -590,6 +611,35 @@ module Gorillib
     #
     def clear
       each_key{|k| delete(k) }
+    end
+
+    #
+    # Returns a hash with each key set to its associated value.
+    #
+    # @example
+    #    my_hshlike = MyHashlike.new
+    #    my_hshlike[:a] = 100; my_hshlike[:b] = 200
+    #    my_hshlike.to_hash # => { :a => 100, :b => 200 }
+    #
+    # @return [Hash] a new Hash instance, with each key set to its associated value.
+    #
+    def to_hash
+      {}.tap{|hsh| each_pair{|key, val| hsh[key] = val } }
+    end
+
+    #
+    # Returns a new hash created by using +hsh+'s values as keys, and the keys as
+    # values. If +hsh+ has duplicate values, the result will contain only one of
+    # them as a key -- which one is not predictable.
+    #
+    # @example
+    #     hsh = { :n => 100, :m => 100, :y => 300, :d => 200, :a => 0 }
+    #     hsh.invert # => { 0 => :a, 100 => :m, 200 => :d, 300 => :y }
+    #
+    # @return [Hash] a new hash, with values for keys and vice-versa
+    #
+    def invert
+      to_hash.invert
     end
 
     #
@@ -626,23 +676,24 @@ module Gorillib
       to_a.flatten(*args)
     end
 
-    module ClassMethods
-    end
-
     def self.included base
       base.class_eval do
-        extend  ClassMethods
-        include EnumerateFromKeys # unless method_defined?(:each)
+        base.send(:include, EnumerateFromKeys) unless base.method_defined?(:each)
+        unless base.is_a?(Enumerable)
+          base.send(:include, Enumerable)
+          base.send(:include, OverrideEnumerable)
+        end
 
-        alias_method :store,    :[]=
+        # included here so they win out over Enumerable
         alias_method :include?, :has_key?
         alias_method :key?,     :has_key?
         alias_method :member?,  :has_key?
         alias_method :value?,   :has_value?
-        alias_method :size,     :length
         alias_method :merge!,   :update
-
+        alias_method :size,     :length
       end
     end
+
   end
 end
+
