@@ -1,4 +1,5 @@
 require File.dirname(__FILE__)+'/../spec_helper'
+require File.dirname(__FILE__)+'/../support/kcode_test_helper'
 require 'gorillib/string/truncate'
 
 describe String do
