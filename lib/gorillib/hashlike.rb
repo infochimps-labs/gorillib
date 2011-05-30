@@ -55,6 +55,7 @@ module Gorillib
     # module.
     #
     module EnumerateFromKeys
+
       #
       # Calls +block+ once for each key in +hsh+, passing the key/value pair as
       # parameters.
@@ -67,6 +68,16 @@ module Gorillib
       #     # produces:
       #     a is 100
       #     b is 200
+      #
+      # @example with block arity:
+      #     hsh = {[:a,:b] => 3, [:c, :d] => 4, :e => 5}
+      #     seen_args = []
+      #     hsh.each{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
+      #     # => [[[:a, :b], 3, nil], [[:c, :d], 4, nil], [:e, 5, nil]]
+      #
+      #     seen_args = []
+      #     hsh.each{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
+      #     # => [[:a, :b, 3], [:c, :d, 4], [:e, nil, 5]]
       #
       # @overload hsh.each{|key, val| block }      -> hsh
       #   Calls block once for each key in +hsh+
@@ -84,6 +95,39 @@ module Gorillib
         end
         self
       end
+
+      #
+      # Calls +block+ once for each key in +hsh+, passing the key/value pair as
+      # parameters.
+      #
+      # If no block is given, an enumerator is returned instead.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200 }
+      #     hsh.each_pair{|key, value| puts "#{key} is #{value}" }
+      #     # produces:
+      #     a is 100
+      #     b is 200
+      #
+      # @example with block arity:
+      #     hsh = {[:a,:b] => 3, [:c, :d] => 4, :e => 5}
+      #     seen_args = []
+      #     hsh.each_pair{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
+      #     # => [[[:a, :b], 3, nil], [[:c, :d], 4, nil], [:e, 5, nil]]
+      #
+      #     seen_args = []
+      #     hsh.each_pair{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
+      #     # => [[:a, :b, 3], [:c, :d, 4], [:e, nil, 5]]
+      #
+      # @overload hsh.each_pair{|key, val| block }      -> hsh
+      #   Calls block once for each key in +hsh+
+      #   @yield [key, val] in order, each key and its associated value
+      #   @return [Hashlike]
+      #
+      # @overload hsh.each_pair                         -> an_enumerator
+      #   with no block, returns a raw enumerator
+      #   @return [Enumerator]
+      #
       def each_pair(&block)
         return enum_for(:each_pair) unless block_given?
         each(&block)
@@ -159,6 +203,16 @@ module Gorillib
     #     a
     #     b
     #
+    # @example with block arity:
+    #     hsh = {[:a,:b] => 3, [:c, :d] => 4, :e => 5}
+    #     seen_args = []
+    #     hsh.each_key{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
+    #     # => [[:a, :b, nil], [:c, :d, nil], [:e, nil, nil]]
+    #
+    #     seen_args = []
+    #     hsh.each_key{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
+    #     # => [[:a, nil, :b], [:c, nil, :d], [:e, nil, nil]]
+    #
     # @overload hsh.each_key{|key| block }       -> hsh
     #   Calls +block+ once for each key in +hsh+
     #   @yield [key] in order, each key
@@ -185,6 +239,16 @@ module Gorillib
     #     # produces:
     #     100
     #     200
+    #
+    # @example with block arity:
+    #     hsh = {:a => [300,333], :b => [400,444], :e => 500})
+    #     seen_args = []
+    #     hsh.each_value{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
+    #     # => [[300, 333, nil], [400, 444, nil], [500, nil, nil]]
+    #
+    #     seen_args = []
+    #     hsh.each_value{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
+    #     # => [[300, nil, 333], [400, nil, 444], [500, nil, nil]]
     #
     # @overload hsh.each_value{|val| block }     -> hsh
     #   Calls +block+ once for each value in +hsh+
@@ -229,7 +293,8 @@ module Gorillib
     # @return [true, false] true if the value is present, false otherwise
     #
     def has_value? target
-      any?{|key, val| val == target }
+      each_pair{|key, val| return true if (val == target) }
+      false
     end
 
     #
@@ -267,8 +332,8 @@ module Gorillib
     def fetch(key, default=nil, &block)
       warn "#{caller[0]}: warning: block supersedes default value argument" if default && block_given?
       if    has_key?(key) then self[key]
-      elsif default       then default
       elsif block_given?  then yield(key)
+      elsif default       then default
       else  raise KeyError, "key not found: #{key.inspect}"
       end
     end
@@ -644,18 +709,19 @@ module Gorillib
     end
 
     #
-    # Returns a new array that is a one-dimensional flattening of this hashlike. That
-    # is, for every key or value that is an array, extract its elements into the
-    # new array.  Unlike Array#flatten, this method does not flatten recursively
-    # by default.  The optional level argument determines the level of recursion
-    # to flatten.
+    # Returns a new array that is a one-dimensional flattening of this
+    # hashlike. That is, for every key or value that is an array, extract its
+    # elements into the new array.  Unlike Array#flatten, this method does not
+    # flatten recursively by default; pass +nil+ explicitly to flatten
+    # recursively.  The optional level argument determines the level of
+    # recursion to flatten.
     #
     # @example
     #     hsh =  {1=> "one", 2 => [2,"two"], 3 => "three"}
     #     hsh.flatten    # => [1, "one", 2, [2, "two"], 3, "three"]
     #     hsh.flatten(2) # => [1, "one", 2, 2, "two", 3, "three"]
     #
-    # @example
+    # @example with deep nesting
     #     hsh = { [1, 2, [3, 4]] => [1, [2, 3, [4, 5, 6]]] }
     #     hsh.flatten
     #     # =>   [[1, 2, [3, 4]],   [1, [2, 3, [4, 5, 6]]]]
@@ -669,18 +735,24 @@ module Gorillib
     #     # =>    [1, 2,  3, 4,      1,  2, 3, [4, 5, 6]]
     #     hsh.flatten(4)
     #     # =>    [1, 2,  3, 4,      1,  2, 3,  4, 5, 6]
+    #     hsh.flatten.flatten
+    #     # =>    [1, 2,  3, 4,      1,  2, 3,  4, 5, 6]
+    #
+    # @example nil level means complete flattening
+    #     hsh.flatten(nil)
+    #     # =>    [1, 2,  3, 4,      1,  2, 3,  4, 5, 6]
     #
     # @param  level [Integer] the level of recursion to flatten, 0 by default.
     # @return [Array] the flattened key-value array.
     #
-    def flatten *args
-      to_a.flatten(*args)
+    def flatten(*args)
+      to_hash.flatten(*args)
     end
 
     def self.included base
       base.class_eval do
         base.send(:include, EnumerateFromKeys) unless base.method_defined?(:each)
-        unless base.is_a?(Enumerable)
+        unless base.include?(Enumerable)
           base.send(:include, Enumerable)
           base.send(:include, OverrideEnumerable)
         end

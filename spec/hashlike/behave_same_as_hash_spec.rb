@@ -4,7 +4,7 @@ require 'gorillib/hashlike'
 require File.dirname(__FILE__)+'/../support/hashlike_fuzzing_helper'
 require File.dirname(__FILE__)+'/../support/hashlike_via_delegation'
 
-class InternalHash
+class InternalHashWithEquality < InternalHash
   # Override these so we can compare exceptions.
   def to_s()             @myhsh.to_s          ; end
   def ==(other_hash)     @myhsh == other_hash ; end
@@ -15,8 +15,8 @@ describe Gorillib::Hashlike do
 
   before do
     @total = 0
-    @hsh      = HashlikeFuzzingHelper::HASH_TO_TEST_WITH.dup
-    @hshlike  = InternalHash.new.merge(HashlikeFuzzingHelper::HASH_TO_TEST_WITH)
+    @hsh      = HashlikeFuzzingHelper::HASH_TO_TEST_FULLY_HASHLIKE.dup
+    @hshlike  = InternalHashWithEquality.new.merge(HashlikeFuzzingHelper::HASH_TO_TEST_FULLY_HASHLIKE)
   end
 
   it 'does everything a hash can do' do
@@ -42,3 +42,4 @@ describe Gorillib::Hashlike do
   end
 
 end
+

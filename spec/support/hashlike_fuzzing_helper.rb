@@ -7,7 +7,19 @@ module HashlikeFuzzingHelper
   #
   #
 
-  HASH_TO_TEST_WITH = { :a  => 3,  :b  => 4, :c => nil, :nil_val => nil, :false_val => false, :z => nil }.freeze
+  HASH_TO_TEST_FULLY_HASHLIKE = {
+    :a  => 100,  :b  => 200, :c => 300,
+    :nil_val => nil, :false_val => false, :true_val => true,
+    :arr_val => [1,2,3],
+    [1, 2, [3, 4]] => [1, [2, 3, [4, 5, 6]]],
+    nil => :has_nil_key, false => :has_false_key, Object.new => :has_dummy_key,
+  }.freeze
+
+  HASH_TO_TEST_HASHLIKE_STRUCT = {
+    :a  => 100, :b  => 200, :c => 300,
+    :nil_val => nil, :false_val => false, :true_val => true,
+    :arr_val => [1,2,3],
+  }.freeze
 
   #
   # Methods from Hash
@@ -45,7 +57,9 @@ module HashlikeFuzzingHelper
     :compare_by_identity, :compare_by_identity?,
     :default, :default=, :default_proc, :default_proc=,
     :rehash, :replace, :shift, :index,
-    #
+  ]
+
+  FANCY_HASHLIKE_METHODS = [
     :assert_valid_keys,
     :nested_under_indifferent_access, 
     :stringify_keys, :stringify_keys!, :symbolize_keys, :symbolize_keys!,
@@ -60,12 +74,12 @@ module HashlikeFuzzingHelper
   TOTAL_K_PROC     = Proc.new{|k|   @total += self[k].to_i }
   TOTAL_V_PROC     = Proc.new{|v|   @total += v.to_i }
   TOTAL_KV_PROC    = Proc.new{|k,v| @total += v.to_i }
-  VAL_GTE_4_PROC   = Proc.new{|k,v| v.to_i >= 4   }
-  VAL_GTE_0_PROC   = Proc.new{|k,v| v.to_i >= 0   }
-  VAL_GTE_1E6_PROC = Proc.new{|k,v| v.to_i >= 1e6 }
+  VAL_GTE_4_PROC   = Proc.new{|k,v| v.respond_to?(:to_i) && v.to_i >= 4   }
+  VAL_GTE_0_PROC   = Proc.new{|k,v| v.respond_to?(:to_i) && v && v.to_i >= 0   }
+  VAL_GTE_1E6_PROC = Proc.new{|k,v| v.respond_to?(:to_i) && v && v.to_i >= 1e6 }
 
   INPUTS_FOR_ALL_HASHLIKES = [
-    [], [:a], [:b], [:z],
+    [], [:a], [:b], [:z], [0], [1], [2], [100], [-1],
     [:a, :b], [:a, 30], [:b, 50], [:z, :a], [:c, 70],
     [TOTAL_KV_PROC], [TOTAL_K_PROC], [TOTAL_V_PROC],
     [:a, STRING_2X_PROC], [:z, STRING_2X_PROC], [:z, 100, STRING_2X_PROC],
