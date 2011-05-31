@@ -1,6 +1,5 @@
 require 'stringio'
 
-
 ::Enumerator = Enumerable::Enumerator if (RUBY_VERSION < '1.9') && (not defined?(::Enumerator))
 
 module HashlikeFuzzingHelper
@@ -12,17 +11,11 @@ module HashlikeFuzzingHelper
 
   HASH_TO_TEST_FULLY_HASHLIKE = {
     :a  => 100,  :b  => 200, :c => 300,
-    :nil_val => nil, :false_val => false, :true_val => true,
-    :arr_val => [1,2,3],
+    :nil_val => nil, :false_val => false, :true_val => true, :arr_val => [1,2,3],
     [1, 2, [3, 4]] => [1, [2, 3, [4, 5, 6]]],
     nil => :has_nil_key, false => :has_false_key, Object.new => :has_dummy_key,
   }.freeze
-
-  HASH_TO_TEST_HASHLIKE_STRUCT = {
-    :a  => 100, :b  => 200, :c => 300,
-    :nil_val => nil, :false_val => false, :new_key => nil,
-  }.freeze
-
+  
   #
   # Methods from Hash
   #
@@ -32,7 +25,7 @@ module HashlikeFuzzingHelper
     # defined by class
     :[], :[]=, :delete, :keys,
     # typically defined via EnumerateFromKeys, but Struct does its own thing
-    :each, :each_pair, :values, :values_at, :length,
+    :each, :each_pair, :values, :values_at, :values_of, :length,
     # defined by hashlike using above
     :each_key, :each_value, :has_key?, :has_value?, :fetch, :key, :assoc,
     :rassoc, :empty?, :update, :merge, :reject!, :reject, :select!, :select,
@@ -42,12 +35,13 @@ module HashlikeFuzzingHelper
   ]
 
   if RUBY_VERSION < '1.9'
-    class ::Hash
-      alias_method(:key, :index) unless method_defined?(:key)
-    end
     HASH_METHODS_MISSING_FROM_VERSION = [:flatten, :keep_if, :select!, :select, :rassoc, :assoc]
   else
     HASH_METHODS_MISSING_FROM_VERSION = []
+  end
+  class ::Hash
+    alias_method(:key, :index) unless method_defined?(:key)
+    alias_method(:values_of, :values_at) unless method_defined?(:values_of)
   end
   
   METHODS_TO_TEST = HASHLIKE_METHODS + Enumerable.public_instance_methods.map(&:to_sym) - HASH_METHODS_MISSING_FROM_VERSION

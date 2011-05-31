@@ -2,26 +2,10 @@ require File.dirname(__FILE__)+'/../spec_helper'
 require 'gorillib/hashlike'
 require 'gorillib/struct/acts_as_hash'
 require File.dirname(__FILE__)+'/../support/hashlike_via_delegation'
-
-StructUsingHashlike = Struct.new(:a, :b, :c, :nil_val, :false_val, :new_key) do
-  include Gorillib::Hashlike
-  include Gorillib::Struct::ActsAsHash
-
-  def to_s ; to_hash.to_s ; end
-  def inspect ; to_s ; end
-
-  # compares so nil key is same as missing key
-  def ==(othr)
-    self.each_pair{|k,v| return false unless (v == othr[k]) }
-    othr.each_pair{|k,v| return false unless (v == self[k]) }
-    true
-  end
-end
+require File.dirname(__FILE__)+'/../support/hashlike_fuzzing_helper'
+require File.dirname(__FILE__)+'/../support/hashlike_struct_helper'
 
 describe Gorillib::Struct::ActsAsHash do
-
-  BASE_HSH                 = { :a  => 100, :b  => 200, :c => 300, :nil_val => nil, :false_val => false }.freeze
-  BASE_HSH_WITH_ARRAY_VALS = { :a => [100,111], :b => 200, :c => [1, [2, 3, [4, 5, 6]]] }.freeze
 
   before do
     @total = 0
@@ -401,38 +385,7 @@ describe Gorillib::Struct::ActsAsHash do
   #
   # Update, merge!, merge
 
-  shared_examples_for :merging_method do |method_to_test|
-    it 'adds the contents of another hash' do
-      ret_val = @hshlike.send(method_to_test, {:a => [], :new_key => "zzz" })
-      ret_val.should   be_hash_eql({:a=>[], :b=>200, :c=>300, :nil_val=>nil, :false_val=>false, :new_key => "zzz"})
-    end
-    it 'adds the contents of a Struct' do
-      bob_klass = Struct.new(:a, :b, :nil_val, :new_key)
-      bob = bob_klass.new("aaa", 200, "here", "zzz")
-      ret_val = @hshlike.send(method_to_test, bob)
-      ret_val.should   be_hash_eql({ :a => "aaa", :b => 200, :c => 300, :nil_val => "here", :false_val => false, :new_key => "zzz" })
-      bob.values.should == ["aaa", 200, "here", "zzz"]
-    end
-    it 'adds the contents of another Hashlike' do
-      bob = InternalHash.new.merge({ :a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
-      ret_val = @hshlike.send(method_to_test, bob)
-      ret_val.should   be_hash_eql({ :a => "aaa", :b => 200, :c => 300, :nil_val => "here", :false_val => false, :new_key => "zzz" })
-      bob.should       be_hash_eql({ :a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
-    end
-    it 'adds the contents of anything that respond_to?(:each_pair)' do
-      obj = Object.new
-      def obj.each_pair
-        [[:a, "aaa"], [:b, 200], [:nil_val, "here"], [:new_key, "zzz"]].each{|k,v| yield(k,v) }
-      end
-      ret_val = @hshlike.send(method_to_test, obj)
-      ret_val.should   be_hash_eql({ :a => "aaa", :b => 200, :c => 300, :nil_val => "here", :false_val => false, :new_key => "zzz" })
-    end
-    describe 'with no block' do
-      it 'overwrites entries in this hash with those from the other hash' do
-        ret_val = @hshlike.send(method_to_test, {:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
-        ret_val.should be_hash_eql({ :a => "aaa", :b => 200, :c => 300, :nil_val => "here", :false_val => false, :new_key => "zzz" })
-      end
-    end
+  shared_examples_for :merging_method_fixed_keys do |method_to_test|
     describe 'with a block' do
       it 'sets the value for colliding keys by evaluating the block' do
         ret_val = @hshlike.send(method_to_test, {:a => "aaa", :nil_val => "here", :new_key => "zzz" }) do |key, other_val, hsh_val|
@@ -466,15 +419,11 @@ describe Gorillib::Struct::ActsAsHash do
         seen_args.should be_array_eql([ [:a, "aaa", 100], [:b, 200, 200], [:new_key, "zzz", nil] ])
       end
     end
-    it 'raises a type error unless given hash responds to each_pair' do
-      obj = Object.new
-      lambda{ @hshlike.send(method_to_test, obj) }.should raise_error(TypeError, "can't convert Object into Hash")
-    end
-    it 'something something convert_key'
   end
 
   describe 'update' do
     it_should_behave_like :merging_method, :update
+    it_should_behave_like :merging_method_fixed_keys, :update
     it 'updates in-place, returning self' do
       ret_val = @hshlike.update({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
       ret_val.should equal(@hshlike)
@@ -484,6 +433,7 @@ describe Gorillib::Struct::ActsAsHash do
 
   describe '#merge!' do
     it_should_behave_like :merging_method, :merge!
+    it_should_behave_like :merging_method_fixed_keys, :merge!
     it 'updates in-place, returning self' do
       ret_val = @hshlike.merge!({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
       ret_val.should equal(@hshlike)
@@ -493,6 +443,7 @@ describe Gorillib::Struct::ActsAsHash do
 
   describe '#merge' do
     it_should_behave_like :merging_method, :merge
+    it_should_behave_like :merging_method_fixed_keys, :merge
     it 'does not alter state, returning a new object' do
       ret_val = @hshlike.merge({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
       ret_val.should_not equal(@hshlike)
@@ -509,7 +460,7 @@ describe Gorillib::Struct::ActsAsHash do
   #
   # Filters
 
-  shared_examples_for :hashlike_filter do |method_to_test|
+  shared_examples_for :hashlike_filter_fixed_keys do |method_to_test|
     it 'passes every key-value pair to block' do
       seen_args = []
       ret_val = @hshlike.send(method_to_test){|key,val| seen_args << [key, val] ; val && (val.to_i > 150) }
@@ -527,118 +478,38 @@ describe Gorillib::Struct::ActsAsHash do
     end
   end
 
-  shared_examples_for :rejection_filter do |method_to_test|
-    it 'deletes every key-value pair for which the block evaluates truthy' do
-      ret_val = @hshlike.send(method_to_test){|key,val| val && (val.to_i > 150) }
-      ret_val.should be_hash_eql({ :a => 100, :nil_val => nil, :false_val => false })
-      @hshlike.should be_hash_eql({ :a => 100, :nil_val => nil, :false_val => false })
-      #
-      ret_val = @hshlike.send(method_to_test){|key,val| 1 }
-      ret_val.should be_empty
-    end
-  end
-
-  shared_examples_for :selection_filter do |method_to_test|
-    it 'deletes every key-value pair for which the block evaluates truthy' do
-      ret_val = @hshlike.keep_if{|key,val| val }
-      ret_val.should be_hash_eql({ :a => 100, :b => 200, :c => 300  })
-      #
-      ret_val = @hshlike.keep_if{|key,val| val && (val.to_i > 150) }
-      ret_val.should be_hash_eql({ :b => 200, :c => 300  })
-      #
-      ret_val = @hshlike.keep_if{|key,val| false }
-      ret_val.should be_empty
-    end
-  end
-
-  shared_examples_for :filter_modifies_self_returns_nil_if_unchanged do |method_to_test, force_unchanged|
-    it 'modifies in-place and returns self if changes were made' do
-      ret_val = @hshlike.send(method_to_test){|key,val| val && (val.to_i > 150) }
-      ret_val.should equal(@hshlike)
-    end
-    it 'modifies in-place and returns self if changes were made (arity 1)' do
-      ret_val = @hshlike.send(method_to_test){|key| @hshlike[key] && (@hshlike[key].to_i > 150) }
-      ret_val.should equal(@hshlike)
-    end
-    it 'returns nil if unchanged' do
-      ret_val = @hshlike.send(method_to_test){|key,val| force_unchanged }
-      #
-      ret_val.should be_nil
-      @hshlike.should be_hash_eql(BASE_HSH)
-    end
-  end
-
-  shared_examples_for :filter_modifies_self_returns_self do |method_to_test, force_unchanged|
-    it 'modifies in-place and returns self if changes were made' do
-      ret_val = @hshlike.send(method_to_test){|key,val| val && (val.to_i > 150) }
-      ret_val.should equal(@hshlike)
-    end
-    it 'modifies in-place and returns self if changes were made (arity 1)' do
-      ret_val = @hshlike.send(method_to_test){|key| @hshlike[key] && (@hshlike[key].to_i > 150) }
-      ret_val.should equal(@hshlike)
-    end
-    it 'returns self if unchanged' do
-      ret_val = @hshlike.send(method_to_test){|key,val| force_unchanged }
-      #
-      ret_val.should     equal(@hshlike)
-      @hshlike.should    be_hash_eql(BASE_HSH)
-    end
-  end
-
-  shared_examples_for :filter_does_not_modify_self_returns_same_class do |method_to_test, force_unchanged|
-    it 'modifies in-place and returns self' do
-      ret_val = @hshlike.send(method_to_test){|key,val| val && (val.to_i > 150) }
-      ret_val.should_not be_hash_eql(@hshlike)
-      ret_val.should_not equal(@hshlike)
-      @hshlike.should    be_hash_eql(BASE_HSH)
-    end
-    it 'is == if unchanged' do
-      ret_val = @hshlike.send(method_to_test){|key,val| force_unchanged }
-      #
-      ret_val.should_not equal(@hshlike)
-      ret_val.should     be_hash_eql(@hshlike)
-      @hshlike.should    be_hash_eql(BASE_HSH)
-    end
-    it 'returns same class as caller' do
-      ret_val = @hshlike_subklass_inst.send(method_to_test){|key,val| val && (val.to_i > 150) }
-      ret_val.should be_a(@hshlike_subklass)
-      ret_val.should be_a(@hshlike.class)
-      ret_val.class.should_not == @hshlike.class
-    end
-  end
-
   describe '#reject!' do
-    it_should_behave_like :hashlike_filter,  :reject!
+    it_should_behave_like :hashlike_filter_fixed_keys,  :reject!
     it_should_behave_like :rejection_filter, :reject!
     it_should_behave_like :filter_modifies_self_returns_nil_if_unchanged, :reject!, false
   end
 
   describe '#select!' do
-    it_should_behave_like :hashlike_filter,  :select!
+    it_should_behave_like :hashlike_filter_fixed_keys,  :select!
     it_should_behave_like :selection_filter, :select!
     it_should_behave_like :filter_modifies_self_returns_nil_if_unchanged, :select!, true
   end
 
   describe '#delete_if' do
-    it_should_behave_like :hashlike_filter,  :delete_if
+    it_should_behave_like :hashlike_filter_fixed_keys,  :delete_if
     it_should_behave_like :rejection_filter, :delete_if
     it_should_behave_like :filter_modifies_self_returns_self, :delete_if, false
   end
 
   describe '#keep_if' do
-    it_should_behave_like :hashlike_filter,  :keep_if
+    it_should_behave_like :hashlike_filter_fixed_keys,  :keep_if
     it_should_behave_like :selection_filter, :keep_if
     it_should_behave_like :filter_modifies_self_returns_self, :keep_if, true
   end
 
   # describe '#reject' do
-  #   it_should_behave_like :hashlike_filter,  :select
+  #   it_should_behave_like :hashlike_filter_fixed_keys,  :select
   #   it_should_behave_like :selection_filter, :select
   #   it_should_behave_like :filter_does_not_modify_self_returns_same_class, :reject, false
   # end
   #
   # describe '#select' do
-  #   it_should_behave_like :hashlike_filter,  :select
+  #   it_should_behave_like :hashlike_filter_fixed_keys,  :select
   #   it_should_behave_like :selection_filter, :select
   #   it_should_behave_like :filter_does_not_modify_self_returns_same_class, :select, true
   # end
@@ -664,54 +535,49 @@ describe Gorillib::Struct::ActsAsHash do
     end
   end
 
-  describe '#invert' do
-    it 'returns a new Hash using the values as keys, and the keys as values' do
-      ret_val = @hshlike.invert
-      if (RUBY_VERSION >= '1.9')
+  if (RUBY_VERSION >= '1.9')
+    describe '#invert' do
+      it 'returns a new Hash using the values as keys, and the keys as values' do
+        ret_val = @hshlike.invert
         ret_val.should == { 100 => :a, 200 => :b, 300 => :c, nil => :new_key, false => :false_val }
       end
-    end
-    it 'with duplicate values, the result will contain only one of them as a key' do
-      @hshlike[:a]       = 999
-      @hshlike[:new_key] = 999
-      if (RUBY_VERSION >= '1.9')
+      it 'with duplicate values, the result will contain only one of them as a key' do
+        @hshlike[:a]       = 999
+        @hshlike[:new_key] = 999
         @hshlike.invert.should == { 999 => :new_key, 200 => :b, 300 => :c, nil => :nil_val, false => :false_val }
       end
+      it 'returns a Hash, not a self.class' do
+        ret_val = @hshlike.invert
+        ret_val.should be_an_instance_of(Hash)
+      end
     end
-    it 'returns a Hash, not a self.class' do
-      ret_val = @hshlike.invert
-      ret_val.should be_an_instance_of(Hash)
-    end
-  end
 
-  if (RUBY_VERSION >= '1.9')
     describe '#flatten' do
-
-    it 'with no arg returns a one-dimensional flattening' do
-      ret_val     = @hshlike_with_array_vals.flatten
-      ret_val.should == [  :a, [100, 111],  :b, 200,    :c, [1, [2, 3, [4, 5, 6]]],   :nil_val, nil, :false_val, nil, :new_key, nil ]
+      it 'with no arg returns a one-dimensional flattening' do
+        ret_val     = @hshlike_with_array_vals.flatten
+        ret_val.should == [  :a, [100, 111],  :b, 200,    :c, [1, [2, 3, [4, 5, 6]]],   :nil_val, nil, :false_val, nil, :new_key, nil ]
+      end
+      it 'with no arg is same as level = 1' do
+        @hshlike_with_array_vals.flatten(1).should == @hshlike_with_array_vals.flatten
+      end
+      it 'with level == nil, returns a complete flattening' do
+        ret_val     = @hshlike_with_array_vals.flatten(nil)
+        ret_val.should == [  :a,  100, 111,    :b,  200,  :c, 1,  2, 3,  4, 5, 6,       :nil_val, nil, :false_val, nil, :new_key, nil ]
+      end
+      it 'with an arg, flattens to that level (0)' do
+        ret_val     = @hshlike_with_array_vals.flatten(0)
+        ret_val.should == [ [:a, [100, 111]], [:b, 200], [:c, [1, [2, 3, [4, 5, 6]]]], [:nil_val, nil], [:false_val, nil], [:new_key, nil]]
+      end
+      it 'with an arg, flattens to that level (3)' do
+        ret_val     = @hshlike_with_array_vals.flatten(3)
+        ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3, [4, 5, 6],      :nil_val, nil, :false_val, nil, :new_key, nil ]
+      end
+      it 'with an arg, flattens to that level (4)' do
+        ret_val     = @hshlike_with_array_vals.flatten(4)
+        ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3,  4, 5, 6,       :nil_val, nil, :false_val, nil, :new_key, nil ]
+        ret_val.should == @hshlike_with_array_vals.flatten(999)
+      end
     end
-    it 'with no arg is same as level = 1' do
-      @hshlike_with_array_vals.flatten(1).should == @hshlike_with_array_vals.flatten
-    end
-    it 'with level == nil, returns a complete flattening' do
-      ret_val     = @hshlike_with_array_vals.flatten(nil)
-      ret_val.should == [  :a,  100, 111,    :b,  200,  :c, 1,  2, 3,  4, 5, 6,       :nil_val, nil, :false_val, nil, :new_key, nil ]
-    end
-    it 'with an arg, flattens to that level (0)' do
-      ret_val     = @hshlike_with_array_vals.flatten(0)
-      ret_val.should == [ [:a, [100, 111]], [:b, 200], [:c, [1, [2, 3, [4, 5, 6]]]], [:nil_val, nil], [:false_val, nil], [:new_key, nil]]
-    end
-    it 'with an arg, flattens to that level (3)' do
-      ret_val     = @hshlike_with_array_vals.flatten(3)
-      ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3, [4, 5, 6],      :nil_val, nil, :false_val, nil, :new_key, nil ]
-    end
-    it 'with an arg, flattens to that level (4)' do
-      ret_val     = @hshlike_with_array_vals.flatten(4)
-      ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3,  4, 5, 6,       :nil_val, nil, :false_val, nil, :new_key, nil ]
-      ret_val.should == @hshlike_with_array_vals.flatten(999)
-    end
-  end
   end
 
   # ===========================================================================

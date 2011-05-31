@@ -15,21 +15,20 @@ module Gorillib
   #
   # Given the above, hashlike will provide the rest, defining the methods
   #
-  #     :each_pair, :each, :each_key, :each_value, :values, :values_at, :size,
-  #     :length, :has_key?, :include?, :key?, :member?, :has_value?, :value?,
-  #     :fetch, :key, :assoc, :rassoc, :empty?, :merge, :update, :merge!,
-  #     :reject!, :select!, :delete_if, :keep_if, :reject, :clear, :store,
-  #     :to_hash, :invert, :flatten
+  #     :each_pair, :each, :each_key, :each_value, :values_at, :values_of, :values,
+  #     :size, :length, :has_key?, :include?, :key?, :member?, :has_value?, :value?,
+  #     :fetch, :key, :assoc, :rassoc, :empty?, :merge, :update, :merge!, :reject!,
+  #     :select!, :delete_if, :keep_if, :reject, :clear, :store, :to_hash, :invert,
+  #     :flatten
   #
   # and these methods added by Enumerable:
   #
-  #     :each_cons, :each_entry, :each_slice, :each_with_index,
-  #     :each_with_object, :entries, :to_a, :map, :collect, :collect_concat,
-  #     :group_by, :flat_map, :inject, :reduce, :chunk, :reverse_each,
-  #     :slice_before, :drop, :drop_while, :take, :take_while, :detect, :find,
-  #     :find_all, :select, :find_index, :grep, :all?, :any?, :none?, :one?,
-  #     :first, :count, :zip, :max, :max_by, :min, :min_by, :minmax, :minmax_by,
-  #     :sort, :sort_by, :cycle, :partition,
+  #     :each_cons, :each_entry, :each_slice, :each_with_index, :each_with_object,
+  #     :entries, :to_a, :map, :collect, :collect_concat, :group_by, :flat_map,
+  #     :inject, :reduce, :chunk, :reverse_each, :slice_before, :drop, :drop_while,
+  #     :take, :take_while, :detect, :find, :find_all, :select, :find_index, :grep,
+  #     :all?, :any?, :none?, :one?, :first, :count, :zip, :max, :max_by, :min,
+  #     :min_by, :minmax, :minmax_by, :sort, :sort_by, :cycle, :partition,
   #
   # It does not define these methods that do exist on hash:
   #

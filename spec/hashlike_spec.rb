@@ -1,12 +1,9 @@
 require File.dirname(__FILE__)+'/spec_helper'
 require 'gorillib/hashlike'
 require File.dirname(__FILE__)+'/support/hashlike_via_delegation'
+require File.dirname(__FILE__)+'/support/hashlike_helper'
 
 describe Gorillib::Hashlike do
-
-  BASE_HSH                 = { :a  => 100, :b  => 200, :c => 300, :nil_val => nil, :false_val => false }.freeze
-  BASE_HSH_WITH_ARRAY_VALS = { :a => [100,111], :b => 200, :c => [1, [2, 3, [4, 5, 6]]] }.freeze
-  BASE_HSH_WITH_ARRAY_KEYS = {[:a,:aa] => 100,  :b => 200, [:c,:cc] => [300,333],  [1, 2, [3, 4]] => [1, [2, 3, [4, 5, 6]]] }.freeze
 
   before do
     @total = 0
@@ -425,6 +422,14 @@ describe Gorillib::Hashlike do
         ret_val.should be_hash_eql({ :a => "aaa", :b => 200, :c => 300, :nil_val => "here", :false_val => false, :new_key => "zzz" })
       end
     end
+    it 'raises a type error unless given hash responds to each_pair' do
+      obj = Object.new
+      lambda{ @hshlike.send(method_to_test, obj) }.should raise_error(TypeError, "can't convert Object into Hash")
+    end
+    it 'something something convert_key'
+  end
+
+  shared_examples_for :merging_method_normal_keys do |method_to_test|
     describe 'with a block' do
       it 'sets the value for colliding keys by evaluating the block' do
         ret_val = @hshlike.send(method_to_test, {:a => "aaa", :nil_val => "here", :new_key => "zzz" }) do |key, other_val, hsh_val|
@@ -458,15 +463,12 @@ describe Gorillib::Hashlike do
         seen_args.should be_array_eql([ [:a, "aaa", 100], [:b, 200, 200] ])
       end
     end
-    it 'raises a type error unless given hash responds to each_pair' do
-      obj = Object.new
-      lambda{ @hshlike.send(method_to_test, obj) }.should raise_error(TypeError, "can't convert Object into Hash")
-    end
-    it 'something something convert_key'
+
   end
 
   describe 'update' do
     it_should_behave_like :merging_method, :update
+    it_should_behave_like :merging_method_normal_keys, :update
     it 'updates in-place, returning self' do
       ret_val = @hshlike.update({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
       ret_val.should equal(@hshlike)
@@ -476,6 +478,7 @@ describe Gorillib::Hashlike do
 
   describe '#merge!' do
     it_should_behave_like :merging_method, :merge!
+    it_should_behave_like :merging_method_normal_keys, :merge!
     it 'updates in-place, returning self' do
       ret_val = @hshlike.merge!({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
       ret_val.should equal(@hshlike)
@@ -485,6 +488,7 @@ describe Gorillib::Hashlike do
 
   describe '#merge' do
     it_should_behave_like :merging_method, :merge
+    it_should_behave_like :merging_method_normal_keys, :merge
     it 'does not alter state, returning a new object' do
       ret_val = @hshlike.merge({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
       ret_val.should_not equal(@hshlike)
@@ -656,64 +660,60 @@ describe Gorillib::Hashlike do
     end
   end
 
-  describe '#invert' do
-    it 'returns a new Hash using the values as keys, and the keys as values' do
-      ret_val = @hshlike.invert
-      if (RUBY_VERSION >= '1.9')
+  if (RUBY_VERSION >= '1.9')
+    describe '#invert' do
+      it 'returns a new Hash using the values as keys, and the keys as values' do
+        ret_val = @hshlike.invert
         ret_val.should == { 100 => :a, 200 => :b, 300 => :c, nil => :nil_val, false => :false_val }
       end
-    end
-    it 'with duplicate values, the result will contain only one of them as a key' do
-      @hshlike[:a]       = 999
-      @hshlike[:new_key] = 999
-      if (RUBY_VERSION >= '1.9')
+      it 'with duplicate values, the result will contain only one of them as a key' do
+        @hshlike[:a]       = 999
+        @hshlike[:new_key] = 999
         @hshlike.invert.should == { 999 => :new_key, 200 => :b, 300 => :c, nil => :nil_val, false => :false_val }
       end
+      it 'returns a Hash, not a self.class' do
+        ret_val = @hshlike.invert
+        ret_val.should be_an_instance_of(Hash)
+      end
     end
-    it 'returns a Hash, not a self.class' do
-      ret_val = @hshlike.invert
-      ret_val.should be_an_instance_of(Hash)
-    end
-  end
 
-  if (RUBY_VERSION >= '1.9')
-  describe '#flatten' do
-    it 'with no arg returns a one-dimensional flattening' do
-      ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten
-      ret_val     = @hshlike_with_array_vals.flatten
-      ret_val.should == ret_as_hash
-      ret_val.should == [  :a, [100, 111],  :b, 200,    :c, [1, [2, 3, [4, 5, 6]]],  ]
-      @hshlike_with_array_vals.should be_hash_eql(BASE_HSH_WITH_ARRAY_VALS)
+    describe '#flatten' do
+      it 'with no arg returns a one-dimensional flattening' do
+        ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten
+        ret_val     = @hshlike_with_array_vals.flatten
+        ret_val.should == ret_as_hash
+        ret_val.should == [  :a, [100, 111],  :b, 200,    :c, [1, [2, 3, [4, 5, 6]]],  ]
+        @hshlike_with_array_vals.should be_hash_eql(BASE_HSH_WITH_ARRAY_VALS)
+      end
+      it 'with no arg is same as level = 1' do
+        @hshlike_with_array_vals.flatten(1).should == @hshlike_with_array_vals.flatten
+      end
+      it 'with level == nil, returns a complete flattening' do
+        ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(nil)
+        ret_val     = @hshlike_with_array_vals.flatten(nil)
+        ret_val.should == ret_as_hash
+        ret_val.should == [  :a,  100, 111,    :b,  200,  :c, 1,  2, 3,  4, 5, 6,       ]
+      end
+      it 'with an arg, flattens to that level (0)' do
+        ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(0)
+        ret_val     = @hshlike_with_array_vals.flatten(0)
+        ret_val.should == ret_as_hash
+        ret_val.should == [ [:a, [100, 111]], [:b, 200], [:c, [1, [2, 3, [4, 5, 6]]]], ]
+      end
+      it 'with an arg, flattens to that level (3)' do
+        ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(3)
+        ret_val     = @hshlike_with_array_vals.flatten(3)
+        ret_val.should == ret_as_hash
+        ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3, [4, 5, 6],]
+      end
+      it 'with an arg, flattens to that level (4)' do
+        ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(4)
+        ret_val     = @hshlike_with_array_vals.flatten(4)
+        ret_val.should == ret_as_hash
+        ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3,  4, 5, 6, ]
+        ret_val.should == @hshlike_with_array_vals.flatten(999)
+      end
     end
-    it 'with no arg is same as level = 1' do
-      @hshlike_with_array_vals.flatten(1).should == @hshlike_with_array_vals.flatten
-    end
-    it 'with level == nil, returns a complete flattening' do
-      ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(nil)
-      ret_val     = @hshlike_with_array_vals.flatten(nil)
-      ret_val.should == ret_as_hash
-      ret_val.should == [  :a,  100, 111,    :b,  200,  :c, 1,  2, 3,  4, 5, 6,       ]
-    end
-    it 'with an arg, flattens to that level (0)' do
-      ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(0)
-      ret_val     = @hshlike_with_array_vals.flatten(0)
-      ret_val.should == ret_as_hash
-      ret_val.should == [ [:a, [100, 111]], [:b, 200], [:c, [1, [2, 3, [4, 5, 6]]]], ]
-    end
-    it 'with an arg, flattens to that level (3)' do
-      ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(3)
-      ret_val     = @hshlike_with_array_vals.flatten(3)
-      ret_val.should == ret_as_hash
-      ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3, [4, 5, 6],]
-    end
-    it 'with an arg, flattens to that level (4)' do
-      ret_as_hash = BASE_HSH_WITH_ARRAY_VALS.flatten(4)
-      ret_val     = @hshlike_with_array_vals.flatten(4)
-      ret_val.should == ret_as_hash
-      ret_val.should == [  :a,  100, 111,    :b, 200,   :c, 1,  2, 3,  4, 5, 6, ]
-      ret_val.should == @hshlike_with_array_vals.flatten(999)
-    end
-  end
   end
 
   # ===========================================================================
