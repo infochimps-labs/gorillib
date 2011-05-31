@@ -2,19 +2,6 @@ require File.dirname(__FILE__)+'/spec_helper'
 require 'gorillib/hashlike'
 require File.dirname(__FILE__)+'/support/hashlike_via_delegation'
 
-RSpec::Matchers.define(:be_array_eql) do |other_arr|
-  diffable
-  if RUBY_VERSION < '1.9'
-    match do |obj|
-      obj.sort_by(&:inspect) == other_arr.sort_by(&:inspect)
-    end
-  else
-    match do |obj|
-      obj == other_arr
-    end
-  end
-end
-
 describe Gorillib::Hashlike do
 
   BASE_HSH                 = { :a  => 100,  :b  => 200, 'c' => 300, :nil_val => nil, :false_val => false }.freeze

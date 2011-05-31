@@ -20,8 +20,7 @@ module HashlikeFuzzingHelper
 
   HASH_TO_TEST_HASHLIKE_STRUCT = {
     :a  => 100, :b  => 200, :c => 300,
-    :nil_val => nil, :false_val => false, :true_val => true,
-    :arr_val => [1,2,3],
+    :nil_val => nil, :false_val => false, :new_key => nil,
   }.freeze
 
   #
@@ -180,7 +179,13 @@ module HashlikeFuzzingHelper
       actual.inspect.gsub(/[\"\:]/, '').gsub(/0x[a-f\d]+/,'').should == expected.inspect.gsub(/[\"\:]/, '').gsub(/0x[a-f\d]+/,'')
     else # run the method
       actual = send_to(obj_2, method_to_test, input)
-      actual.should == expected
+      if expected.is_a?(Hash) && (RUBY_VERSION < '1.9')
+        actual.should be_hash_eql(expected)
+      elsif expected.is_a?(Array) && (RUBY_VERSION < '1.9')
+        actual.should be_array_eql(expected)
+      else
+        actual.should == expected
+      end
     end
     $stderr.string.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '').should == expected_stderr.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '')
     $stderr = old_stderr

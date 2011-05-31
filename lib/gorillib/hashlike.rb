@@ -292,6 +292,30 @@ module Gorillib
     end
 
     #
+    # Array containing the values associated with the given keys.
+    #
+    # @see Hashlike#select.
+    #
+    # @example
+    #     hsh = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
+    #     hsh.values_of("cow", "cat")  # => ["bovine", "feline"]
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300 }
+    #     hsh.values_of(:c, :a, :c, :z, :a)
+    #     # => [300, 100, 300, nil, 100]
+    #
+    # @param  *allowed_keys [Object] the keys to retrieve.
+    # @return [Array] the values, in order according to allowed_keys.
+    #
+    def values_of(*allowed_keys)
+      allowed_keys.map do |key|
+        key = convert_key(key) if respond_to?(:convert_key)
+        self[key] if has_key?(key)
+      end
+    end
+
+    #
     # Returns true if the given key is present in +hsh+.
     #
     # @example

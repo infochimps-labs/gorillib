@@ -1,12 +1,14 @@
-RSpec::Matchers.define(:be_hash_eql) do |other_hsh|
+RSpec::Matchers.define(:be_hash_eql) do |othr|
   diffable
   match do |obj|
     if obj.respond_to?(:hash_eql?)
-      obj.hash_eql?(other_hsh)
+      obj.hash_eql?(othr)
     else
-      return false unless (obj.length == other_hsh.length)
-      other_hsh.each_pair{|k,v| return false unless (v == obj[k]) }
-      true
+      # same = (obj.length == othr.length)
+      same = true
+      ( othr.each_pair{|k,v| same &&= (v == obj[k]) } &&
+        obj .each_pair{|k,v| same &&= (v == othr[k]) })
+      same
     end
   end
 end

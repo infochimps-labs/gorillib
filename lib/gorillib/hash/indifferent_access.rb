@@ -176,6 +176,7 @@ module Gorillib
   class HashWithIndifferentSymbolKeys < Gorillib::HashWithIndifferentAccess
 
     def convert_key key
+      return key if key.is_a?(Fixnum)
       key.respond_to?(:to_sym) ? key.to_sym : key
     end
   end

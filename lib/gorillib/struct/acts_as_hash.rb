@@ -87,10 +87,15 @@ module Gorillib
       # @return [Array] list of keys
       #
       def keys
-        members # .select{|k| not self[k].nil? }
+        @keys ||= members.map{|key| convert_key(key) }
+      end
+
+      def empty?
+        keys.select{|key| not self[key].nil? }.empty?
       end
 
       def convert_key(key)
+        return key if key.is_a?(Fixnum)
         key.respond_to?(:to_sym) ? key.to_sym : key
       end
 
