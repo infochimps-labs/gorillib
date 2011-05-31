@@ -4,7 +4,6 @@ require 'gorillib/hash/keys'
 # people can write <tt>params[:key]</tt> instead of <tt>params['key']</tt>
 # and they get the same value for both keys.
 
-
 module Gorillib
   class HashWithIndifferentAccess < Hash
     def extractable_options?
@@ -25,8 +24,8 @@ module Gorillib
     end
 
     def default(key = nil)
-      if key.is_a?(Symbol) && include?(key = key.to_s)
-        self[key]
+      if include?(converted = convert_key(key))
+        self[converted]
       else
         super
       end
@@ -135,7 +134,7 @@ module Gorillib
 
     def stringify_keys!; self end
     def stringify_keys; dup end
-    undef :symbolize_keys!
+    undef_method :symbolize_keys! if method_defined?(:symbolize_keys!)
     def symbolize_keys; to_hash.symbolize_keys end
     def to_options!; self end
 
@@ -145,6 +144,7 @@ module Gorillib
     end
 
     def assoc key
+      key = convert_key(key)
       return unless has_key?(key)
       [key, self[key]]
     end
@@ -154,23 +154,32 @@ module Gorillib
       [key, self[key]]
     end
 
-    protected
-      def convert_key(key)
-        key.kind_of?(Symbol) ? key.to_s : key
-      end
+  protected
+    def convert_key(key)
+      key.kind_of?(Symbol) ? key.to_s : key
+    end
 
-      def convert_value(value)
-        if value.is_a? Hash
-          value.nested_under_indifferent_access
-        elsif value.is_a?(Array)
-          value.dup.replace(value.map { |e| convert_value(e) })
-        else
-          value
-        end
+    def convert_value(value)
+      if value.is_a? Hash
+        value.nested_under_indifferent_access
+      elsif value.is_a?(Array)
+        value.dup.replace(value.map{|e| convert_value(e) })
+      else
+        value
       end
+    end
   end
+
 end
 
+module Gorillib
+  class HashWithIndifferentSymbolKeys < Gorillib::HashWithIndifferentAccess
+
+    def convert_key key
+      key.respond_to?(:to_sym) ? key.to_sym : key
+    end
+  end
+end
 
 class Hash
 

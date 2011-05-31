@@ -1,3 +1,7 @@
+if (RUBY_VERSION < '1.9') && (not defined?(KeyError))
+  class KeyError < IndexError ; end
+end
+
 module Gorillib
   #
   # Your class must provide #[], #[]=, #delete, and #keys --
@@ -7,25 +11,15 @@ module Gorillib
   # * hsh.delete(key)      Deletes & returns the value whose key is equal to +key+.
   # * hsh.keys             Returns a new array populated with the keys.
   #
-  # Given the above, hashlike will provide the rest.  See Hashlike::ActsAsHash
-  # for an well-documented implementation using instance variables.
+  # (see Hashlike::HashlikeViaAccessors for example)
   #
-  # It defines these fundamental iterators by including
-  # Gorillib::Hashlike::EnumerateFromKeys. However, if the #each method already
-  # exists on the class (as it does for Struct), the class is held responsible
-  # for their implementation:
+  # Given the above, hashlike will provide the rest, defining the methods
   #
-  #     :each, :each_pair, :values, :values_at, :length,
-  #
-  # Including Gorillib::Hashlike defines these methods:
-  #
-  #     :each_key, :each_value, :has_key?, :has_value?, :fetch, :key, :assoc,
-  #     :rassoc, :empty?, :merge, :update, :reject!, :select!, :delete_if,
-  #     :keep_if, :reject, :clear, :to_hash, :invert, :flatten,
-  #
-  # these, as aliases to the appropriate method:
-  #
-  #     :store, :include?, :key?, :member?, :size, :value?, :merge!,
+  #     :each_pair, :each, :each_key, :each_value, :values, :values_at, :size,
+  #     :length, :has_key?, :include?, :key?, :member?, :has_value?, :value?,
+  #     :fetch, :key, :assoc, :rassoc, :empty?, :merge, :update, :merge!,
+  #     :reject!, :select!, :delete_if, :keep_if, :reject, :clear, :store,
+  #     :to_hash, :invert, :flatten
   #
   # and these methods added by Enumerable:
   #
@@ -43,6 +37,35 @@ module Gorillib
   #     :compare_by_identity, :compare_by_identity?,
   #     :replace, :rehash, :shift
   #
+  # === Chinese wall
+  #
+  # With a few exceptions, all methods are defined only in terms of
+  #
+  #     #[], #[]=, #delete, #keys, #each_pair and #has_key?
+  #
+  # (exceptions: merge family depend on #update; the reject/select/xx_if family
+  # depend on each other; #invert & #flatten call #to_hash; #rassoc calls #key)
+  #
+  # === custom iterators
+  #
+  # Hashlike typically defines the following fundamental iterators by including
+  # Gorillib::Hashlike::EnumerateFromKeys:
+  #
+  #     :each_pair, :each, :values, :values_at, :length
+  #
+  # However, if the #each_pair method already exists on the class (as it does
+  # for Struct), those methods will *not* be defined. The class is held
+  # responsible for the implementation of all five. (Of these, #each_pair
+  # is the only method called from elsewhere in Hashlike, while #each is the
+  # only method called from Enumerable).
+  #
+  # === #convert_key (Indifferent Access)
+  #
+  # If you define #convert_key the #values_at, #has_key?, #fetch, and #assoc
+  # methods will use it to sanitize keys coming in from the outside.  It's
+  # assumed that you will do the same with #[], #[]= and #delete. (see
+  # Gorillib::HashWithIndifferentAccess for an example).
+  #
   module Hashlike
 
     #
@@ -55,46 +78,6 @@ module Gorillib
     # module.
     #
     module EnumerateFromKeys
-
-      #
-      # Calls +block+ once for each key in +hsh+, passing the key/value pair as
-      # parameters.
-      #
-      # If no block is given, an enumerator is returned instead.
-      #
-      # @example
-      #     hsh = { :a => 100, :b => 200 }
-      #     hsh.each{|key, value| puts "#{key} is #{value}" }
-      #     # produces:
-      #     a is 100
-      #     b is 200
-      #
-      # @example with block arity:
-      #     hsh = {[:a,:b] => 3, [:c, :d] => 4, :e => 5}
-      #     seen_args = []
-      #     hsh.each{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
-      #     # => [[[:a, :b], 3, nil], [[:c, :d], 4, nil], [:e, 5, nil]]
-      #
-      #     seen_args = []
-      #     hsh.each{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
-      #     # => [[:a, :b, 3], [:c, :d, 4], [:e, nil, 5]]
-      #
-      # @overload hsh.each{|key, val| block }      -> hsh
-      #   Calls block once for each key in +hsh+
-      #   @yield [key, val] in order, each key and its associated value
-      #   @return [Hashlike]
-      #
-      # @overload hsh.each                         -> an_enumerator
-      #   with no block, returns a raw enumerator
-      #   @return [Enumerator]
-      #
-      def each
-        return enum_for(:each) unless block_given?
-        keys.each do |key|
-          yield([key, self[key]])
-        end
-        self
-      end
 
       #
       # Calls +block+ once for each key in +hsh+, passing the key/value pair as
@@ -128,9 +111,49 @@ module Gorillib
       #   with no block, returns a raw enumerator
       #   @return [Enumerator]
       #
-      def each_pair(&block)
+      def each_pair
         return enum_for(:each_pair) unless block_given?
-        each(&block)
+        keys.each do |key|
+          yield([key, self[key]])
+        end
+        self
+      end
+
+      #
+      # Calls +block+ once for each key in +hsh+, passing the key/value pair as
+      # parameters.
+      #
+      # If no block is given, an enumerator is returned instead.
+      #
+      # @example
+      #     hsh = { :a => 100, :b => 200 }
+      #     hsh.each{|key, value| puts "#{key} is #{value}" }
+      #     # produces:
+      #     a is 100
+      #     b is 200
+      #
+      # @example with block arity:
+      #     hsh = {[:a,:b] => 3, [:c, :d] => 4, :e => 5}
+      #     seen_args = []
+      #     hsh.each{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
+      #     # => [[[:a, :b], 3, nil], [[:c, :d], 4, nil], [:e, 5, nil]]
+      #
+      #     seen_args = []
+      #     hsh.each{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
+      #     # => [[:a, :b, 3], [:c, :d, 4], [:e, nil, 5]]
+      #
+      # @overload hsh.each{|key, val| block }      -> hsh
+      #   Calls block once for each key in +hsh+
+      #   @yield [key, val] in order, each key and its associated value
+      #   @return [Hashlike]
+      #
+      # @overload hsh.each                         -> an_enumerator
+      #   with no block, returns a raw enumerator
+      #   @return [Enumerator]
+      #
+      def each(&block)
+        return enum_for(:each) unless block_given?
+        each_pair(&block)
       end
 
       #
@@ -160,7 +183,7 @@ module Gorillib
       # @return [Array] the values, in order by their key.
       #
       def values
-        [].tap{|arr| each{|key, val| arr << val } }
+        [].tap{|arr| each_pair{|key, val| arr << val } }
       end
 
       #
@@ -180,8 +203,11 @@ module Gorillib
       # @param  *allowed_keys [Object] the keys to retrieve.
       # @return [Array] the values, in order according to allowed_keys.
       #
-      def values_at *allowed_keys
-        allowed_keys.map{|key| self[key] if has_key?(key) }
+      def values_at(*allowed_keys)
+        allowed_keys.map do |key|
+          key = convert_key(key) if respond_to?(:convert_key)
+          self[key] if has_key?(key)
+        end
       end
     end
 
@@ -259,7 +285,7 @@ module Gorillib
     #   with no block, returns a raw enumerator
     #   @return [Enumerator]
     #
-    def each_value &block
+    def each_value
       return enum_for(:each_value) unless block_given?
       each_pair{|k,v| yield v }
       self
@@ -292,7 +318,8 @@ module Gorillib
     # @param  target [Object] the value to query
     # @return [true, false] true if the value is present, false otherwise
     #
-    def has_value? target
+    def has_value?(target)
+      # don't refactor this to any? -- Struct's #any is weird
       each_pair{|key, val| return true if (val == target) }
       false
     end
@@ -330,6 +357,7 @@ module Gorillib
     #                           block's return value
     #
     def fetch(key, default=nil, &block)
+      key = convert_key(key) if respond_to?(:convert_key)
       warn "#{caller[0]}: warning: block supersedes default value argument" if default && block_given?
       if    has_key?(key) then self[key]
       elsif block_given?  then yield(key)
@@ -353,7 +381,7 @@ module Gorillib
     # @param  val [Object] the value to look up
     # @return [Object, nil] the key for the given val, or nil if missing
     #
-    def key val
+    def key(val)
       keys.find{|key| self[key] == val }
     end
 
@@ -373,7 +401,8 @@ module Gorillib
     # @return [Array, nil] the key-value pair (two elements array) or nil if no
     #   match is found.
     #
-    def assoc key
+    def assoc(key)
+      key = convert_key(key) if respond_to?(:convert_key)
       return unless has_key?(key)
       [key, self[key]]
     end
@@ -393,7 +422,7 @@ module Gorillib
     # @return [Array, nil] The first key-value pair (two-element array) that
     #   matches, or nil if no match is found
     #
-    def rassoc val
+    def rassoc(val)
       key = key(val) or return
       [key, self[key]]
     end
@@ -407,7 +436,7 @@ module Gorillib
     # @return [true, false] true if +hsh+ contains no key-value pairs, false otherwise
     #
     def empty?
-      length == 0
+      keys.empty?
     end
 
     #
@@ -442,7 +471,7 @@ module Gorillib
     #   @yield  [Object, Object, Object] called if key exists in each +hsh+
     #   @return [Hashlike] this hashlike, updated
     #
-    def update other_hash, &block
+    def update(other_hash)
       raise TypeError, "can't convert #{other_hash.nil? ? 'nil' : other_hash.class} into Hash" unless other_hash.respond_to?(:each_pair)
       other_hash.each_pair do |key, val|
         if block_given? && has_key?(key)
@@ -484,8 +513,8 @@ module Gorillib
     #   @yield  [Object, Object, Object] called if key exists in each +hsh+
     #   @return [Hashlike] a new merged hashlike
     #
-    def merge *args, &block
-      self.dup.merge!(*args, &block)
+    def merge(*args, &block)
+      self.dup.update(*args, &block)
     end
 
     #
@@ -507,7 +536,7 @@ module Gorillib
     #   with no block, returns a raw enumerator
     #   @return [Enumerator]
     #
-    def reject! &block
+    def reject!(&block)
       return enum_for(:reject!) unless block_given?
       changed = false
       each_pair do |key, val|
@@ -538,7 +567,7 @@ module Gorillib
     #   with no block, returns a raw enumerator
     #   @return [Enumerator]
     #
-    def select! &block
+    def select!(&block)
       return enum_for(:select!) unless block_given?
       changed = false
       each_pair do |key, val|
@@ -676,7 +705,7 @@ module Gorillib
     # @return [Hashlike] this hashlike, emptied
     #
     def clear
-      each_key{|k| delete(k) }
+      each_pair{|k,v| delete(k) }
     end
 
     #
@@ -749,9 +778,9 @@ module Gorillib
       to_hash.flatten(*args)
     end
 
-    def self.included base
+    def self.included(base)
       base.class_eval do
-        base.send(:include, EnumerateFromKeys) unless base.method_defined?(:each)
+        base.send(:include, EnumerateFromKeys) unless base.method_defined?(:each_pair)
         unless base.include?(Enumerable)
           base.send(:include, Enumerable)
           base.send(:include, OverrideEnumerable)

@@ -1,5 +1,8 @@
 require 'stringio'
 
+
+::Enumerator = Enumerable::Enumerator if (RUBY_VERSION < '1.9') && (not defined?(::Enumerator))
+
 module HashlikeFuzzingHelper
   
   #
@@ -38,25 +41,25 @@ module HashlikeFuzzingHelper
     # aliases to the appropriate method
     :store, :include?, :key?, :member?, :size, :value?, :merge!,
   ]
-  
-  # Test unless have own #each
-  ENUMERABLE_METHODS = [
-    :each_cons, :each_entry, :each_slice, :each_with_index, :each_with_object,
-    :entries, :to_a, :map, :collect, :collect_concat, :group_by, :flat_map,
-    :inject, :reduce, :chunk, :reverse_each, :slice_before, :drop, :drop_while,
-    :take, :take_while, :detect, :find, :find_all, :find_index, :grep,
-    :all?, :any?, :none?, :one?, :first, :count, :zip, :max, :max_by, :min,
-    :min_by, :minmax, :minmax_by, :sort, :sort_by,
-    :cycle, :partition,
-  ]
 
-  METHODS_TO_TEST = HASHLIKE_METHODS + ENUMERABLE_METHODS
+  if RUBY_VERSION < '1.9'
+    class ::Hash
+      alias_method(:key, :index) unless method_defined?(:key)
+    end
+    HASH_METHODS_MISSING_FROM_VERSION = [:flatten, :keep_if, :select!, :select, :rassoc, :assoc]
+  else
+    HASH_METHODS_MISSING_FROM_VERSION = []
+  end
+  
+  METHODS_TO_TEST = HASHLIKE_METHODS + Enumerable.public_instance_methods.map(&:to_sym) - HASH_METHODS_MISSING_FROM_VERSION
 
   OMITTED_METHODS_FROM_HASH = [
     # not implemented in hashlike
     :compare_by_identity, :compare_by_identity?,
     :default, :default=, :default_proc, :default_proc=,
-    :rehash, :replace, :shift, :index,
+    :rehash, :replace, :shift,
+    # obsolete
+    :index, :indexes, :indices,
   ]
 
   FANCY_HASHLIKE_METHODS = [
@@ -65,6 +68,21 @@ module HashlikeFuzzingHelper
     :stringify_keys, :stringify_keys!, :symbolize_keys, :symbolize_keys!,
     :with_indifferent_access
   ]  
+
+  # ENUMERABLE_METHODS = [
+  #   :each_cons, :each_entry, :each_slice, :each_with_index, :each_with_object,
+  #   :entries, :to_a, :map, :collect, :collect_concat, :group_by, :flat_map,
+  #   :inject, :reduce, :chunk, :reverse_each, :slice_before, :drop, :drop_while,
+  #   :take, :take_while, :detect, :find, :find_all, :find_index, :grep,
+  #   :all?, :any?, :none?, :one?, :first, :count, :zip, :max, :max_by, :min,
+  #   :min_by, :minmax, :minmax_by, :sort, :sort_by,
+  #   :cycle, :partition,
+  # ]
+  #
+  # p Enumerable.public_instance_methods.map(&:to_sym) - ENUMERABLE_METHODS
+  # p ENUMERABLE_METHODS - Enumerable.public_instance_methods.map(&:to_sym)
+  # extra:   [:member?, :enum_slice, :reject, :select, :include?, :enum_cons, :enum_with_index]
+  # missing: [:each_entry, :each_with_object, :collect_concat, :flat_map, :chunk, :slice_before]
 
   #
   # Inputs to throw at it
@@ -86,21 +104,23 @@ module HashlikeFuzzingHelper
     [:a, :b, :z], [:a, :b, :a, :c, :a],
     [VAL_GTE_4_PROC], [VAL_GTE_0_PROC], [VAL_GTE_1E6_PROC],
   ]
-  INPUTS_WHEN_STRING_KEYS_DIFFER_FROM_SYMBOL_KEYS = [
-    [], ['a'], ['b'], ['z'], [1], [0], [nil], [false], [''], [Object.new], [ [] ],
-    ['a', 'b'], ['a', 30], ['b', 50], ['z', 'a'], [nil, 60], [:c, 70], [Object.new, 70], [ [], [] ],
-    ['a', STRING_2X_PROC], ['z', STRING_2X_PROC], [:z, 100, STRING_2X_PROC],
-    ['a', 'b', 'z'], ['a', 'b', 'a', :c, 'a'],
-  ]
-  
-  INPUTS_WHEN_STRING_KEYS_SAME_AS_SYMBOL_KEYS = [
+
+  INPUTS_WHEN_INDIFFERENT_ACCESS = [
     ['a'], [:a], ['z'], [:z],
-    [:a, :b], [:a, 'b'], ['a', 'b'], [:a, :z], [:z, :a],
+    [:a, :b], [:a, 'b'], ['a', 'b'], [:a, :z], [:z, :a], ['z', :a],
+    ['a', STRING_2X_PROC], ['z', STRING_2X_PROC], ['a', 100, STRING_2X_PROC],
     [:b, 50], ['b', 50],
     [:a, 'b', :z],
   ]
 
-  INPUTS_WHEN_FULLY_HASHLIKE = INPUTS_FOR_ALL_HASHLIKES + INPUTS_WHEN_STRING_KEYS_SAME_AS_SYMBOL_KEYS + INPUTS_WHEN_STRING_KEYS_DIFFER_FROM_SYMBOL_KEYS
+  INPUTS_WHEN_ARBITRARY_KEYS_ALLOWED = [
+    [], ['a'], ['b'], ['z'], [1], [0], [nil], [false], [''], [Object.new], [ [] ],
+    ['a', 'b'], ['a', 30], ['b', 50], ['z', 'a'], [nil, 60], [:c, 70], [Object.new, 70], [ [], [] ],
+    ['a', 'b', 'z'], ['a', 'b', 'a', :c, 'a'],
+    [[1, 2, [3, 4]]], [[1, [2, 3, [4, 5, 6]]]]
+  ]
+  
+  INPUTS_WHEN_FULLY_HASHLIKE = INPUTS_FOR_ALL_HASHLIKES + INPUTS_WHEN_ARBITRARY_KEYS_ALLOWED + INPUTS_WHEN_INDIFFERENT_ACCESS
   
   #
   # Hacky methods to do comparison
@@ -123,13 +143,22 @@ module HashlikeFuzzingHelper
       err_str.gsub!(/nil/,   '(nil|NilClass)')
       err_str.gsub!(/false/, '(false|FalseClass)')
     elsif err.is_a?(ArgumentError)
-      err_str.gsub!(/arguments\\\s*\(/, 'arguments\s*\(')
+      err_str.gsub!(/arguments(\\ )*\\\(/, 'arguments\s*\(')
       err_str.gsub!(/for\\ (\d\\\.\\\.\d)/, 'for [\d\.]+')
     end
     Regexp.new(err_str)
   end
 
   def behaves_the_same obj_1, obj_2, method_to_test, input
+    input.unshift(1) if [:cycle, :partition].include?(method_to_test) && input.last.is_a?(Proc)
+
+    # Hash in 1.8.7 behaves differently when arity mismatched to method
+    if ((RUBY_VERSION < '1.9') &&
+        [:reject!, :delete_if, :each_pair, :select, :reject].include?(method_to_test) &&
+        input.last.is_a?(Proc) && (input.last.arity == 1))
+      return
+    end
+    
     old_stderr = $stderr
     $stderr = StringIO.new('', 'w')
     obj_1.should_receive(:warn){|str| stderr_output << str }.at_most(:once)
@@ -153,7 +182,7 @@ module HashlikeFuzzingHelper
       actual = send_to(obj_2, method_to_test, input)
       actual.should == expected
     end
-    $stderr.string.sub(/:in `send_to'/, '').should == expected_stderr
+    $stderr.string.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '').should == expected_stderr.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '')
     $stderr = old_stderr
   end
 

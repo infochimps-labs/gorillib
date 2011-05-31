@@ -91,8 +91,7 @@ module Gorillib
       end
 
       def convert_key(key)
-        return unless key.respond_to?(:to_sym)
-        key.to_sym
+        key.respond_to?(:to_sym) ? key.to_sym : key
       end
 
       def size
