@@ -2,8 +2,10 @@ require File.dirname(__FILE__)+'/../spec_helper'
 require 'gorillib/hashlike'
 require 'gorillib/struct/acts_as_hash'
 require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_struct_helper')
+require GORILLIB_ROOT_DIR('spec/hashlike/hashlike_behavior_spec')
 
 describe Gorillib::Struct::ActsAsHash do
 
@@ -18,44 +20,30 @@ describe Gorillib::Struct::ActsAsHash do
     @hshlike_subklass_inst   = @hshlike_subklass.new.merge(HashlikeHelper::BASE_HSH.dup)
   end
 
-  it 'built test objects correctly' do
-    @hshlike_subklass      .should     <  @hshlike.class
-    @hshlike_subklass      .should_not == @hshlike.class
-    @hshlike_subklass_inst .should     be_a(StructUsingHashlike)
-    @hshlike_subklass_inst .should     be_a(@hshlike_subklass)
-    @hshlike_subklass_inst .should_not be_an_instance_of(StructUsingHashlike)
-    @hshlike               .should_not be_a(@hshlike_subklass)
-    @hshlike               .should     be_an_instance_of(StructUsingHashlike)
-  end
-
   # ===========================================================================
   #
   # Fundamental behavior
 
   describe '#[] and #[]= and #store' do
-    it 'stores and retrieves values' do
-      @hshlike[:a].should == 100
-      @hshlike[:a] = 999
-      @hshlike[:a].should == 999
+    it_should_behave_like :hashlike_store_and_retrieve
+    it_should_behave_like :references_string_and_symbol_keys_equivalently, ArgumentError
+    it 'reject unknown keys' do
+      lambda{ @hshlike[:fnord] = 69   }.should raise_error NameError, /no member 'fnord' in struct/
+      lambda{ @hshlike[:fnord]        }.should raise_error NameError, /no member 'fnord' in struct/
+      @hshlike.delete(:fnord).should be_nil
     end
-
-    it 'treats string and symbol keys as interchangeable' do
-      @hshlike['c'].should  == 300
-      @hshlike[:c].should   == 300
-      @hshlike['c'] = 999
-      @hshlike['c'].should == 999
-      @hshlike[:c].should  == 999
+    it 'accepts defined but unset keys' do
+      @hshlike[:new_key].should be_nil
+      @hshlike[:new_key] = 69
+      @hshlike[:new_key].should == 69
     end
-
     it 'does not allow nil, Object, and other non-stringy keys' do
       lambda{ @hshlike[300] = :i_haz_num  }.should raise_error(IndexError, /offset 300 too large for struct/)
       lambda{ @hshlike[nil] = :i_haz_nil  }.should raise_error(TypeError, "no implicit conversion from nil to integer")
       obj = Object.new
       lambda{ @hshlike[obj] = :i_haz_obj  }.should raise_error(TypeError, "can't convert Object into Integer")
-    end
-
-    it 'raises an error on a missing key' do
-      lambda{ @hshlike[:missing_key] }.should raise_error(NameError, "no member 'missing_key' in struct")
+      def obj.to_sym() :c ; end
+      lambda{ @hshlike[obj] = :i_haz_obj  }.should raise_error(TypeError, "can't convert Object into Integer")
     end
   end
 
@@ -99,6 +87,13 @@ describe Gorillib::Struct::ActsAsHash do
   #
   # Iteration
 
+  describe '#each_pair' do
+    describe 'with block' do
+      it_should_behave_like :each_pair_on_stringlike_fixed_keys, :each_pair
+    end
+    it_should_behave_like :with_no_block_returns_enumerator, :each_pair
+  end
+
   describe '#each' do
     describe 'with block' do
       it 'calls block once for each *val* in hsh !like array not hash!' do
@@ -126,105 +121,21 @@ describe Gorillib::Struct::ActsAsHash do
         ret_val.should equal(@hshlike)
       end
     end
-    describe 'with no block' do
-      it('returns an enumerator'){ @hshlike.each.should enumerate_method(@hshlike, :each) }
-    end
-  end
-
-  describe '#each_pair' do
-    describe 'with block' do
-      it 'calls block once for each key/value pair in hsh' do
-        seen_arg1 = []
-        seen_arg2 = []
-        @hshlike.each_pair{|arg1,arg2| seen_arg1 << arg1 ; seen_arg2 << arg2 }
-        seen_arg1.should be_array_eql([:a,  :b,  :c, :nil_val, :false_val, :new_key ])
-        seen_arg2.should be_array_eql([100, 200, 300, nil,      false,      nil      ])
-      end
-      it 'with arity 1, returns array pairs' do
-        seen_args = []
-        @hshlike.each_pair{|arg| seen_args << arg }
-        # seen_args.should be_array_eql([[:a, 100], [:b, 200], [:c, 300], [:nil_val, nil], [:false_val, false], [:new_key, nil]])
-        seen_args.should be_array_eql([:a, :b, :c, :nil_val, :false_val, :new_key])
-      end
-      it 'handles array vals' do
-        seen_args = []
-        @hshlike_with_array_vals.each_pair{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[:a, [100, 111], nil], [:b, 200, nil], [:c, [1, [2, 3, [4, 5, 6]]], nil], [:nil_val, nil, nil], [:false_val, nil, nil], [:new_key, nil, nil]])
-        seen_args = []
-        @hshlike_with_array_vals.each_pair{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[:a, nil, [100, 111]], [:b, nil, 200], [:c, nil, [1, [2, 3, [4, 5, 6]]]], [:nil_val, nil, nil], [:false_val, nil, nil], [:new_key, nil, nil]])
-      end
-      it 'returns self' do
-        ret_val = @hshlike.each_pair{|k,v| 3 }
-        ret_val.should equal(@hshlike)
-      end
-    end
-    describe 'with no block' do
-      it('returns an enumerator'){ @hshlike.each_pair.should enumerate_method(@hshlike, :each_pair) }
-    end
+    it_should_behave_like :with_no_block_returns_enumerator, :each
   end
 
   describe '#each_key' do
     describe 'with block' do
-      it 'calls block once for each key in hsh' do
-        seen_keys = []
-        @hshlike.each_key{|k| seen_keys << k }
-        seen_keys.should be_array_eql([:a,  :b,  :c, :nil_val, :false_val, :new_key ])
-      end
-      it 'handles array keys and extra arity' do
-        seen_args = []
-        @hshlike.each_key{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[:a, nil, nil], [:b, nil, nil], [:c, nil, nil], [:nil_val, nil, nil], [:false_val, nil, nil], [:new_key, nil, nil] ])
-        seen_args = []
-        @hshlike_with_array_vals.each_key{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[:a, nil, nil], [:b, nil, nil], [:c, nil, nil], [:nil_val, nil, nil], [:false_val, nil, nil], [:new_key, nil, nil]])
-        seen_args = []
-        @hshlike_with_array_vals.each_key{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[:a, nil, nil], [:b, nil, nil], [:c, nil, nil], [:nil_val, nil, nil], [:false_val, nil, nil], [:new_key, nil, nil]])
-      end
-      it 'returns self' do
-        ret_val = @hshlike.each_key{|k,v| 3 }
-        ret_val.should equal(@hshlike)
-      end
+      it_should_behave_like :each_key_on_stringlike_fixed_keys
     end
-    describe 'with no block' do
-      it('returns an enumerator'){ @hshlike.each_key.should enumerate_method(@hshlike, :each_key) }
-    end
+    it_should_behave_like :with_no_block_returns_enumerator, :each_key
   end
 
   describe '#each_value' do
     describe 'with block' do
-      it 'calls block once for each key in hsh, passing the value as parameter' do
-        seen_vals = []
-        @hshlike.each_value{|k| seen_vals << k }
-        seen_vals.should be_array_eql([100, 200, 300, nil, false, nil])
-      end
-      it 'calls block on each value even when nil, false, empty or duplicate' do
-        @hshlike[:a]       = 999
-        @hshlike[:new_key] = 999
-        seen_vals = []
-        @hshlike.each_value{|k| seen_vals << k }
-        seen_vals.should be_array_eql([999, 200, 300, nil, false, 999 ])
-      end
-      it 'handles array vals and extra arity' do
-        seen_args = []
-        @hshlike.each_value{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[100, nil, nil], [200, nil, nil], [300, nil, nil], [nil, nil, nil], [false, nil, nil], [nil, nil, nil]])
-        seen_args = []
-        @hshlike_with_array_vals.each_value{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[100, 111, nil], [200, nil, nil], [1, [2, 3, [4, 5, 6]], nil], [nil, nil, nil], [nil, nil, nil], [nil, nil, nil]])
-        seen_args = []
-        @hshlike_with_array_vals.each_value{|(arg1, arg2), arg3| seen_args << [arg1, arg2, arg3] }
-        seen_args.should be_array_eql([[100, nil, 111], [200, nil, nil], [1, nil, [2, 3, [4, 5, 6]]], [nil, nil, nil], [nil, nil, nil], [nil, nil, nil]])
-      end
-      it 'returns self' do
-        ret_val = @hshlike.each_value{|k,v| 3 }
-        ret_val.should equal(@hshlike)
-      end
+      it_should_behave_like :each_value_on_stringlike_fixed_keys
     end
-    describe 'with no block' do
-      it('returns an enumerator'){ @hshlike.each_value.should enumerate_method(@hshlike, :each_value) }
-    end
+    it_should_behave_like :with_no_block_returns_enumerator, :each_value
   end
 
   # ===========================================================================
@@ -232,7 +143,7 @@ describe Gorillib::Struct::ActsAsHash do
   # Retrieval and Membership
 
   describe '#values' do
-    it 'returns a new array populated with the values from hsh' do
+    it 'returns a new array populated with the values from hsh even when they were never set' do
       @hshlike.values.should be_array_eql([100, 200, 300, nil, false, nil])
     end
   end
@@ -245,18 +156,16 @@ describe Gorillib::Struct::ActsAsHash do
   end
 
   describe '#values_of' do
-    it 'returns an array containing the values associated with the given keys' do
-      @hshlike.values_of(:b, :a, :z, :nil_val).should == [200, 100, nil, nil]
-    end
-    it 'returns duplicate keys or missing keys in given slot' do
-      @hshlike.values_of(:b, :b, :new_key, :nil_val, :c, :c).should == [200, 200, nil, nil, 300, 300]
-    end
+    it_should_behave_like :hashlike_values_at_or_of, :values_of
   end
 
   describe '#length' do
     it 'returns the number of key/value pairs in the hashlike' do
       @hshlike.length.should == 6
       @hshlike.length.should == @hshlike.members.length
+      @hshlike.delete(:a)
+      @hshlike.delete(:b)
+      @hshlike.length.should == 6
     end
     it 'is always the length of #members, regardless of contents' do
       @empty_hshlike.length.should == 6
@@ -267,56 +176,52 @@ describe Gorillib::Struct::ActsAsHash do
     it 'returns the number of key/value pairs in the hashlike' do
       @hshlike.size.should == 6
       @hshlike.size.should == @hshlike.members.size
+      @hshlike.delete(:a)
+      @hshlike.delete(:b)
+      @hshlike.size.should == 6
     end
     it 'is always the length of #members, regardless of contents' do
       @empty_hshlike.size.should == 6
     end
   end
 
-  [:has_key?, :include?, :key?, :member?].each do |method_to_test|
-    describe "##{method_to_test}" do
-      it 'returns true if the given key is present, false otherwise' do
-        @hshlike.should evaluate_to_true(method_to_test, :a)
-        @hshlike.should_not evaluate_to_true(method_to_test, :i_am_missing)
-      end
-      it 'treats symbol and string keys as equivalent' do
-        @hshlike.should     evaluate_to_true(method_to_test, :a)
-        @hshlike.should     evaluate_to_true(method_to_test, 'a')
-        @hshlike.should     evaluate_to_true(method_to_test, :c)
-        @hshlike.should     evaluate_to_true(method_to_test, 'c')
-      end
-      it 'is true even if value is nil, empty or false' do
-        @hshlike.should evaluate_to_true(method_to_test, :nil_val)
-        @hshlike.should evaluate_to_true(method_to_test, :false_val)
-      end
-      it 'something something convert_key'
-    end
+  describe '#has_key?' do
+    it_should_behave_like :hashlike_has_key_predefined_always_present, :has_key?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :has_key?
   end
 
-  [:has_value?, :value?].each do |method_to_test|
-    describe "##{method_to_test}" do
-      it 'returns true if the given value is present, false otherwise' do
-        @hshlike.should evaluate_to_true(method_to_test, 100)
-        @hshlike.should_not evaluate_to_true(method_to_test, :i_am_missing)
-      end
-      it 'is true even if key or value is nil, empty or false values' do
-        @hshlike.should be_hash_eql({:a=>100, :b=>200, :c=>300, :nil_val=>nil, :false_val=>false })
-        @hshlike.should evaluate_to_true(method_to_test, nil)
-        @hshlike.should evaluate_to_true(method_to_test, false)
-      end
-      it 'something something convert_key'
-    end
+  describe '#include?' do
+    it_should_behave_like :hashlike_has_key_predefined_always_present, :include?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :include?
+  end
+
+  describe '#key?' do
+    it_should_behave_like :hashlike_has_key_predefined_always_present, :key?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :key?
+  end
+
+  describe '#member?' do
+    it_should_behave_like :hashlike_has_key_predefined_always_present, :member?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :member?
+  end
+
+  describe '#has_value?' do
+    it_should_behave_like :hashlike_has_value?, :has_value?
+  end
+
+  describe '#value?' do
+    it_should_behave_like :hashlike_has_value?, :value?
   end
 
   describe '#fetch' do
     it 'returns a value from the hashlike for the given key' do
       @hshlike.fetch(:a).should       == 100
-      @hshlike.fetch(:c).should      == 300
+      @hshlike.fetch(:c).should       == 300
       @hshlike.fetch(:nil_val).should == nil
     end
     describe 'on a missing key' do
       it 'with no other arguments, raises a +KeyError+ exception' do
-        lambda{ @hshlike.fetch(:i_am_missing) }.should raise_error(KeyError, 'key not found: :i_am_missing')
+        lambda{ @hshlike.fetch(:is_missing) }.should raise_error(KeyError, 'key not found: :is_missing')
       end
       it 'if block given, runs the block with the given key and returns its value' do
         set_in_block = nil
@@ -339,45 +244,23 @@ describe Gorillib::Struct::ActsAsHash do
   end
 
   describe '#key' do
-    it 'searches for an entry with the given val, returning the corresponding key; if not found, returns nil' do
-      @hshlike.key(100).should == :a
-      @hshlike.key(300).should == :c
-      @hshlike.key(nil).should == :nil_val
-      @hshlike.key(:i_am_missing).should be_nil
-    end
-    it 'returns the first matching key/value pair' do
-      @hshlike[:a] = 999
-      @hshlike[:new_key] = 999
-      @hshlike.key(999).should == :a
-    end
+    it_should_behave_like :hashlike_key
   end
 
   describe '#assoc' do
-    it 'searches for an entry with the given key, returning the corresponding key/value pair' do
-      @hshlike.assoc(:a).should       == [:a,  100]
-      @hshlike.assoc(:nil_val).should == [:nil_val, nil]
-    end
-    it 'returns nil if missing' do
-      @hshlike.assoc(:i_am_missing).should be_nil
-    end
-    it 'something something convert_key'
+    it_should_behave_like :hashlike_assoc
   end
 
   describe '#rassoc' do
-    it 'searches for an entry with the given val, returning the corresponding key/value pair' do
-      @hshlike.rassoc(100).should == [:a,  100]
-      @hshlike.rassoc(300).should == [:c, 300]
-      @hshlike.rassoc(nil).should == [:nil_val, nil]
-    end
-    it 'returns nil if missing' do
-      @hshlike.rassoc(:i_am_missing).should be_nil
-    end
+    it_should_behave_like :hashlike_rassoc
   end
 
   describe '#empty?' do
-    it 'returns true if the hashlike contains no key-value pairs, false otherwise' do
+    it 'returns true if the hashlike contains only nil values, false otherwise' do
+      @hshlike.empty?.should       == false
       @empty_hshlike.empty?.should == true
-      @hshlike.empty?.should_not   == true
+      @empty_hshlike[:a] = false
+      @empty_hshlike.empty?.should == false
     end
   end
 
@@ -385,75 +268,23 @@ describe Gorillib::Struct::ActsAsHash do
   #
   # Update, merge!, merge
 
-  shared_examples_for :merging_method_fixed_keys do |method_to_test|
-    describe 'with a block' do
-      it 'sets the value for colliding keys by evaluating the block' do
-        ret_val = @hshlike.send(method_to_test, {:a => "aaa", :nil_val => "here", :new_key => "zzz" }) do |key, other_val, hsh_val|
-          "key: '#{key.inspect}', other_val: '#{other_val.inspect}', hsh_val: '#{hsh_val.inspect}'"
-        end
-        ret_val.should be_hash_eql({
-            :a         => %Q{key: ':a', other_val: '"aaa"', hsh_val: '100'},
-            :b         => 200,
-            :c         => 300,
-            :nil_val   => %Q{key: ':nil_val', other_val: '"here"', hsh_val: 'nil'},
-            :false_val => false,
-            :new_key   => %Q{key: ':new_key', other_val: '"zzz"', hsh_val: 'nil'},
-          })
-      end
-      it 'passes params |key, current val, other hash val|' do
-        seen_args = []
-        ret_val = @hshlike.send(method_to_test, {:a => "aaa", :nil_val => "here", :new_key => "zzz" }) do |key, other_val, hsh_val|
-          seen_args << [key, other_val, hsh_val]
-          3
-        end
-        ret_val.should be_hash_eql({ :a => 3, :b => 200, :c => 300, :nil_val => 3, :false_val => false, :new_key => 3 })
-        seen_args.should be_array_eql([ [:a, "aaa", 100], [:nil_val, "here", nil], [:new_key, "zzz", nil] ])
-      end
-      it 'calls the block even if colliding keys have same value' do
-        seen_args = []
-        ret_val = @hshlike.send(method_to_test, {:a => "aaa", :b => 200, :new_key => "zzz" }) do |key, other_val, hsh_val|
-          seen_args << [key, other_val, hsh_val]
-          3
-        end
-        ret_val.should be_hash_eql({ :a => 3, :b => 3, :c => 300, :nil_val => nil, :false_val => false, :new_key => 3 })
-        seen_args.should be_array_eql([ [:a, "aaa", 100], [:b, 200, 200], [:new_key, "zzz", nil] ])
-      end
-    end
-  end
 
   describe 'update' do
     it_should_behave_like :merging_method, :update
-    it_should_behave_like :merging_method_fixed_keys, :update
-    it 'updates in-place, returning self' do
-      ret_val = @hshlike.update({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
-      ret_val.should equal(@hshlike)
-      @hshlike.should be_hash_eql({:a=>"aaa", :b=>200, :c=>300, :nil_val=>"here", :false_val=>false, :new_key=>"zzz"})
-    end
+    it_should_behave_like :merging_method_with_struct_keys, :update
+    it_should_behave_like :merging_method_inplace, :update
   end
 
   describe '#merge!' do
     it_should_behave_like :merging_method, :merge!
-    it_should_behave_like :merging_method_fixed_keys, :merge!
-    it 'updates in-place, returning self' do
-      ret_val = @hshlike.merge!({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
-      ret_val.should equal(@hshlike)
-      @hshlike.should be_hash_eql({:a=>"aaa", :b=>200, :c=>300, :nil_val=>"here", :false_val=>false, :new_key=>"zzz"})
-    end
+    it_should_behave_like :merging_method_with_struct_keys, :merge!
+    it_should_behave_like :merging_method_inplace, :merge!
   end
 
   describe '#merge' do
     it_should_behave_like :merging_method, :merge
-    it_should_behave_like :merging_method_fixed_keys, :merge
-    it 'does not alter state, returning a new object' do
-      ret_val = @hshlike.merge({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
-      ret_val.should_not equal(@hshlike)
-      @hshlike.should be_hash_eql({:a=>100,   :b=>200, :c=>300, :nil_val=>nil,    :false_val=>false })
-      ret_val.should  be_hash_eql({:a=>"aaa", :b=>200, :c=>300, :nil_val=>"here", :false_val=>false, :new_key=>"zzz"})
-    end
-    it 'returns an object of same class' do
-      ret_val = @hshlike_subklass_inst.merge({:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
-      ret_val.should be_a(@hshlike_subklass)
-    end
+    it_should_behave_like :merging_method_with_struct_keys, :merge
+    it_should_behave_like :merging_method_returning_new, :merge
   end
 
   # ===========================================================================
@@ -515,12 +346,7 @@ describe Gorillib::Struct::ActsAsHash do
   # end
 
   describe '#clear' do
-    it 'removes all key/value pairs' do
-      ret_val = @hshlike.clear
-      ret_val.should be_hash_eql(@empty_hshlike)
-      ret_val.should be_empty
-      @hshlike.should be_empty
-    end
+    it_should_behave_like :hashlike_clear
   end
 
   # ===========================================================================
@@ -582,58 +408,16 @@ describe Gorillib::Struct::ActsAsHash do
 
   # ===========================================================================
   #
-  # Method Decoration
+  # Sanity check
 
-  describe 'including Hashlike' do
-    module CollidesWithEnumerable ; def map() 3 ; end ; def keys(); [] ; end ; end
-    it 'includes enumerable by default' do
-      foo_class = Class.new(Object) do
-        include CollidesWithEnumerable
-        include Gorillib::Hashlike
-      end
-      #
-      foo_class.should include(Enumerable)
-      # Enumerable's map method won
-      foo_class.new.first.should be_nil
-    end
-    it 'does not include enumerable if already included' do
-      foo_class = Class.new(Object) do
-        include Enumerable
-        include CollidesWithEnumerable
-        include Gorillib::Hashlike
-      end
-      #
-      foo_class.should include(Enumerable)
-      # Enumerable wasn't reincluded, so CollidesWithEnumerable's 'map method won
-      foo_class.new.map.should == 3
-    end
-    it 'defines iterator by default' do
-      foo_class = Class.new(Object) do
-        include Gorillib::Hashlike
-      end
-      foo_class.should include(Gorillib::Hashlike::EnumerateFromKeys)
-      [:each, :each_pair, :length, :values, :values_at].each{|meth| foo_class.should be_method_defined(meth) }
-    end
-    it 'does not define iterators if #each_pair is already defined' do
-      foo_class = Class.new(Object) do
-        def each_pair() 3 ; end
-        def length() 3 ; end
-        include Gorillib::Hashlike
-      end
-      foo_class.should_not include(Gorillib::Hashlike::EnumerateFromKeys)
-      foo_class                                         .should     be_method_defined(:each_pair)
-      [:each, :values, :values_at].each{|meth| foo_class.should_not be_method_defined(meth) }
-    end
-    it 'does not implement the default, rehash, replace, compare_by or shift families of methods' do
-      ({}.methods.map(&:to_sym) -
-        (@hshlike.methods.map(&:to_sym) +
-          [:compare_by_identity, :compare_by_identity?,
-            :default, :default=, :default_proc, :default_proc=,
-            :indexes, :indices,
-            :rehash, :replace, :shift, :index,
-          ])
-        ).should == []
-    end
-  end # including Hashlike
+  it 'built test objects correctly' do
+    @hshlike_subklass      .should     <  @hshlike.class
+    @hshlike_subklass      .should_not == @hshlike.class
+    @hshlike_subklass_inst .should     be_a(StructUsingHashlike)
+    @hshlike_subklass_inst .should     be_a(@hshlike_subklass)
+    @hshlike_subklass_inst .should_not be_an_instance_of(StructUsingHashlike)
+    @hshlike               .should_not be_a(@hshlike_subklass)
+    @hshlike               .should     be_an_instance_of(StructUsingHashlike)
+  end
 
 end

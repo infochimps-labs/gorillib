@@ -47,7 +47,7 @@ module Gorillib
       #
       def [](key)
         key = convert_key(key)
-        self.send(key) if self.respond_to?(key)
+        self.send(key)
       end
 
       # Hashlike#[]=
