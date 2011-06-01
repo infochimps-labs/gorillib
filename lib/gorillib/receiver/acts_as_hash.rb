@@ -1,4 +1,3 @@
-require 'enumerator'
 module Receiver
   #
   # Makes a Receiver thingie behave mostly like a hash.
@@ -31,29 +30,6 @@ module Receiver
   #
   module ActsAsHash
 
-    # Hashlike#==
-    #
-    # Equality -- Two hashes are equal if they contain the same number of keys,
-    # and the value corresponding to each key in the first hash is equal (using
-    # <tt>==</tt>) to the value for the same key in the second. If +obj+ is not a
-    # Hashlike, attempt to convert it using +to_hash+ and return <tt>obj ==
-    # hsh</tt>.
-    #
-    # Does not take a default value comparion into account.
-    #
-    # @example
-    #     h1 = { :a => 1, :c => 2 }
-    #     h2 = { 7 => 35, :c => 2, :a => 1 }
-    #     h3 = { :a => 1, :c => 2, 7 => 35 }
-    #     h4 = { :a => 1, :d => 2, :f => 35 }
-    #     h1 == h2 # => false
-    #     h2 == h3 # => true
-    #     h3 == h4 # => false
-    #
-    def ==(name)
-      raise 'hell'
-    end
-
     # Hashlike#[]
     #
     # Element Reference -- Retrieves the value stored for +key+.
@@ -70,10 +46,10 @@ module Receiver
     # @param  key [Object] key to retrieve
     # @return [Object] the value stored for key, nil if missing
     #
-    def [](name)
-      self.send(name) if members.include?(name.to_sym)
+    def [](key)
+      key = convert_key(key)
+      self.send(key)
     end
-
 
     # Hashlike#[]=
     # Hashlike#store
@@ -100,8 +76,9 @@ module Receiver
     # @param  val [Object] value to associate it with
     # @return [Object]
     #
-    def []=(name, val)
-      self.send("#{name}=", val) if members.include?(name.to_sym)
+    def []=(key, val)
+      key = convert_key(key)
+      self.send("#{key}=", val)
     end
 
     # Hashlike#delete
@@ -129,44 +106,86 @@ module Receiver
     #   @return [Object, Nil] the removed object, or if missing, the return value
     #     of the block
     #
-    def delete(key)
-      val = self[key]
-      unset!(key)
-      val
+    def delete(key, &block)
+      key = convert_key(key)
+      if has_key?(key)
+        val = self[key]
+        self.send(:remove_instance_variable, "@#{key}")
+        val
+      elsif block_given?
+        block.call(key)
+      else
+        nil
+      end
     end
 
-    if RUBY_VERSION < '1.9.0'
-      # Hashlike#keys
-      #
-      # Returns a new array populated with the keys from this hashlike.
-      #
-      # @see Hashlike#values.
+    # # Hashlike#==
+    # #
+    # # Equality -- Two hashes are equal if they contain the same number of keys,
+    # # and the value corresponding to each key in the first hash is equal (using
+    # # <tt>==</tt>) to the value for the same key in the second. If +obj+ is not a
+    # # Hashlike, attempt to convert it using +to_hash+ and return <tt>obj ==
+    # # hsh</tt>.
+    # #
+    # # Does not take a default value comparion into account.
+    # #
+    # # @example
+    # #     h1 = { :a => 1, :c => 2 }
+    # #     h2 = { 7 => 35, :c => 2, :a => 1 }
+    # #     h3 = { :a => 1, :c => 2, 7 => 35 }
+    # #     h4 = { :a => 1, :d => 2, :f => 35 }
+    # #     h1 == h2 # => false
+    # #     h2 == h3 # => true
+    # #     h3 == h4 # => false
+    # #
+    # def ==(other_hash)
+    #   (length == other_hash.length) &&
+    #     all?{|k,v| v == other_hash[k] }
+    # end
+
+    # Hashlike#keys
+    #
+    # Returns a new array populated with the keys from this hashlike.
+    #
+    # @see Hashlike#values.
+    #
+    # @example
+    #     hsh = { :a => 100, :b => 200, :c => 300, :d => 400 }
+    #     hsh.keys   # => [:a, :b, :c, :d]
+    #
+    # @return [Array] list of keys
+    #
+    def keys
+      members & instance_variables.map{|s| convert_key(s[1..-1]) }
+    end
+
+    def members
+      self.class.members
+    end
+
+    module ClassMethods
+      # By default, the hashlike methods iterate over the receiver attributes.
+      # If you want to filter our add to the keys list, override this method
       #
       # @example
-      #     hsh = { :a => 100, :b => 200, :c => 300, :d => 400 }
-      #     hsh.keys   # => [:a, :b, :c, :d]
-      #
-      # @return [Array] list of keys
-      #
-      def keys
-        members & instance_variables.map{|s| s.gsub(/^@/, "").to_sym  }
-      end
-    else
-      # Hashlike#keys
-      #
-      # Returns a new array populated with the keys from this hashlike.
-      #
-      # @see Hashlike#values.
-      #
-      # @example
-      #     hsh = { :a => 100, :b => 200, :c => 300, :d => 400 }
-      #     hsh.keys   # => [:a, :b, :c, :d]
-      #
-      # @return [Array] list of keys
+      #     def self.keys
+      #       super + [:firstname, :lastname] - [:fullname]
+      #     end
       #
       def keys
-        members & instance_variables
+        receiver_attr_names
       end
+    end
+
+  protected
+
+    def convert_key(key)
+      raise ArgumentError, "Keys for #{self.class} must be symbols, strings or respond to #to_sym" unless key.respond_to?(:to_sym)
+      key.to_sym
+    end
+
+    def self.included base
+      base.extend ClassMethods
     end
   end
 end

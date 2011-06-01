@@ -7,11 +7,13 @@ require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_struct_helper')
 require GORILLIB_ROOT_DIR('spec/hashlike/hashlike_behavior_spec')
 
+
+
+
+
 describe Gorillib::Struct::ActsAsHash do
 
   before do
-    @total = 0
-    @base_hsh
     @hshlike                 = StructUsingHashlike.new.merge(HashlikeHelper::BASE_HSH.dup)
     @empty_hshlike           = StructUsingHashlike.new
     @hshlike_with_array_vals = StructUsingHashlike.new.merge(HashlikeHelper::BASE_HSH_WITH_ARRAY_VALS.dup)
@@ -19,6 +21,7 @@ describe Gorillib::Struct::ActsAsHash do
     @hshlike_subklass        = Class.new(StructUsingHashlike)
     @hshlike_subklass_inst   = @hshlike_subklass.new.merge(HashlikeHelper::BASE_HSH.dup)
   end
+
 
   # ===========================================================================
   #

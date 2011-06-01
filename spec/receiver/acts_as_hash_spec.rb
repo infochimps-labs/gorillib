@@ -1,26 +1,38 @@
-require File.expand_path(File.dirname(__FILE__)+'/spec_helper')
+require File.dirname(__FILE__)+'/../spec_helper'
+require 'gorillib/receiver'
+require 'gorillib/metaprogramming/class_attribute'
 require 'gorillib/hashlike'
-require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
+require 'gorillib/receiver/acts_as_hash'
 require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
 require GORILLIB_ROOT_DIR('spec/hashlike/hashlike_behavior_spec')
 
+class SimpleReceiver
+  include Receiver
+  include Receiver::ActsAsHash
+  include Gorillib::Hashlike
+  #
+  rcvr_accessor :a,         Integer
+  rcvr_accessor :b,         Integer
+  rcvr_accessor :c,         Integer
+  # rcvr_reader   :b,         Integer
+  # rcvr_writer   :c,         Integer
+  rcvr_accessor :nil_val,   NilClass
+  rcvr_accessor :false_val, Boolean
+  rcvr_accessor :new_key,   String
+end
 
-
-
-
-
-
-describe Gorillib::Hashlike do
+describe Receiver do
 
   before do
-    @hshlike                 = InternalHash.new.merge(HashlikeHelper::BASE_HSH.dup)
-    @empty_hshlike           = InternalHash.new
-    @hshlike_with_array_keys = InternalHash.new.merge(HashlikeHelper::BASE_HSH_WITH_ARRAY_KEYS.dup)
-    @hshlike_with_array_vals = InternalHash.new.merge(HashlikeHelper::BASE_HSH_WITH_ARRAY_VALS.dup)
+    @hshlike                 = SimpleReceiver.new.merge(HashlikeHelper::HASH_TO_TEST_HL_V_A.dup)
+    @empty_hshlike           = SimpleReceiver.new
+    @hshlike_with_array_vals = SimpleReceiver.new.merge(HashlikeHelper::BASE_HSH_WITH_ARRAY_VALS.dup)
     #
-    @hshlike_subklass        = Class.new(InternalHash)
+    @hshlike_subklass        = Class.new(SimpleReceiver)
     @hshlike_subklass_inst   = @hshlike_subklass.new.merge(HashlikeHelper::BASE_HSH.dup)
   end
+
 
   # ===========================================================================
   #
@@ -28,8 +40,39 @@ describe Gorillib::Hashlike do
 
   describe '#[] and #[]= and #store' do
     it_should_behave_like :hashlike_store_and_retrieve
-    it_should_behave_like :references_complex_keys
-    it_should_behave_like :accepts_arbitrary_keys
+    it_should_behave_like :references_string_and_symbol_keys_equivalently
+    it 'reject unknown keys' do
+      lambda{ @hshlike[:fnord] = 69   }.should raise_error NoMethodError, /undefined method `fnord=' for/
+      lambda{ @hshlike[:fnord]        }.should raise_error NoMethodError, /undefined method `fnord' for/
+      @hshlike.delete(:fnord).should be_nil
+    end
+    it 'accepts defined but unset keys' do
+      @hshlike[:new_key].should be_nil
+      @hshlike[:new_key] = 69
+      @hshlike[:new_key].should == 69
+    end
+    it 'does not allow nil, Object, or other non-stringy keys' do
+      lambda{ @hshlike[300] = :i_haz_num }.should raise_error(ArgumentError, "Keys for SimpleReceiver must be symbols, strings or respond to #to_sym")
+      lambda{ @hshlike[nil] = :i_haz_nil }.should raise_error(ArgumentError, "Keys for SimpleReceiver must be symbols, strings or respond to #to_sym")
+      obj = Object.new
+      lambda{ @hshlike[obj] = :i_haz_obj }.should raise_error(ArgumentError, "Keys for SimpleReceiver must be symbols, strings or respond to #to_sym")
+      def obj.to_sym() :c ; end
+      @hshlike[obj] = :i_haz_obj
+      @hshlike[obj].should == :i_haz_obj
+    end
+
+    it 'd' do
+      @hshlike_subklass.rcvr_writer :write_only_attr,  String
+      @hshlike_subklass.rcvr_reader :read_only_attr,   String
+      @hshlike_subklass.rcvr        :internal_attr,    String
+      @hshlike_subklass.class_eval{ attr_accessor :not_a_receiver }
+      raise 'finish me'
+    end
+
+    it 'has ' do
+      @hshlike_subklass.class_eval{ attr_accessor :not_a_receiver }
+      raise 'finish me'
+    end
   end
 
   describe '#delete' do
@@ -46,16 +89,14 @@ describe Gorillib::Hashlike do
 
   describe '#each_pair' do
     describe 'with block' do
-      it_should_behave_like :each_pair_on_stringlike_keys,   :each_pair
-      it_should_behave_like :each_pair_on_complex_keys,      :each_pair
+      it_should_behave_like :each_pair_on_stringlike_keys, :each_pair
     end
     it_should_behave_like :with_no_block_returns_enumerator, :each_pair
   end
 
   describe '#each' do
     describe 'with block' do
-      it_should_behave_like :each_pair_on_stringlike_keys,   :each
-      it_should_behave_like :each_pair_on_complex_keys,      :each
+      it_should_behave_like :each_pair_on_stringlike_keys, :each
     end
     it_should_behave_like :with_no_block_returns_enumerator, :each
   end
@@ -63,7 +104,6 @@ describe Gorillib::Hashlike do
   describe '#each_key' do
     describe 'with block' do
       it_should_behave_like :each_key_on_stringlike_keys
-      it_should_behave_like :each_key_on_complex_keys
     end
     it_should_behave_like :with_no_block_returns_enumerator, :each_key
   end
@@ -101,32 +141,30 @@ describe Gorillib::Hashlike do
 
   describe '#has_key?' do
     it_should_behave_like :hashlike_has_key?, :has_key?
-    it_should_behave_like :hashlike_has_key_on_complex_keys, :has_key?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :has_key?
   end
 
   describe '#include?' do
     it_should_behave_like :hashlike_has_key?, :include?
-    it_should_behave_like :hashlike_has_key_on_complex_keys, :include?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :include?
   end
 
   describe '#key?' do
     it_should_behave_like :hashlike_has_key?, :key?
-    it_should_behave_like :hashlike_has_key_on_complex_keys, :key?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :key?
   end
 
   describe '#member?' do
     it_should_behave_like :hashlike_has_key?, :member?
-    it_should_behave_like :hashlike_has_key_on_complex_keys, :member?
+    it_should_behave_like :hashlike_has_key_string_and_symbol_equivalent, :member?
   end
 
   describe '#has_value?' do
     it_should_behave_like :hashlike_has_value?, :has_value?
-    it_should_behave_like :hashlike_has_value_on_complex_keys, :has_value?
   end
 
   describe '#value?' do
     it_should_behave_like :hashlike_has_value?, :value?
-    it_should_behave_like :hashlike_has_value_on_complex_keys, :value?
   end
 
   describe '#fetch' do
@@ -233,70 +271,16 @@ describe Gorillib::Hashlike do
 
   # ===========================================================================
   #
-  # Method Decoration
-
-  describe 'including Hashlike' do
-    module CollidesWithEnumerable ; def map() 3 ; end ; def keys(); [] ; end ; end
-    it 'includes enumerable by default' do
-      foo_class = Class.new(Object) do
-        include CollidesWithEnumerable
-        include Gorillib::Hashlike
-      end
-      #
-      foo_class.should include(Enumerable)
-      # Enumerable's map method won
-      foo_class.new.first.should be_nil
-    end
-    it 'does not include enumerable if already included' do
-      foo_class = Class.new(Object) do
-        include Enumerable
-        include CollidesWithEnumerable
-        include Gorillib::Hashlike
-      end
-      #
-      foo_class.should include(Enumerable)
-      # Enumerable wasn't reincluded, so CollidesWithEnumerable's 'map method won
-      foo_class.new.map.should == 3
-    end
-    it 'defines iterator by default' do
-      foo_class = Class.new(Object) do
-        include Gorillib::Hashlike
-      end
-      foo_class.should include(Gorillib::Hashlike::EnumerateFromKeys)
-      [:each, :each_pair, :length, :values, :values_at].each{|meth| foo_class.should be_method_defined(meth) }
-    end
-    it 'does not define iterators if #each_pair is already defined' do
-      foo_class = Class.new(Object) do
-        def each_pair() 3 ; end
-        def length() 3 ; end
-        include Gorillib::Hashlike
-      end
-      foo_class.should_not include(Gorillib::Hashlike::EnumerateFromKeys)
-      foo_class                                         .should     be_method_defined(:each_pair)
-      [:each, :values, :values_at].each{|meth| foo_class.should_not be_method_defined(meth) }
-    end
-    it 'does not implement the default, rehash, replace, compare_by or shift families of methods' do
-      ({}.methods.map(&:to_sym) -
-        (@hshlike.methods.map(&:to_sym) +
-          HashlikeHelper::OMITTED_METHODS_FROM_HASH +
-          HashlikeHelper::FANCY_HASHLIKE_METHODS
-          )
-        ).should == []
-    end
-  end # including Hashlike
-
-  # ===========================================================================
-  #
   # Sanity check
 
   it 'built test objects correctly' do
     @hshlike_subklass      .should     <  @hshlike.class
     @hshlike_subklass      .should_not == @hshlike.class
-    @hshlike_subklass_inst .should     be_a(InternalHash)
+    @hshlike_subklass_inst .should     be_a(SimpleReceiver)
     @hshlike_subklass_inst .should     be_a(@hshlike_subklass)
-    @hshlike_subklass_inst .should_not be_an_instance_of(InternalHash)
+    @hshlike_subklass_inst .should_not be_an_instance_of(SimpleReceiver)
     @hshlike               .should_not be_a(@hshlike_subklass)
-    @hshlike               .should     be_an_instance_of(InternalHash)
+    @hshlike               .should     be_an_instance_of(SimpleReceiver)
   end
 
 end

@@ -14,8 +14,6 @@ end
 describe Gorillib::Hashlike::HashlikeViaAccessors do
 
   before do
-    @total = 0
-    @base_hsh
     @hshlike                 = SimpleHashlikeViaAccessors.new.merge(HashlikeHelper::HASH_TO_TEST_HL_V_A.dup)
     @empty_hshlike           = SimpleHashlikeViaAccessors.new
     @hshlike_with_array_vals = SimpleHashlikeViaAccessors.new.merge(HashlikeHelper::BASE_HSH_WITH_ARRAY_VALS.dup)
@@ -23,6 +21,7 @@ describe Gorillib::Hashlike::HashlikeViaAccessors do
     @hshlike_subklass        = Class.new(SimpleHashlikeViaAccessors)
     @hshlike_subklass_inst   = @hshlike_subklass.new.merge(HashlikeHelper::BASE_HSH.dup)
   end
+
 
   # ===========================================================================
   #
