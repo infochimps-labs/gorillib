@@ -1,21 +1,21 @@
 require File.dirname(__FILE__)+'/../spec_helper'
 require 'gorillib/hashlike'
 require 'gorillib/struct/acts_as_hash'
-require File.dirname(__FILE__)+'/../support/hashlike_via_delegation'
-require File.dirname(__FILE__)+'/../support/hashlike_fuzzing_helper'
-require File.dirname(__FILE__)+'/../support/hashlike_struct_helper'
+require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_struct_helper')
 
 describe Gorillib::Struct::ActsAsHash do
 
   before do
     @total = 0
     @base_hsh
-    @hshlike                 = StructUsingHashlike.new.merge(BASE_HSH.dup)
+    @hshlike                 = StructUsingHashlike.new.merge(HashlikeHelper::BASE_HSH.dup)
     @empty_hshlike           = StructUsingHashlike.new
-    @hshlike_with_array_vals = StructUsingHashlike.new.merge(BASE_HSH_WITH_ARRAY_VALS.dup)
+    @hshlike_with_array_vals = StructUsingHashlike.new.merge(HashlikeHelper::BASE_HSH_WITH_ARRAY_VALS.dup)
     #
     @hshlike_subklass        = Class.new(StructUsingHashlike)
-    @hshlike_subklass_inst   = @hshlike_subklass.new.merge(BASE_HSH.dup)
+    @hshlike_subklass_inst   = @hshlike_subklass.new.merge(HashlikeHelper::BASE_HSH.dup)
   end
 
   it 'built test objects correctly' do
@@ -146,7 +146,7 @@ describe Gorillib::Struct::ActsAsHash do
         # seen_args.should be_array_eql([[:a, 100], [:b, 200], [:c, 300], [:nil_val, nil], [:false_val, false], [:new_key, nil]])
         seen_args.should be_array_eql([:a, :b, :c, :nil_val, :false_val, :new_key])
       end
-      it 'handles array keys' do
+      it 'handles array vals' do
         seen_args = []
         @hshlike_with_array_vals.each_pair{|arg1, arg2, arg3| seen_args << [arg1, arg2, arg3] }
         seen_args.should be_array_eql([[:a, [100, 111], nil], [:b, 200, nil], [:c, [1, [2, 3, [4, 5, 6]]], nil], [:nil_val, nil, nil], [:false_val, nil, nil], [:new_key, nil, nil]])

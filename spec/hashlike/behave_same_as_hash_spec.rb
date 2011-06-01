@@ -2,8 +2,9 @@ require File.dirname(__FILE__)+'/../spec_helper'
 require 'enumerator'
 require 'gorillib/hashlike'
 
-require File.dirname(__FILE__)+'/../support/hashlike_fuzzing_helper'
-require File.dirname(__FILE__)+'/../support/hashlike_via_delegation'
+require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
 
 class InternalHashWithEquality < InternalHash
   # Override these so we can compare exceptions.
@@ -21,23 +22,23 @@ describe Gorillib::Hashlike do
   end
 
   it 'does everything a hash can do' do
-    hsh_methods     = ({}.methods.map(&:to_sym) - HashlikeFuzzingHelper::OMITTED_METHODS_FROM_HASH - HashlikeFuzzingHelper::HASH_METHODS_MISSING_FROM_VERSION)
+    hsh_methods     = ({}.methods.map(&:to_sym) - HashlikeHelper::OMITTED_METHODS_FROM_HASH - HashlikeHelper::HASH_METHODS_MISSING_FROM_VERSION)
     hshlike_methods = (@hshlike.methods.map(&:to_sym) -
-      ([:hash_eql?, :myhsh] + HashlikeFuzzingHelper::HASH_METHODS_MISSING_FROM_VERSION))
+      ([:hash_eql?, :myhsh] + HashlikeHelper::HASH_METHODS_MISSING_FROM_VERSION))
     hsh_methods.sort_by(&:to_s).should == hshlike_methods.sort_by(&:to_s)
   end
 
   it 'has specs for every Hash method' do
     (@hshlike.methods.map(&:to_sym) -
       (Object.new.methods.map(&:to_sym) +
-        HashlikeFuzzingHelper::METHODS_TO_TEST +
-        HashlikeFuzzingHelper::HASH_METHODS_MISSING_FROM_VERSION +
+        HashlikeHelper::METHODS_TO_TEST +
+        HashlikeHelper::HASH_METHODS_MISSING_FROM_VERSION +
         [:hash_eql?, :myhsh])
       ).should == []
   end
 
-  ( HashlikeFuzzingHelper::METHODS_TO_TEST -
-    HashlikeFuzzingHelper::HASH_METHODS_MISSING_FROM_VERSION
+  ( HashlikeHelper::METHODS_TO_TEST -
+    HashlikeHelper::HASH_METHODS_MISSING_FROM_VERSION
     ).each do |method_to_test|
     describe "##{method_to_test} same as for Hash" do
       HashlikeFuzzingHelper::INPUTS_WHEN_FULLY_HASHLIKE.each do |input|
@@ -79,7 +80,7 @@ describe Gorillib::Hashlike do
     end
   end
 
-  ( HashlikeFuzzingHelper::METHODS_TO_TEST
+  ( HashlikeHelper::METHODS_TO_TEST
     ).each do |method_to_test|
     describe "##{method_to_test} same as for Hash" do
       before do

@@ -2,10 +2,15 @@ require 'rubygems' unless defined?(Gem)
 require 'spork'
 require 'rspec'
 
+GORILLIB_ROOT_DIR = File.expand_path(File.join(File.dirname(__FILE__),'..'))
+def GORILLIB_ROOT_DIR *paths
+  File.join(::GORILLIB_ROOT_DIR, *paths)
+end
+
 Spork.prefork do # Must restart for changes to config / code from libraries loaded here
-  $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-  $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'support'))
-  Dir[File.join(File.dirname(__FILE__), 'support/matchers/*.rb')].each {|f| require f}
+  $LOAD_PATH.unshift(GORILLIB_ROOT_DIR('lib'))
+  $LOAD_PATH.unshift(GORILLIB_ROOT_DIR('spec/support'))
+  Dir[GORILLIB_ROOT_DIR('spec/support/matchers/*.rb')].each {|f| require f}
 
   RSpec.configure do |config|
   end

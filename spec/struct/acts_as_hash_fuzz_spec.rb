@@ -2,9 +2,9 @@ require File.dirname(__FILE__)+'/../spec_helper'
 require 'gorillib/hashlike'
 require 'gorillib/struct/acts_as_hash'
 require 'gorillib/hash/indifferent_access'
-require File.dirname(__FILE__)+'/../support/hashlike_fuzzing_helper'
-require File.dirname(__FILE__)+'/../support/hashlike_helper'
-require File.dirname(__FILE__)+'/../support/hashlike_struct_helper'
+require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')
+require GORILLIB_ROOT_DIR('spec/support/hashlike_struct_helper')
 
 #
 # Don't test the built-in Struct methods.
@@ -14,18 +14,18 @@ require File.dirname(__FILE__)+'/../support/hashlike_struct_helper'
 #
 STRUCT_HASHLIKE_METHODS_TO_SKIP = [:each, :flatten, :clear, :values_at] +
   Enumerable.public_instance_methods.map(&:to_sym) +
-  HashlikeFuzzingHelper::HASH_METHODS_MISSING_FROM_VERSION
+  HashlikeHelper::HASH_METHODS_MISSING_FROM_VERSION
 
 include HashlikeFuzzingHelper
 
 describe "Hash vs Gorillib::Struct::ActsAsHash" do
   before do
     @total = 0
-    @hsh      = HASH_TO_TEST_HASHLIKE_STRUCT.dup
-    @hshlike  = StructUsingHashlike.new.merge(HASH_TO_TEST_HASHLIKE_STRUCT)
+    @hsh      = HashlikeHelper::HASH_TO_TEST_HASHLIKE_STRUCT.dup
+    @hshlike  = StructUsingHashlike.new.merge(HashlikeHelper::HASH_TO_TEST_HASHLIKE_STRUCT)
   end
 
-  ( HashlikeFuzzingHelper::METHODS_TO_TEST - STRUCT_HASHLIKE_METHODS_TO_SKIP ).each do |method_to_test|
+  ( HashlikeHelper::METHODS_TO_TEST - STRUCT_HASHLIKE_METHODS_TO_SKIP ).each do |method_to_test|
     describe "##{method_to_test}" do
 
       (HashlikeFuzzingHelper::INPUTS_FOR_ALL_HASHLIKES).each do |input|
@@ -43,12 +43,12 @@ describe "Gorillib::HashWithIndifferentSymbolKeys vs Gorillib::Struct::ActsAsHas
   before do
     @total = 0
     @hsh      = Gorillib::HashWithIndifferentSymbolKeys.new_from_hash_copying_default(
-      HASH_TO_TEST_HASHLIKE_STRUCT)
+      HashlikeHelper::HASH_TO_TEST_HASHLIKE_STRUCT)
     @hshlike  = StructUsingHashlike.new.merge(
-      HASH_TO_TEST_HASHLIKE_STRUCT)
+      HashlikeHelper::HASH_TO_TEST_HASHLIKE_STRUCT)
   end
 
-  ( HashlikeFuzzingHelper::METHODS_TO_TEST - STRUCT_HASHLIKE_METHODS_TO_SKIP
+  ( HashlikeHelper::METHODS_TO_TEST - STRUCT_HASHLIKE_METHODS_TO_SKIP
     ).each do |method_to_test|
     describe "##{method_to_test}" do
 

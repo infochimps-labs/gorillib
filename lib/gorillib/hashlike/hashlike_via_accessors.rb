@@ -45,10 +45,10 @@ module Gorillib
       # @param  key [Object] key to retrieve
       # @return [Object] the value stored for key, nil if missing
       #
-      def [](name)
-        self.send(name) if self.respond_to?(name)
+      def [](key)
+        key = convert_key(key)
+        self.send(key) if self.respond_to?(key)
       end
-
 
       # Hashlike#[]=
       # Hashlike#store
@@ -75,8 +75,9 @@ module Gorillib
       # @param  val [Object] value to associate it with
       # @return [Object]
       #
-      def []=(name, val)
-        self.send("#{name}=", val) unless name.nil?
+      def []=(key, val)
+        key = convert_key(key)
+        self.send("#{key}=", val)
       end
 
       # Hashlike#delete
@@ -105,6 +106,7 @@ module Gorillib
       #     of the block
       #
       def delete(key, &block)
+        key = convert_key(key)
         if has_key?(key)
           val = self[key]
           self.send(:remove_instance_variable, "@#{key}")
@@ -158,7 +160,7 @@ module Gorillib
 
     protected
       def convert_key(key)
-        return unless key.respond_to?(:to_sym)
+        raise ArgumentError, "Keys for #{self.class} must be symbols, strings or respond to #to_sym" unless key.respond_to?(:to_sym)
         key.to_sym
       end
 

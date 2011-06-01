@@ -16,5 +16,7 @@ watch("spec/.*/*_spec\.rb") do |match|
 end
 
 watch("lib/gorillib/(.*)\.rb") do |match|
-  run_spec %{spec/#{match[1]}_spec.rb}
+  Dir[%{spec/#{match[1]}*_spec.rb}].each do |f|
+    run_spec f
+  end
 end
