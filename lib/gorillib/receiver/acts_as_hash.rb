@@ -119,30 +119,6 @@ module Receiver
       end
     end
 
-    # # Hashlike#==
-    # #
-    # # Equality -- Two hashes are equal if they contain the same number of keys,
-    # # and the value corresponding to each key in the first hash is equal (using
-    # # <tt>==</tt>) to the value for the same key in the second. If +obj+ is not a
-    # # Hashlike, attempt to convert it using +to_hash+ and return <tt>obj ==
-    # # hsh</tt>.
-    # #
-    # # Does not take a default value comparion into account.
-    # #
-    # # @example
-    # #     h1 = { :a => 1, :c => 2 }
-    # #     h2 = { 7 => 35, :c => 2, :a => 1 }
-    # #     h3 = { :a => 1, :c => 2, 7 => 35 }
-    # #     h4 = { :a => 1, :d => 2, :f => 35 }
-    # #     h1 == h2 # => false
-    # #     h2 == h3 # => true
-    # #     h3 == h4 # => false
-    # #
-    # def ==(other_hash)
-    #   (length == other_hash.length) &&
-    #     all?{|k,v| v == other_hash[k] }
-    # end
-
     # Hashlike#keys
     #
     # Returns a new array populated with the keys from this hashlike.
@@ -186,6 +162,7 @@ module Receiver
 
     def self.included base
       base.extend ClassMethods
+      base.send(:include, Gorillib::Hashlike)
     end
   end
 end
