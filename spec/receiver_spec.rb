@@ -63,6 +63,19 @@ describe Receiver do
     end
   end
 
+  describe '.receive_tuple' do
+    it 'receives a tuple, assigning to rcvrs in order'
+
+    it 'allows empty tuple'
+
+    it '?breaks? on too-long tuple'
+  end
+
+
+  describe '.receive_foo' do
+    it 'injects a superclass, so I can call super() in receive_foo'
+  end
+
   describe '.rcvr' do
 
     it 'creates the receive_{whatever} method' do

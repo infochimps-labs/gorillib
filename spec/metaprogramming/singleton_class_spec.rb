@@ -6,4 +6,7 @@ describe 'Singleton Class' do
     o = Object.new
     class << o; self end.should == o.singleton_class
   end
+
+  it 'does not have an effect if already provided by another library.'
+
 end

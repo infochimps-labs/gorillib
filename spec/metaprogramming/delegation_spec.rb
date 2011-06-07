@@ -69,6 +69,8 @@ describe 'metaprogramming' do
       @david = Someone.new("David", Somewhere.new("Paulina", "Chicago"))
     end
 
+    it 'does not have an effect if already provided by another library.'
+
     it 'delegates to methods' do
       @david.street.should == "Paulina"
       @david.city.should == "Chicago"

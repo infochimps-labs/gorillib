@@ -57,5 +57,5 @@ class Module
     mattr_reader(*syms)
     mattr_writer(*syms)
   end unless method_defined?(:mattr_accessor)
-  
+
 end

@@ -43,6 +43,9 @@ describe 'metaprogramming' do
   end
 
   describe 'alias_method_chain' do
+
+    it 'does not have an effect if already provided by another library.'
+
     it 'creates a with_ and without_ method that chain' do
       @instance.should respond_to(:bar)
       feature_aliases = [:bar_with_baz, :bar_without_baz]

@@ -8,6 +8,8 @@ describe 'metaprogramming' do
       @sub = Class.new(@klass)
     end
 
+    it 'does not have an effect if already provided by another lib.'
+
     it 'defaults to nil' do
       @klass.setting.should be_nil
       @sub.setting.should be_nil

@@ -25,7 +25,7 @@ unless Enumerable.method_defined?(:sum)
       else
         inject { |sum, element| sum + element } || identity
       end
-    end
+    end unless method_defined?(:sum)
   end
 
   class Range #:nodoc:
@@ -35,6 +35,6 @@ unless Enumerable.method_defined?(:sum)
       return super if block_given? || !(first.instance_of?(Integer) && last.instance_of?(Integer))
       actual_last = exclude_end? ? (last - 1) : last
       (actual_last - first + 1) * (actual_last + first) / 2
-    end
+    end unless method_defined?(:sum)
   end
 end

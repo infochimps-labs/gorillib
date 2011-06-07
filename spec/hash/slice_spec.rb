@@ -61,8 +61,6 @@ describe Hash do
       original.extract!(:a, :b).should == expected
       original.should == remaining
     end
-
-
   end
 
 end
