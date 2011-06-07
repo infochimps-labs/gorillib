@@ -1,3 +1,9 @@
+h3. Version 0.1.0: Hashlike refactor, Receiver arrives
+
+v0.1.0 brings
+* Receiver module
+* refeactoring of hash decorations into a new hashlike class
+* ability to inject hashlike behavior into Struct
 
 h3. Version 0.0.7: full test coverage!
 
