@@ -84,10 +84,11 @@ module Receiver
   RECEIVER_BODIES[Date]     = %q{ v.nil?   ? nil : Date.parse(v.to_s)     rescue nil }
   RECEIVER_BODIES[Array]    = %q{ case when v.nil? then nil when v.blank? then [] else Array(v) end }
   RECEIVER_BODIES[Hash]     = %q{ case when v.nil? then nil when v.blank? then {} else v end }
-  RECEIVER_BODIES[Boolean]  = %q{ case when v.nil? then nil when v.to_s.strip.blank? then false else v.to_s.strip != "false" end }
+  RECEIVER_BODIES[Boolean]  = %q{ case when v.nil? then nil when v.to_s.strip.blank? then false when v.to_s.strip =~ /^0[\.0]*$/ then false else v.to_s.strip != "false" end }
   RECEIVER_BODIES[NilClass] = %q{ raise ArgumentError, "This field must be nil, but {#{v}} was given" unless (v.nil?) ; nil }
   RECEIVER_BODIES[Object]   = %q{ v } # accept and love the object just as it is
 
+  # add to boolean (v.to_s.strip != "false") || (v.to_s.strip =~ /^0[\.0]*$/)
   #
   # Give each base class a receive method
   #
