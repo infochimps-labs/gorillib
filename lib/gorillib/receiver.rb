@@ -88,7 +88,6 @@ module Receiver
   RECEIVER_BODIES[NilClass] = %q{ raise ArgumentError, "This field must be nil, but {#{v}} was given" unless (v.nil?) ; nil }
   RECEIVER_BODIES[Object]   = %q{ v } # accept and love the object just as it is
 
-  # add to boolean (v.to_s.strip != "false") || (v.to_s.strip =~ /^0[\.0]*$/)
   #
   # Give each base class a receive method
   #
