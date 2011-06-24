@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorillib}
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = %q{2011-06-07}
+  s.date = %q{2011-06-24}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
