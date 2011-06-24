@@ -1,3 +1,9 @@
+h3. Version 0.1.2: Receiver body fixes
+
+* Better @Object.try@ (via active_support)
+* Receiver body can now be an interpolated string or a hash; this lets you use anonymous classes. Added tuple methods (does an in-order traversal).
+* Bugfix for inclusion order in ActsAsHash
+
 h3. Version 0.1.0: Hashlike refactor, Receiver arrives
 
 v0.1.0 brings
