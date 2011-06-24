@@ -1,3 +1,4 @@
+unless Object.method_defined?(:try)
 class Object
   # Invokes the method identified by the symbol +method+, passing it any arguments
   # and/or the block specified, just like the regular Ruby <tt>Object#send</tt> does.
@@ -52,4 +53,5 @@ class NilClass
   def try(*args)
     nil
   end
+end
 end

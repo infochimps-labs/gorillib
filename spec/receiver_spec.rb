@@ -11,6 +11,36 @@ class Wide
   rcvr_accessor :my_int, Integer
 end
 
+require 'gorillib/receiver/acts_as_hash'
+class StreetAddress
+  include Receiver
+  include Receiver::ActsAsHash
+  rcvr_accessor :num,      Integer
+  rcvr_accessor :street,   String
+  rcvr_accessor :city,     String
+  rcvr_accessor :state,    String
+  rcvr_accessor :zip_code, Integer
+end
+
+class Vcard
+  include Receiver
+  include Receiver::ActsAsHash
+  rcvr_accessor :name,         String
+  rcvr_accessor :home_address, StreetAddress
+  rcvr_accessor :work_address, StreetAddress
+  rcvr_accessor :phone,        String
+end
+
+class RecursiveReceiver < Wide
+  include Receiver
+  rcvr_accessor :a, Integer
+  rcvr_accessor :b, String
+  rcvr_accessor :wide_rcvr_a, Wide
+  rcvr_accessor :rec_field, RecursiveReceiver
+  rcvr_accessor :wide_rcvr_b, Wide
+  rcvr_accessor :c, String
+end
+
 describe Receiver do
   before do
     @klass = Class.new(Wide)
@@ -63,14 +93,44 @@ describe Receiver do
     end
   end
 
-  describe '.receive_tuple' do
-    it 'receives a tuple, assigning to rcvrs in order'
+  ADDRESS_TUPLE = ['Homer J Simpson', 742, 'Evergreen Terr', 'Springfield', 'AZ', 12345, 100, 'Industrial Way', 'Springfield', 'WY', 98765, '800-BITE-ME']
+  ADDRESS_HASH = {
+        :name => 'Homer J Simpson',
+        :home_address => { :num => 742, :street => 'Evergreen Terr', :city => 'Springfield', :state => 'AZ', :zip_code => 12345 },
+        :work_address => { :num => 100, :street => 'Industrial Way', :city => 'Springfield', :state => 'WY', :zip_code => 98765 },
+    :phone => '800-BITE-ME'}
+
+  describe '.consume_tuple' do
+    it 'receives a tuple, assigning to rcvrs in order' do
+      obj = Vcard.consume_tuple(ADDRESS_TUPLE.dup)
+      obj.to_hash.should == ADDRESS_HASH
+    end
 
     it 'allows empty tuple'
 
     it '?breaks? on too-long tuple'
   end
 
+  describe '#to_tuple' do
+    it 'flattens' do
+      obj = Vcard.receive(ADDRESS_HASH)
+      obj.to_tuple.should == ADDRESS_TUPLE
+    end
+  end
+
+  describe '.tuple_keys' do
+    it 'for a simple receiver, produces attrs in order' do
+      StreetAddress.tuple_keys.should == [:num, :street, :city, :state, :zip_code]
+    end
+
+    it 'for a complex receiver, in-order traverses the tree' do
+      Vcard.tuple_keys.should == [:name, :num, :street, :city, :state, :zip_code, :num, :street, :city, :state, :zip_code, :phone]
+    end
+
+    it 'does not recurse endlessly' do
+      RecursiveReceiver.tuple_keys.should == [:my_int, :a, :b, :my_int, RecursiveReceiver, :my_int, :c]
+    end
+  end
 
   describe '.receive_foo' do
     it 'injects a superclass, so I can call super() in receive_foo'
@@ -194,7 +254,6 @@ describe Receiver do
       class Foo ; include Receiver ; rcvr_accessor(:foo, Integer) ; end
       @klass.rcvr_accessor :array_of_obj, Array, :of => Foo
       obj = @klass.receive( :array_of_obj => [ {:foo => 3}, {:foo => 5} ] )
-      p obj
       obj.array_of_obj.first.foo.should == 3
       obj.array_of_obj.last.foo.should == 5
     end
@@ -389,6 +448,14 @@ describe Receiver do
       end
     end
 
+    it "lets me use an anonymous class as a received type" do
+      @klass_2 = Class.new(Wide)
+      @klass_2.rcvr_accessor :maw, Integer
+      @klass.rcvr_accessor :k2, @klass_2
+      obj = @klass.receive({ :my_int => 3, :k2 => { :maw => 2 }})
+      obj.k2.maw.should == 2
+    end
+
     it 'keeps values across a receive!' do
       @klass.rcvr_accessor :repeated,    Integer
       @klass.rcvr_accessor :just_second, Integer
@@ -468,7 +535,7 @@ describe Receiver do
       describe 'NilClass' do
         it 'only accepts nil' do
           @klass.rcvr_accessor :nil_field, NilClass
-          lambda{ @klass.receive( :nil_field => 'hello' ) }.should raise_error(ArgumentError, "This field must be nil, but {hello} was given")
+          lambda{ @klass.receive( :nil_field => 'hello' ) }.should raise_error(ArgumentError, "This field must be nil, but [hello] was given")
         end
       end
     end

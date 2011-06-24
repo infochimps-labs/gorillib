@@ -1,3 +1,7 @@
+require 'gorillib/object/blank'
+require 'gorillib/object/try'
+require 'gorillib/array/extract_options'
+
 # dummy type for receiving True or False
 class Boolean ; end unless defined?(Boolean)
 
@@ -85,19 +89,23 @@ module Receiver
   RECEIVER_BODIES[Array]    = %q{ case when v.nil? then nil when v.blank? then [] else Array(v) end }
   RECEIVER_BODIES[Hash]     = %q{ case when v.nil? then nil when v.blank? then {} else v end }
   RECEIVER_BODIES[Boolean]  = %q{ case when v.nil? then nil when v.to_s.strip.blank? then false else v.to_s.strip != "false" end }
-  RECEIVER_BODIES[NilClass] = %q{ raise ArgumentError, "This field must be nil, but {#{v}} was given" unless (v.nil?) ; nil }
+  RECEIVER_BODIES[NilClass] = %q{ raise ArgumentError, "This field must be nil, but [#{v}] was given" unless (v.nil?) ; nil }
   RECEIVER_BODIES[Object]   = %q{ v } # accept and love the object just as it is
 
   #
   # Give each base class a receive method
   #
   RECEIVER_BODIES.each do |k,b|
-    if k.is_a?(Class)
+    if k.is_a?(Class) && b.is_a?(String)
       k.class_eval <<-STR, __FILE__, __LINE__ + 1
       def self.receive(v)
         #{b}
       end
       STR
+    elsif k.is_a?(Class)
+      k.class_eval do
+        define_singleton_method(:receive, &b)
+      end
     end
   end
 
@@ -187,12 +195,19 @@ public
     def rcvr name, type, info={}
       name = name.to_sym
       type = type_to_klass(type)
-      class_eval <<-STR, __FILE__, __LINE__ + 1
+      body = receiver_body_for(type, info)
+      if body.is_a?(String)
+        class_eval(%Q{
         def receive_#{name}(v)
-          v = (#{receiver_body_for(type, info)}) ;
+          self.instance_variable_set("@#{name}", (#{body}))
+        end}, __FILE__, __LINE__ + 1)
+      else
+        define_method("receive_#{name}") do |*args|
+          v = body.call(*args)
           self.instance_variable_set("@#{name}", v)
+          v
         end
-      STR
+      end
       # careful here: don't modify parent's class_attribute in-place
       self.receiver_attrs = self.receiver_attrs.dup
       self.receiver_attr_names += [name] unless receiver_attr_names.include?(name)
@@ -254,6 +269,30 @@ public
       defs
     end
 
+    # returns an in-order traversal of the
+    #
+    def tuple_keys
+      return @tuple_keys if @tuple_keys
+      @tuple_keys = self
+      @tuple_keys = receiver_attrs.map do |attr, info|
+        info[:type].try(:tuple_keys) || attr
+      end.flatten
+    end
+
+    def consume_tuple(tuple)
+      obj = self.new
+      receiver_attrs.each do |attr, info|
+        if info[:type].respond_to?(:consume_tuple)
+          val = info[:type].consume_tuple(tuple)
+        else
+          val = tuple.shift
+        end
+        # obj.send("receive_#{attr}", val)
+        obj.send("#{attr}=", val)
+      end
+      obj
+    end
+
   protected
     def receiver_body_for type, info
       type = type_to_klass(type)
@@ -261,16 +300,15 @@ public
       # they have an :of => SomeType option.
       case
       when info[:of] && (type == Array)
-        %Q{ v.nil? ? nil : v.map{|el| #{info[:of]}.receive(el) } }
+        receiver_type = info[:of]
+        lambda{|v|  v.nil? ? nil : v.map{|el| receiver_type.receive(el) } }
       when info[:of] && (type == Hash)
-        %Q{ v.nil? ? nil : v.inject({}){|h, (el,val)| h[el] = #{info[:of]}.receive(val); h } }
+        receiver_type = info[:of]
+        lambda{|v| v.nil? ? nil : v.inject({}){|h, (el,val)| h[el] = receiver_type.receive(val); h } }
       when Receiver::RECEIVER_BODIES.include?(type)
         Receiver::RECEIVER_BODIES[type]
       when type.is_a?(Class)
-        %Q{v.blank? ? nil : #{type}.receive(v) }
-      # when (type.is_a?(Symbol) && type.to_s =~ /^[A-Z]/)
-      #   # a hack so you can use a class not defined yet
-      #   %Q{v.blank? ? nil : #{type}.receive(v) }
+        lambda{|v| v.blank? ? nil : type.receive(v) }
       else
         raise("Can't receive #{type} #{info}")
       end
@@ -284,6 +322,18 @@ public
       else raise ArgumentError, "Can\'t handle type #{type}: is it a Class or one of the TYPE_ALIASES?"
       end
     end
+  end
+
+  def to_tuple
+    tuple = []
+    self.each_value do |val|
+      if val.respond_to?(:to_tuple)
+        tuple += val.to_tuple
+      else
+        tuple << val
+      end
+    end
+    tuple
   end
 
   module ClassMethods
@@ -303,13 +353,15 @@ public
   # set up receiver attributes, and bring in methods from the ClassMethods module at class-level
   def self.included base
     base.class_eval do
-      class_attribute :receiver_attrs
-      class_attribute :receiver_attr_names
-      class_attribute :after_receivers
-      self.receiver_attrs      = {} # info about the attr
-      self.receiver_attr_names = [] # ordered set of attr names
-      self.after_receivers     = [] # blocks to execute following receive!
-      extend ClassMethods
+      unless method_defined?(:receiver_attrs)
+        class_attribute :receiver_attrs
+        class_attribute :receiver_attr_names
+        class_attribute :after_receivers
+        self.receiver_attrs      = {} # info about the attr
+        self.receiver_attr_names = [] # ordered set of attr names
+        self.after_receivers     = [] # blocks to execute following receive!
+        extend ClassMethods
+      end
     end
   end
 end

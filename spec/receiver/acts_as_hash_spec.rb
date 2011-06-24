@@ -10,13 +10,10 @@ require GORILLIB_ROOT_DIR('spec/hashlike/hashlike_behavior_spec')
 class SimpleReceiver
   include Receiver
   include Receiver::ActsAsHash
-  include Gorillib::Hashlike
   #
   rcvr_accessor :a,         Integer
   rcvr_accessor :b,         Integer
   rcvr_accessor :c,         Integer
-  # rcvr_reader   :b,         Integer
-  # rcvr_writer   :c,         Integer
   rcvr_accessor :nil_val,   NilClass
   rcvr_accessor :false_val, Boolean
   rcvr_accessor :new_key,   String
@@ -264,6 +261,13 @@ describe Receiver do
 
   describe '#to_hash' do
     it_should_behave_like :hashlike_to_hash
+
+    it 'should recurse' do
+      @hshlike_subklass.rcvr_accessor :k2, SimpleReceiver
+      hsh = HashlikeHelper::HASH_TO_TEST_HL_V_A.merge(:k2 => {:a => 3, :new_key => 'hi' })
+      obj = @hshlike_subklass.receive(hsh)
+      obj.to_hash.should == {:a=>100, :b=>200, :c=>300, :nil_val=>nil, :false_val=>false, :k2=>{:a=>3, :new_key=>"hi"} }
+    end
   end
 
   describe '#invert' do
