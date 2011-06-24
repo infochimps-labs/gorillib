@@ -41,16 +41,19 @@ describe Receiver do
   describe '#[] and #[]= and #store' do
     it_should_behave_like :hashlike_store_and_retrieve
     it_should_behave_like :references_string_and_symbol_keys_equivalently
+
     it 'reject unknown keys' do
       lambda{ @hshlike[:fnord] = 69   }.should raise_error NoMethodError, /undefined method `fnord=' for/
       lambda{ @hshlike[:fnord]        }.should raise_error NoMethodError, /undefined method `fnord' for/
       @hshlike.delete(:fnord).should be_nil
     end
+
     it 'accepts defined but unset keys' do
       @hshlike[:new_key].should be_nil
       @hshlike[:new_key] = 69
       @hshlike[:new_key].should == 69
     end
+
     it 'does not allow nil, Object, or other non-stringy keys' do
       lambda{ @hshlike[300] = :i_haz_num }.should raise_error(ArgumentError, "Keys for SimpleReceiver must be symbols, strings or respond to #to_sym")
       lambda{ @hshlike[nil] = :i_haz_nil }.should raise_error(ArgumentError, "Keys for SimpleReceiver must be symbols, strings or respond to #to_sym")
@@ -61,17 +64,19 @@ describe Receiver do
       @hshlike[obj].should == :i_haz_obj
     end
 
-    it 'd' do
+    it 'defines the right accessor methods' do
       @hshlike_subklass.rcvr_writer :write_only_attr,  String
       @hshlike_subklass.rcvr_reader :read_only_attr,   String
       @hshlike_subklass.rcvr        :internal_attr,    String
       @hshlike_subklass.class_eval{ attr_accessor :not_a_receiver }
-      raise 'finish me'
-    end
-
-    it 'has ' do
-      @hshlike_subklass.class_eval{ attr_accessor :not_a_receiver }
-      raise 'finish me'
+      [ :receive_write_only_attr, :write_only_attr=,
+        :receive_read_only_attr,  :read_only_attr,
+        :receive_internal_attr,
+        :not_a_receiver, :not_a_receiver= ].each{ |attr| @hshlike_subklass.should be_method_defined(attr) }
+      [ :write_only_attr,  :read_only_attr=,
+        :internal_attr,  :internal_attr=,
+        :receive_not_a_receiver ].each{ |attr| @hshlike_subklass.should_not be_method_defined(attr) }
+      @hshlike_subklass.receiver_attr_names.should == [:a, :b, :c, :nil_val, :false_val, :new_key, :write_only_attr, :read_only_attr, :internal_attr]
     end
   end
 

@@ -54,7 +54,8 @@ module HashlikeHelper
     :assert_valid_keys,
     :nested_under_indifferent_access,
     :stringify_keys, :stringify_keys!, :symbolize_keys, :symbolize_keys!,
-    :with_indifferent_access, :yaml_initialize
+    :with_indifferent_access, :yaml_initialize,
+    :extractable_options?, :deep_dup, :reverse_merge, :reverse_merge!, :slice, :slice!, :extract!, :deep_merge, :deep_merge!, :deep_compact!, :compact, :compact!, :compact_blank, :compact_blank!
   ]
   FANCY_HASHLIKE_METHODS.each{|meth| OMITTED_METHODS_FROM_HASH << meth }
 
