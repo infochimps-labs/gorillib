@@ -1,19 +1,23 @@
 require 'active_model'
 
 module Receiver
-  class ActiveModelShim
-    extend ActiveModel::Naming
+  module ActiveModelShim
 
     def to_model
       self
     end
 
-    def valid?()      true  end
     def new_record?() true  end
     def destroyed?()  false end
-
     def errors
       @_errors ||= ActiveModel::Errors.new(self)
+    end
+
+    def self.included(base)
+      base.class_eval do
+        extend  ActiveModel::Naming
+        include ActiveModel::Validations
+      end
     end
   end
 end
