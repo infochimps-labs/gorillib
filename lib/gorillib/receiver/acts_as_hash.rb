@@ -185,9 +185,11 @@ module Receiver
     end
 
     def self.included base
-      base.send(:include, Gorillib::Hashlike)
-      base.extend(ClassMethods)
-      base.send(:include, InstanceMethods)
+      base.class_eval do
+        include Gorillib::Hashlike
+        extend  ClassMethods
+        include InstanceMethods
+      end
     end
   end
 end

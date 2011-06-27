@@ -1,6 +1,7 @@
 require File.dirname(__FILE__)+'/../spec_helper'
 require 'enumerator'
 require 'gorillib/hashlike'
+require 'gorillib/enumerable/sum'
 
 require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
@@ -53,7 +54,6 @@ describe Gorillib::Hashlike do
       end
     end
 
-
     #
     # With a few exceptions (see HASHLIKE_DEPENDENT_METHODS), all hashlike methods go through only the following core methods:
     #
@@ -64,7 +64,7 @@ describe Gorillib::Hashlike do
     # these exceptions call a tightly-bound peer:
     #
     HASHLIKE_DEPENDENT_METHODS = Hash.new([]).merge({
-        :merge => [:update], :rassoc => [:key], :flatten => [:to_hash], :invert => [:to_hash],
+        :merge => [:update], :rassoc => [:key], :flatten => [:to_hash], :invert => [:to_hash], :sum => [:inject, :map],
         :keep_if => [:select!], :delete_if => [:reject!], :select => [:select!, :keep_if], :reject => [:reject!, :delete_if],
       })
     Enumerable.public_instance_methods.map(&:to_sym).each{|meth| HASHLIKE_DEPENDENT_METHODS[meth] << :each }

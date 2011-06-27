@@ -803,10 +803,10 @@ module Gorillib
 
     def self.included(base)
       base.class_eval do
-        base.send(:include, EnumerateFromKeys) unless base.method_defined?(:each_pair)
-        unless base.include?(Enumerable)
-          base.send(:include, Enumerable)
-          base.send(:include, OverrideEnumerable)
+        include EnumerateFromKeys unless method_defined?(:each_pair)
+        unless include?(Enumerable)
+          include Enumerable
+          include OverrideEnumerable
         end
 
         # included here so they win out over Enumerable
