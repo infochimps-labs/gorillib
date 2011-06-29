@@ -1,4 +1,9 @@
-h3. Version 0.1.2: Receiver body fixes
+h3. 2011-06-29 - Version 0.1.3: Fancier receivers
+
+* can now mix activemodel into a receiver, getting all its validation and other awesomeness
+* added receiver_model as an experimental 'I'm a fancy cadillac-style receiver'
+
+h3. 2011-06-24 Version 0.1.2: Receiver body fixes
 
 * Better @Object.try@ (via active_support)
 * Receiver body can now be an interpolated string or a hash; this lets you use anonymous classes. Added tuple methods (does an in-order traversal).
