@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorillib}
-  s.version = "0.1.2"
+  s.version = "0.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = %q{2011-06-24}
+  s.date = %q{2011-06-29}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
@@ -71,8 +71,10 @@ Gem::Specification.new do |s|
     "lib/gorillib/receiver/active_model_shim.rb",
     "lib/gorillib/receiver/acts_as_hash.rb",
     "lib/gorillib/receiver/acts_as_loadable.rb",
+    "lib/gorillib/receiver/locale/en.yml",
     "lib/gorillib/receiver/tree_diff.rb",
     "lib/gorillib/receiver/validations.rb",
+    "lib/gorillib/receiver_model.rb",
     "lib/gorillib/some.rb",
     "lib/gorillib/string/constantize.rb",
     "lib/gorillib/string/human.rb",
@@ -97,7 +99,6 @@ Gem::Specification.new do |s|
     "spec/hash/zip_spec.rb",
     "spec/hashlike/behave_same_as_hash_spec.rb",
     "spec/hashlike/hashlike_behavior_spec.rb",
-    "spec/hashlike/hashlike_via_accessors_fuzzing_spec.rb",
     "spec/hashlike/hashlike_via_accessors_spec.rb",
     "spec/hashlike_spec.rb",
     "spec/logger/log_spec.rb",
@@ -152,7 +153,6 @@ Gem::Specification.new do |s|
     "spec/hash/zip_spec.rb",
     "spec/hashlike/behave_same_as_hash_spec.rb",
     "spec/hashlike/hashlike_behavior_spec.rb",
-    "spec/hashlike/hashlike_via_accessors_fuzzing_spec.rb",
     "spec/hashlike/hashlike_via_accessors_spec.rb",
     "spec/hashlike_spec.rb",
     "spec/logger/log_spec.rb",
