@@ -133,6 +133,7 @@ module Receiver
       _receive_attr attr, val
     end
     impose_defaults!(hsh)
+    replace_options!(hsh)
     run_after_receivers(hsh)
     self
   end
@@ -158,6 +159,25 @@ protected
       self.instance_variable_set "@#{attr}", val
     end
   end
+
+  # class Foo
+  #   include Receiver
+  #   include Receiver::ActsAsHash
+  #   rcvr_accessor :attribute, String, :default => 'okay' :replace => { 'bad' => 'good' }
+  # end
+  #
+  # f = Foo.receive({:attribute => 'bad'})
+  # => #<Foo:0x10156c820 @attribute="good">
+
+  def replace_options!(hsh)
+    self.receiver_attrs.each do |attr, info|
+      val = self.instance_variable_get("@#{attr}")
+      if info[:replace] and info[:replace].has_key? val
+        self.instance_variable_set "@#{attr}", info[:replace][val]
+      end
+    end
+  end
+
 
   def run_after_receivers(hsh)
     self.class.after_receivers.each do |after_receiver|
