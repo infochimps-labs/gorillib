@@ -47,3 +47,7 @@ pkg/*
 
 ## PROJECT::SPECIFIC
 *.rdb
+
+.vendor
+.bundle
+Gemfile.lock
