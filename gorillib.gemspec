@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorillib}
-  s.version = "0.1.4"
+  s.version = "0.1.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Infochimps"]
-  s.date = %q{2011-07-06}
+  s.authors = [%q{Infochimps}]
+  s.date = %q{2011-07-31}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
     ".rspec",
     "CHANGELOG.textile",
     "Gemfile",
-    "Gemfile.lock",
     "LICENSE.textile",
     "README.textile",
     "Rakefile",
@@ -49,6 +48,7 @@ Gem::Specification.new do |s|
     "lib/gorillib/hashlike/compact.rb",
     "lib/gorillib/hashlike/deep_compact.rb",
     "lib/gorillib/hashlike/deep_dup.rb",
+    "lib/gorillib/hashlike/deep_hash.rb",
     "lib/gorillib/hashlike/deep_merge.rb",
     "lib/gorillib/hashlike/hashlike_via_accessors.rb",
     "lib/gorillib/hashlike/keys.rb",
@@ -98,6 +98,7 @@ Gem::Specification.new do |s|
     "spec/hash/slice_spec.rb",
     "spec/hash/zip_spec.rb",
     "spec/hashlike/behave_same_as_hash_spec.rb",
+    "spec/hashlike/deep_hash_spec.rb",
     "spec/hashlike/hashlike_behavior_spec.rb",
     "spec/hashlike/hashlike_via_accessors_spec.rb",
     "spec/hashlike_spec.rb",
@@ -133,9 +134,9 @@ Gem::Specification.new do |s|
     "spec/support/matchers/evaluate_to_true.rb"
   ]
   s.homepage = %q{http://infochimps.com/labs}
-  s.licenses = ["MIT"]
-  s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.licenses = [%q{MIT}]
+  s.require_paths = [%q{lib}]
+  s.rubygems_version = %q{1.8.6}
   s.summary = %q{include only what you need. No dependencies, no creep}
   s.test_files = [
     "spec/array/compact_blank_spec.rb",
@@ -152,6 +153,7 @@ Gem::Specification.new do |s|
     "spec/hash/slice_spec.rb",
     "spec/hash/zip_spec.rb",
     "spec/hashlike/behave_same_as_hash_spec.rb",
+    "spec/hashlike/deep_hash_spec.rb",
     "spec/hashlike/hashlike_behavior_spec.rb",
     "spec/hashlike/hashlike_via_accessors_spec.rb",
     "spec/hashlike_spec.rb",
@@ -188,7 +190,6 @@ Gem::Specification.new do |s|
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
