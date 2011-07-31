@@ -192,13 +192,14 @@ public
     #
     # Returns a new instance with the given hash used to set all rcvrs.
     #
-    # All args after the first are passed to the initializer.
+    # All args up to the last one are passed to the initializer.
+    # The last arg must be a hash -- its attributes are set on the newly-created object
     #
-    # @param hsh [Hash] attr-value pairs to set on the newly created object
+    # @param hsh [Hash] attr-value pairs to set on the newly created object.
     # @param *args [Array] arguments to pass to the constructor
     # @return [Object] a new instance
     def receive *args
-      hsh = args.extract_options!
+      hsh = args.pop
       raise ArgumentError, "Can't receive (it isn't hashlike): {#{hsh.inspect}} -- the hsh should be the *last* arg" unless hsh.respond_to?(:[]) && hsh.respond_to?(:has_key?)
       obj = self.new(*args)
       obj.receive!(hsh)
