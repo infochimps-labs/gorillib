@@ -1,6 +1,7 @@
 require 'gorillib/object/blank'
 require 'gorillib/object/try'
 require 'gorillib/array/extract_options'
+require 'gorillib/metaprogramming/class_attribute'
 
 # dummy type for receiving True or False
 class Boolean ; end unless defined?(Boolean)
@@ -126,7 +127,7 @@ module Receiver
   #
   def receive! hsh={}
     raise ArgumentError, "Can't receive (it isn't hashlike): {#{hsh.inspect}}" unless hsh.respond_to?(:[]) && hsh.respond_to?(:has_key?)
-    self.class.receiver_attr_names.each do |attr|
+    _receiver_fields.each do |attr|
       if    hsh.has_key?(attr.to_sym) then val = hsh[attr.to_sym]
       elsif hsh.has_key?(attr.to_s)   then val = hsh[attr.to_s]
       else  next ; end
@@ -153,8 +154,20 @@ protected
     self.send("receive_#{attr}", val)
   end
 
+  def _receiver_fields
+    self.class.receiver_attr_names
+  end
+
+  def _receiver_defaults
+    self.class.receiver_defaults
+  end
+
+  def _after_receivers
+    self.class.after_receivers
+  end
+
   def impose_defaults!(hsh)
-    self.class.receiver_defaults.each do |attr, val|
+    _receiver_defaults.each do |attr, val|
       next if attr_set?(attr)
       self.instance_variable_set "@#{attr}", val
     end
@@ -180,7 +193,7 @@ protected
 
 
   def run_after_receivers(hsh)
-    self.class.after_receivers.each do |after_receiver|
+    _after_receivers.each do |after_receiver|
       self.instance_exec(hsh, &after_receiver)
     end
   end
@@ -385,4 +398,5 @@ public
       end
     end
   end
+
 end
