@@ -1,5 +1,6 @@
 require 'gorillib/object/blank'
 require 'gorillib/object/try'
+require 'gorillib/object/try_dup'
 require 'gorillib/array/extract_options'
 require 'gorillib/metaprogramming/class_attribute'
 
@@ -169,7 +170,7 @@ protected
   def impose_defaults!(hsh)
     _receiver_defaults.each do |attr, val|
       next if attr_set?(attr)
-      self.instance_variable_set "@#{attr}", val
+      self.instance_variable_set "@#{attr}", val.try_dup
     end
   end
 
@@ -181,7 +182,7 @@ protected
   #
   # f = Foo.receive({:attribute => 'bad'})
   # => #<Foo:0x10156c820 @attribute="good">
-
+  #
   def replace_options!(hsh)
     self.receiver_attrs.each do |attr, info|
       val = self.instance_variable_get("@#{attr}")
@@ -190,7 +191,6 @@ protected
       end
     end
   end
-
 
   def run_after_receivers(hsh)
     _after_receivers.each do |after_receiver|
