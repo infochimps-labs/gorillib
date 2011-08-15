@@ -467,7 +467,7 @@ describe Receiver do
 
     # ---------------------------------------------------------------------------
 
-    describe 'core class .receive method' do
+    it 'core class .receive method' do
       Symbol.receive('hi').should == :hi
       Integer.receive(3.4).should == 3
       Float.receive("4.5").should == 4.5
