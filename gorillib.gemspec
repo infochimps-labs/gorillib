@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorillib}
-  s.version = "0.1.5"
+  s.version = "0.1.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Infochimps}]
-  s.date = %q{2011-08-02}
+  s.date = %q{2011-08-22}
   s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
   s.email = %q{coders@infochimps.org}
   s.extra_rdoc_files = [
@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     "lib/gorillib/array/compact_blank.rb",
     "lib/gorillib/array/deep_compact.rb",
     "lib/gorillib/array/extract_options.rb",
+    "lib/gorillib/array/random.rb",
     "lib/gorillib/base.rb",
     "lib/gorillib/datetime/flat.rb",
     "lib/gorillib/datetime/parse.rb",
@@ -75,6 +76,7 @@ Gem::Specification.new do |s|
     "lib/gorillib/receiver/tree_diff.rb",
     "lib/gorillib/receiver/validations.rb",
     "lib/gorillib/receiver_model.rb",
+    "lib/gorillib/serialization.rb",
     "lib/gorillib/some.rb",
     "lib/gorillib/string/constantize.rb",
     "lib/gorillib/string/human.rb",
@@ -193,6 +195,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<json>, [">= 0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.12"])
       s.add_development_dependency(%q<yard>, ["~> 0.6.7"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
@@ -209,6 +212,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<spork>, ["~> 0.9.0.rc5"])
       s.add_development_dependency(%q<watchr>, [">= 0"])
     else
+      s.add_dependency(%q<json>, [">= 0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.12"])
       s.add_dependency(%q<yard>, ["~> 0.6.7"])
       s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
@@ -226,6 +230,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<watchr>, [">= 0"])
     end
   else
+    s.add_dependency(%q<json>, [">= 0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.12"])
     s.add_dependency(%q<yard>, ["~> 0.6.7"])
     s.add_dependency(%q<jeweler>, ["~> 1.5.2"])

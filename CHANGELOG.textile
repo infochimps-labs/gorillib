@@ -1,3 +1,12 @@
+h3. 2011-08-21 - Version 0.1.6: Serialization and DeepHash
+
+* Serialization with #to_wire -- like #to_hash, but hands #to_wire down the line to any element that contains it (as opposed to `#to_hash`, which should just do that)
+* Hashlike#tree_merge: combined into the one version; gave it a block in the middle to do any fancy footwork
+* deep_hash -- allows dotted (a.b.c) access to a nested hash
+* Array#random_element -- gets a random member of the array.
+
+Will soon be deprecating Receiver, in favor of the far more powerful Icss::ReceiverModel in the icss library.
+
 h3. 2011-06-29 - Version 0.1.3: Fancier receivers
 
 * can now mix activemodel into a receiver, getting all its validation and other awesomeness
