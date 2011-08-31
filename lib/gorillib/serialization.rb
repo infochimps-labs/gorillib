@@ -47,4 +47,10 @@ class ::Time
   end
 end
 
+class ::NilClass
+  def to_wire(options={})
+    nil
+  end
+end
+
 
