@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{gorillib}
-  s.version = "0.1.6"
+  s.name = "gorillib"
+  s.version = "0.1.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Infochimps}]
-  s.date = %q{2011-08-22}
-  s.description = %q{Gorillib: infochimps lightweight subset of ruby convenience methods}
-  s.email = %q{coders@infochimps.org}
+  s.authors = ["Infochimps"]
+  s.date = "2011-10-22"
+  s.description = "Gorillib: infochimps lightweight subset of ruby convenience methods"
+  s.email = "coders@infochimps.org"
   s.extra_rdoc_files = [
     "LICENSE.textile",
     "README.textile"
@@ -135,70 +135,21 @@ Gem::Specification.new do |s|
     "spec/support/matchers/enumerate_method.rb",
     "spec/support/matchers/evaluate_to_true.rb"
   ]
-  s.homepage = %q{http://infochimps.com/labs}
-  s.licenses = [%q{MIT}]
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.6}
-  s.summary = %q{include only what you need. No dependencies, no creep}
-  s.test_files = [
-    "spec/array/compact_blank_spec.rb",
-    "spec/array/extract_options_spec.rb",
-    "spec/datetime/flat_spec.rb",
-    "spec/datetime/parse_spec.rb",
-    "spec/enumerable/sum_spec.rb",
-    "spec/hash/compact_spec.rb",
-    "spec/hash/deep_compact_spec.rb",
-    "spec/hash/deep_merge_spec.rb",
-    "spec/hash/indifferent_access_spec.rb",
-    "spec/hash/keys_spec.rb",
-    "spec/hash/reverse_merge_spec.rb",
-    "spec/hash/slice_spec.rb",
-    "spec/hash/zip_spec.rb",
-    "spec/hashlike/behave_same_as_hash_spec.rb",
-    "spec/hashlike/deep_hash_spec.rb",
-    "spec/hashlike/hashlike_behavior_spec.rb",
-    "spec/hashlike/hashlike_via_accessors_spec.rb",
-    "spec/hashlike_spec.rb",
-    "spec/logger/log_spec.rb",
-    "spec/metaprogramming/aliasing_spec.rb",
-    "spec/metaprogramming/cattr_accessor_spec.rb",
-    "spec/metaprogramming/class_attribute_spec.rb",
-    "spec/metaprogramming/delegation_spec.rb",
-    "spec/metaprogramming/mattr_accessor_spec.rb",
-    "spec/metaprogramming/singleton_class_spec.rb",
-    "spec/numeric/clamp_spec.rb",
-    "spec/object/blank_spec.rb",
-    "spec/object/try_dup_spec.rb",
-    "spec/object/try_spec.rb",
-    "spec/receiver/acts_as_hash_spec.rb",
-    "spec/receiver_spec.rb",
-    "spec/spec_helper.rb",
-    "spec/string/constantize_spec.rb",
-    "spec/string/human_spec.rb",
-    "spec/string/inflections_spec.rb",
-    "spec/string/inflector_test_cases.rb",
-    "spec/string/truncate_spec.rb",
-    "spec/struct/acts_as_hash_fuzz_spec.rb",
-    "spec/struct/acts_as_hash_spec.rb",
-    "spec/support/hashlike_fuzzing_helper.rb",
-    "spec/support/hashlike_helper.rb",
-    "spec/support/hashlike_struct_helper.rb",
-    "spec/support/hashlike_via_delegation.rb",
-    "spec/support/kcode_test_helper.rb",
-    "spec/support/matchers/be_array_eql.rb",
-    "spec/support/matchers/be_hash_eql.rb",
-    "spec/support/matchers/enumerate_method.rb",
-    "spec/support/matchers/evaluate_to_true.rb"
-  ]
+  s.homepage = "http://infochimps.com/labs"
+  s.licenses = ["MIT"]
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.10"
+  s.summary = "include only what you need. No dependencies, no creep"
+  s.test_files = ["spec/array/compact_blank_spec.rb", "spec/array/extract_options_spec.rb", "spec/datetime/flat_spec.rb", "spec/datetime/parse_spec.rb", "spec/enumerable/sum_spec.rb", "spec/hash/compact_spec.rb", "spec/hash/deep_compact_spec.rb", "spec/hash/deep_merge_spec.rb", "spec/hash/indifferent_access_spec.rb", "spec/hash/keys_spec.rb", "spec/hash/reverse_merge_spec.rb", "spec/hash/slice_spec.rb", "spec/hash/zip_spec.rb", "spec/hashlike/behave_same_as_hash_spec.rb", "spec/hashlike/deep_hash_spec.rb", "spec/hashlike/hashlike_behavior_spec.rb", "spec/hashlike/hashlike_via_accessors_spec.rb", "spec/hashlike_spec.rb", "spec/logger/log_spec.rb", "spec/metaprogramming/aliasing_spec.rb", "spec/metaprogramming/cattr_accessor_spec.rb", "spec/metaprogramming/class_attribute_spec.rb", "spec/metaprogramming/delegation_spec.rb", "spec/metaprogramming/mattr_accessor_spec.rb", "spec/metaprogramming/singleton_class_spec.rb", "spec/numeric/clamp_spec.rb", "spec/object/blank_spec.rb", "spec/object/try_dup_spec.rb", "spec/object/try_spec.rb", "spec/receiver/acts_as_hash_spec.rb", "spec/receiver_spec.rb", "spec/spec_helper.rb", "spec/string/constantize_spec.rb", "spec/string/human_spec.rb", "spec/string/inflections_spec.rb", "spec/string/inflector_test_cases.rb", "spec/string/truncate_spec.rb", "spec/struct/acts_as_hash_fuzz_spec.rb", "spec/struct/acts_as_hash_spec.rb", "spec/support/hashlike_fuzzing_helper.rb", "spec/support/hashlike_helper.rb", "spec/support/hashlike_struct_helper.rb", "spec/support/hashlike_via_delegation.rb", "spec/support/kcode_test_helper.rb", "spec/support/matchers/be_array_eql.rb", "spec/support/matchers/be_hash_eql.rb", "spec/support/matchers/enumerate_method.rb", "spec/support/matchers/evaluate_to_true.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<json>, [">= 0"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.0.12"])
+      s.add_development_dependency(%q<bundler>, ["~> 1"])
       s.add_development_dependency(%q<yard>, ["~> 0.6.7"])
-      s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
+      s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rspec>, ["~> 2.5.0"])
       s.add_development_dependency(%q<spork>, ["~> 0.9.0.rc5"])
       s.add_development_dependency(%q<RedCloth>, [">= 0"])
@@ -213,9 +164,9 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<watchr>, [">= 0"])
     else
       s.add_dependency(%q<json>, [">= 0"])
-      s.add_dependency(%q<bundler>, ["~> 1.0.12"])
+      s.add_dependency(%q<bundler>, ["~> 1"])
       s.add_dependency(%q<yard>, ["~> 0.6.7"])
-      s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
+      s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rspec>, ["~> 2.5.0"])
       s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
       s.add_dependency(%q<RedCloth>, [">= 0"])
@@ -231,9 +182,9 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<json>, [">= 0"])
-    s.add_dependency(%q<bundler>, ["~> 1.0.12"])
+    s.add_dependency(%q<bundler>, ["~> 1"])
     s.add_dependency(%q<yard>, ["~> 0.6.7"])
-    s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
+    s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<rspec>, ["~> 2.5.0"])
     s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
     s.add_dependency(%q<RedCloth>, [">= 0"])
