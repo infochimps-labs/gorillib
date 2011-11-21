@@ -151,7 +151,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<yard>, ["~> 0.6.7"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rspec>, ["~> 2.5.0"])
-      s.add_development_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_development_dependency(%q<spork>, ["~> 0.9.0"])
       s.add_development_dependency(%q<RedCloth>, [">= 0"])
       s.add_development_dependency(%q<rcov>, [">= 0.9.9"])
       s.add_development_dependency(%q<watchr>, [">= 0"])
@@ -160,7 +160,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
       s.add_development_dependency(%q<rspec>, ["~> 2.5.0"])
       s.add_development_dependency(%q<rcov>, [">= 0.9.9"])
-      s.add_development_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_development_dependency(%q<spork>, ["~> 0.9.0"])
       s.add_development_dependency(%q<watchr>, [">= 0"])
     else
       s.add_dependency(%q<json>, [">= 0"])
@@ -168,7 +168,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<yard>, ["~> 0.6.7"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rspec>, ["~> 2.5.0"])
-      s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_dependency(%q<spork>, ["~> 0.9.0"])
       s.add_dependency(%q<RedCloth>, [">= 0"])
       s.add_dependency(%q<rcov>, [">= 0.9.9"])
       s.add_dependency(%q<watchr>, [">= 0"])
@@ -177,7 +177,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
       s.add_dependency(%q<rspec>, ["~> 2.5.0"])
       s.add_dependency(%q<rcov>, [">= 0.9.9"])
-      s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+      s.add_dependency(%q<spork>, ["~> 0.9.0"])
       s.add_dependency(%q<watchr>, [">= 0"])
     end
   else
@@ -186,7 +186,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<yard>, ["~> 0.6.7"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<rspec>, ["~> 2.5.0"])
-    s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+    s.add_dependency(%q<spork>, ["~> 0.9.0"])
     s.add_dependency(%q<RedCloth>, [">= 0"])
     s.add_dependency(%q<rcov>, [">= 0.9.9"])
     s.add_dependency(%q<watchr>, [">= 0"])
@@ -195,7 +195,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
     s.add_dependency(%q<rspec>, ["~> 2.5.0"])
     s.add_dependency(%q<rcov>, [">= 0.9.9"])
-    s.add_dependency(%q<spork>, ["~> 0.9.0.rc5"])
+    s.add_dependency(%q<spork>, ["~> 0.9.0"])
     s.add_dependency(%q<watchr>, [">= 0"])
   end
 end
