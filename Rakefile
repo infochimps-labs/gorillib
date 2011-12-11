@@ -19,14 +19,6 @@ Jeweler::Tasks.new do |gem|
   gem.email       = "coders@infochimps.org"
   gem.authors     = ["Infochimps"]
 
-  gem.add_development_dependency 'bundler', "~> 1.0.12"
-  gem.add_development_dependency 'yard',    "~> 0.6.7"
-  gem.add_development_dependency 'jeweler', "~> 1.5.2"
-  gem.add_development_dependency 'rspec',   "~> 2.5.0"
-  gem.add_development_dependency 'rcov',    ">= 0.9.9"
-  gem.add_development_dependency 'spork',   "~> 0.9.0.rc5"
-  gem.add_development_dependency 'watchr'
-
   ignores = File.readlines(".gitignore").grep(/^[^#]\S+/).map{|s| s.chomp }
   dotfiles = [".gemtest", ".gitignore", ".rspec", ".yardopts"]
   gem.files = dotfiles + Dir["**/*"].
@@ -41,10 +33,12 @@ Jeweler::RubygemsDotOrgTasks.new
 require 'rspec/core'
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
+  Bundler.setup(:default, :development, :test)
   spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
 RSpec::Core::RakeTask.new(:rcov) do |spec|
+  Bundler.setup(:default, :development, :test)
   spec.pattern = 'spec/**/*_spec.rb'
   spec.rcov = true
   spec.rcov_opts = %w[ --exclude .rvm --no-comments --text-summary]
@@ -53,7 +47,10 @@ end
 task :default => :spec
 
 require 'yard'
-YARD::Rake::YardocTask.new
+YARD::Rake::YardocTask.new do
+  Bundler.setup(:default, :development, :docs)
+  require 'redcloth'
+end
 
 # App-specific tasks
 Dir[File.dirname(__FILE__)+'/lib/tasks/**/*.rake'].sort.each{|f| load f }
