@@ -1,4 +1,4 @@
-require File.dirname(__FILE__)+'/../spec_helper'
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
 require 'gorillib/object/try_dup'
 
 describe "try_dup" do
@@ -44,4 +44,3 @@ describe "try_dup" do
     obj.object_id.should == oth.object_id
   end
 end
-

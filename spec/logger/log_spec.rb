@@ -1,11 +1,16 @@
-require File.dirname(__FILE__)+'/../spec_helper'
-CODE_FILE = File.dirname(__FILE__)+'/../../lib/gorillib/logger/log.rb'
-require CODE_FILE
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require 'gorillib/logger/log'
+
 
 describe 'Logger' do
+  # so we can practice loading and unloading
+  def logger_code_file
+    GORILLIB_ROOT_DIR('lib/gorillib/logger/log.rb')
+  end
+
   describe '#dump' do
     it 'inspects each arg and sends tab-separated to Log.debug' do
-      Log.should_receive(:debug).with(%Q{{:hi=>"there"}\t3\t"bye"})
+      Log.should_receive(:debug).with(%r{\{:hi=>"there"\}\t3\t\"bye\".*#{__FILE__}:.*in })
       Log.dump({ :hi => "there" }, 3, "bye")
     end
   end
@@ -13,7 +18,7 @@ describe 'Logger' do
   it 'does not create a log if one exists' do
     dummy = 'dummy'
     Object.instance_eval{ remove_const(:Log) rescue nil ; ::Log = dummy }
-    load(CODE_FILE)
+    load(logger_code_file)
     ::Log.should equal(dummy)
     Object.instance_eval{ remove_const(:Log) rescue nil }
   end
@@ -22,7 +27,7 @@ describe 'Logger' do
     @old_stderr = $stderr
     $stderr = StringIO.new
     Object.instance_eval{ remove_const(:Log) rescue nil }
-    load(CODE_FILE)
+    load(logger_code_file)
     Log.info 'hi mom'
     $stderr.string.should =~ /hi mom/
     $stderr = @old_stderr

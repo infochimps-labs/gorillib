@@ -1,4 +1,4 @@
-require File.dirname(__FILE__)+'/../spec_helper'
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
 require GORILLIB_ROOT_DIR('spec/support/kcode_test_helper')
 require 'gorillib/string/truncate'
 

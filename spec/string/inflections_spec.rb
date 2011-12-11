@@ -1,5 +1,5 @@
-require File.dirname(__FILE__)+'/../spec_helper'
-require File.dirname(__FILE__)+'/inflector_test_cases'
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('inflector_test_cases', File.dirname(__FILE__))
 require 'gorillib/string/inflections'
 
 include InflectorTestCases

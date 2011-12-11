@@ -1,4 +1,4 @@
-require File.dirname(__FILE__)+'/spec_helper.rb'
+require File.expand_path('spec_helper', File.dirname(__FILE__))
 require 'gorillib/metaprogramming/class_attribute'
 require 'gorillib/object/blank'
 require 'time'
@@ -76,11 +76,18 @@ describe Receiver do
       ret = @klass.receive(:a, :b, {})
     end
 
-    it 'accepts an empty arg set (receives an empty hash)' do
+    it 'accepts an empty arg set (as if it got an empty hash)' do
       obj = mock
       @klass.should_receive(:new).and_return(obj)
       obj.should_receive(:receive!).with({})
-      @klass.receive(nil)
+      @klass.receive()
+    end
+
+    it 'accepts an empty hash' do
+      obj = mock
+      @klass.should_receive(:new).and_return(obj)
+      obj.should_receive(:receive!).with({})
+      @klass.receive({})
     end
 
     it 'uses the *last* arg as the hsh to receive' do
@@ -542,4 +549,3 @@ describe Receiver do
 
   end
 end
-

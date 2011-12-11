@@ -1,4 +1,4 @@
-require File.dirname(__FILE__)+'/../spec_helper'
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
 require 'gorillib/metaprogramming/mattr_accessor'
 
 describe Module do
@@ -43,4 +43,3 @@ describe Module do
     end
   end
 end
-

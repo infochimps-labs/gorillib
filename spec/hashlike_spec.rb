@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__)+'/spec_helper')
+require File.expand_path('spec_helper', File.dirname(__FILE__))
 require 'gorillib/hashlike'
 require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')

@@ -1,4 +1,4 @@
-require File.dirname(__FILE__)+'/../spec_helper'
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hashlike'
 require 'gorillib/struct/acts_as_hash'
 require 'gorillib/hash/indifferent_access'

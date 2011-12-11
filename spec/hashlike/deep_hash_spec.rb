@@ -1,10 +1,7 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-require 'gorillib/receiver_model'
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hashlike/deep_hash'
 
-
 class AwesomeHash < Hash
-  # include Gorillib::ReceiverModel
   include Gorillib::Hashlike::DeepHash
 end
 class AwesomeHashSubclass < AwesomeHash ; end
