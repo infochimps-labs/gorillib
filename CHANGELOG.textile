@@ -1,3 +1,9 @@
+h3. 2011-12-11 - Version 0.1.8: Gemfile fixes; Log.dump shows caller
+
+* Gorillib has no real dependencies on spork, rcov, Redcloth, etc; these are only useful for rake tasks. Dialed down the urgency of version req's on rspec, yard, etc, and moved the esoterica (spork, rcov, watchr, RedCloth) into bundler groups. Bundler will still install them if you 'bundle install' from the gorillib directory, but the gemspec no longer forces upstream requirers to consider them dependencies
+* Log.dump adds the immediate caller to the end of its output
+* fix to Gemfile so that early versions of jruby don't hate on it
+
 h3. 2011-08-21 - Version 0.1.6: Serialization and DeepHash
 
 * Serialization with #to_wire -- like #to_hash, but hands #to_wire down the line to any element that contains it (as opposed to `#to_hash`, which should just do that)
