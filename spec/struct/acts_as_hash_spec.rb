@@ -7,10 +7,6 @@ require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_struct_helper')
 require GORILLIB_ROOT_DIR('spec/hashlike/hashlike_behavior_spec')
 
-
-
-
-
 describe Gorillib::Struct::ActsAsHash do
 
   before do

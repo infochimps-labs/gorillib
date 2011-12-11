@@ -8,7 +8,8 @@ require 'logger'
 ::Log = Logger.new($stderr) unless defined?(::Log)
 
 def Log.dump *args
-  debug args.map(&:inspect).join("\t")
+  self.debug([
+      args.map(&:inspect),
+      caller.first
+    ].join("\t"))
 end unless Log.respond_to?(:dump)
-
-
