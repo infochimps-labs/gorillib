@@ -212,7 +212,7 @@ public
     # @param *args [Array] arguments to pass to the constructor
     # @return [Object] a new instance
     def receive *args
-      hsh = args.pop
+      hsh = args.pop || {}
       raise ArgumentError, "Can't receive (it isn't hashlike): {#{hsh.inspect}} -- the hsh should be the *last* arg" unless hsh.respond_to?(:[]) && hsh.respond_to?(:has_key?)
       obj = self.new(*args)
       obj.receive!(hsh)
