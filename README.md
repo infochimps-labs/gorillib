@@ -1,16 +1,16 @@
 
-h2. Gorillib: infochimps' lightweight subset of ruby convenience methods
+## Gorillib: infochimps' lightweight subset of ruby convenience methods
 
-We love the conveniences provided by active_support and extlib, we just don't love them at the same time and on top of each other. active_support is slow to load, has many dependencies, and is all intertwingled. We had too many collisions between active_support 2.x and 3.x and extlib. 
+We love the conveniences provided by `active_support` and `extlib`, we just don't love them at the same time and on top of each other. active_support is slow to load, has many dependencies, and is all intertwingled. We had too many collisions between `active_support` 2.x and 3.x and `extlib`. 
 
-What gorillib gives you is clarity over what features are brought in. If you want to *just* get <code>Object#blank?</code>, just <code>require 'gorillib/object/blank'</code>. No dependencies, no codependents.
+What gorillib gives you is clarity over what features are brought in. If you want to *just* get `Object#blank?`, just `require 'gorillib/object/blank'`. No dependencies, no codependents.
 
 * No creep: include only what you need
 * No dependencies unless audaciously advertised.
-* Upwards compatible with active_record and extlib
-  - the active_support components have significantly more robust internationalization, and some functions have rich option sets in active_support vs. basic functionality in gorillib.  So the rule is if you were happy with gorillib you'll be happy with active_support, but not vice-versa.
+* Upwards compatible with `active_record` and `extlib`
+  - the `active_support` components have significantly more robust internationalization, and some functions have rich option sets in `active_support` vs. basic functionality in `gorillib`.  So the rule is if you were happy with `gorillib` you'll be happy with `active_support`, but not vice-versa.
 
-h3. require 'gorillib/receiver'
+### require 'gorillib/receiver'
 
 Gorillib has at least one powerful addition to the canon: the receiver mixin.
 
@@ -18,11 +18,11 @@ Gorillib has at least one powerful addition to the canon: the receiver mixin.
 * gives you weak type safety but doesn't jack around with setters/getters.
 * object/hash semantics
   
-h3. require 'gorillib'
+### require 'gorillib'
 
 * require 'gorrillib/base'
 
-h3. require 'gorillib/base'
+### require 'gorillib/base'
 
 requires the following libraries:
 
@@ -32,7 +32,7 @@ requires the following libraries:
 * gorillib/array/compact_blank
 * gorillib/object/try
 
-h3. require 'gorillib/some'
+### require 'gorillib/some'
 
 requires @gorillib/base@ and the following additional libraries:
 
@@ -54,7 +54,7 @@ requires @gorillib/base@ and the following additional libraries:
 
 ---------------------------------------------------------------------------
 
-h3. gorillib/array
+### gorillib/array
 
 * *gorrillib/array/extract_options*
   - Array       extract_options!
@@ -64,19 +64,19 @@ h3. gorillib/array
 * *gorrillib/array/deep_compact*
   - Array       deep_compact, deep_compact!
 
-h3. gorillib/datetime
+### gorillib/datetime
 
 * *gorillib/datetime/flat*
   - Date, Time	to_flat
 * *gorillib/datetime/parse*
   - Time        parse_safely
 
-h3. gorillib/enumerable
+### gorillib/enumerable
 
 * *gorillib/enumerable/sum*
   - Enumerable  sum
   
-h3. gorillib/hash
+### gorillib/hash
 
 * *gorillib/hash/compact*
   - Hash        compact, compact!, compact_blank, compact_blank!
@@ -94,12 +94,12 @@ h3. gorillib/hash
 * *gorillib/hash/zip*
   - Hash        Hash.zip
 
-h3. gorillib/logger
+### gorillib/logger
 
 * *gorillib/logger/log*
   - Unless the top-level constant ::Log has been defined, opens a new Logger to STDERR and assigns it to ::Log
 
-h3. gorillib/metaprogramming
+### gorillib/metaprogramming
 
 * *gorillib/metaprogramming/aliasing*
   - alias_method_chain
@@ -116,12 +116,12 @@ h3. gorillib/metaprogramming
 * *gorillib/metaprogramming/delegation*
   - Module#     delegate
 
-h3. gorillib/numeric
+### gorillib/numeric
 
 * *gorillib/numeric/clamp*
   - Numeric     clamp -- coerce a number to lie within a certain min/max
 
-h3. gorillib/object
+### gorillib/object
 
 * *gorillib/object/blank*
   - Object      blank?, present?  (and specialized for all other classes)
@@ -130,7 +130,7 @@ h3. gorillib/object
 * *gorillib/object/try_dup*
   - Object      try_dup
 
-h3. gorillib/string
+### gorillib/string
 
 * *gorillib/string/constantize*
   - String	constantize
@@ -148,9 +148,9 @@ h3. gorillib/string
 
 ---------------------------------------------------------------------------
 
-h2. Maybe and No
+## Maybe and No
 
-h4. Maybe
+#### Maybe
 
 * *Mash*
 * *Receiver*
@@ -162,7 +162,7 @@ h4. Maybe
 * *extlib/module/find_const*
   - Module      find_const
 
-h4. No
+#### No
 
 * String        classify -- this singularizes. You want camelize unless you're in ActiveSupport
 * Object        tap     isn't necessary -- included in 1.8.7+
@@ -173,7 +173,7 @@ h4. No
 
 ---------------------------------------------------------------------------
 
-h2. Credits & Copyright
+## Credits & Copyright
 
 Most of this code is ripped from active_support and extlib -- their license
 carries over. Everything else is Copyright (c) 2011 Infochimps. See LICENSE.txt
