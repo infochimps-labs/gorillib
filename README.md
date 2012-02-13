@@ -26,31 +26,31 @@ Gorillib has at least one powerful addition to the canon: the receiver mixin.
 
 requires the following libraries:
 
-* gorillib/object/blank
-* gorillib/hash/reverse_merge
-* gorillib/hash/compact
-* gorillib/array/compact_blank
-* gorillib/object/try
+* `gorillib/object/blank`
+* `gorillib/hash/reverse_merge`
+* `gorillib/hash/compact`
+* `gorillib/array/compact_blank`
+* `gorillib/object/try`
 
 ### require 'gorillib/some'
 
 requires @gorillib/base@ and the following additional libraries:
 
-* gorillib/logger/log.rb
-* set
-* time
-* date
-* gorillib/array/extract_options
-* gorillib/enumerable/sum
-* gorillib/datetime/flat
-* gorillib/datetime/parse
-* gorillib/hash/zip
-* gorillib/hash/slice
-* gorillib/hash/keys
-* gorillib/metaprogramming/class_attribute
-* gorillib/metaprogramming/cattr_accessor
-* gorillib/metaprogramming/singleton_class
-* gorillib/metaprogramming/remove_method
+* `gorillib/logger/log.rb`
+* `set`
+* `time`
+* `date`
+* `gorillib/array/extract_options`
+* `gorillib/enumerable/sum`
+* `gorillib/datetime/flat`
+* `gorillib/datetime/parse`
+* `gorillib/hash/zip`
+* `gorillib/hash/slice`
+* `gorillib/hash/keys`
+* `gorillib/metaprogramming/class_attribute`
+* `gorillib/metaprogramming/cattr_accessor`
+* `gorillib/metaprogramming/singleton_class`
+* `gorillib/metaprogramming/remove_method`
 
 ---------------------------------------------------------------------------
 
