@@ -20,7 +20,7 @@ Gorillib has at least one powerful addition to the canon: the receiver mixin.
   
 ### require 'gorillib'
 
-* require 'gorrillib/base'
+* `require 'gorrillib/base'`
 
 ### require 'gorillib/base'
 
