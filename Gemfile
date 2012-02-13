@@ -17,6 +17,7 @@ end
 
 group :test do
   gem 'spork',     "~> 0.9.0.rc5", :platform => :mri
-  gem 'rcov',      ">= 0.9.9"
+  gem 'rcov',      ">= 0.9.9",     :platform => :ruby_18
+  gem 'simplecov', :platform => :ruby_19
   gem 'watchr'
 end
