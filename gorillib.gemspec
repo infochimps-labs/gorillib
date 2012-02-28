@@ -5,16 +5,16 @@
 
 Gem::Specification.new do |s|
   s.name = "gorillib"
-  s.version = "0.1.8"
+  s.version = "0.1.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = "2011-12-11"
+  s.date = "2012-02-28"
   s.description = "Gorillib: infochimps lightweight subset of ruby convenience methods"
   s.email = "coders@infochimps.org"
   s.extra_rdoc_files = [
     "LICENSE.textile",
-    "README.textile"
+    "README.md"
   ]
   s.files = [
     ".gitignore",
@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
     "CHANGELOG.textile",
     "Gemfile",
     "LICENSE.textile",
-    "README.textile",
+    "README.md",
     "Rakefile",
     "VERSION",
     "gorillib.gemspec",
@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
     "lib/gorillib/base.rb",
     "lib/gorillib/datetime/flat.rb",
     "lib/gorillib/datetime/parse.rb",
+    "lib/gorillib/dsl_object.rb",
     "lib/gorillib/enumerable/sum.rb",
     "lib/gorillib/hash/compact.rb",
     "lib/gorillib/hash/deep_compact.rb",
@@ -90,6 +91,7 @@ Gem::Specification.new do |s|
     "spec/array/extract_options_spec.rb",
     "spec/datetime/flat_spec.rb",
     "spec/datetime/parse_spec.rb",
+    "spec/dsl_object_spec.rb",
     "spec/enumerable/sum_spec.rb",
     "spec/hash/compact_spec.rb",
     "spec/hash/deep_compact_spec.rb",
@@ -138,9 +140,9 @@ Gem::Specification.new do |s|
   s.homepage = "http://infochimps.com/labs"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.11"
+  s.rubygems_version = "1.8.15"
   s.summary = "include only what you need. No dependencies, no creep"
-  s.test_files = ["spec/array/compact_blank_spec.rb", "spec/array/extract_options_spec.rb", "spec/datetime/flat_spec.rb", "spec/datetime/parse_spec.rb", "spec/enumerable/sum_spec.rb", "spec/hash/compact_spec.rb", "spec/hash/deep_compact_spec.rb", "spec/hash/deep_merge_spec.rb", "spec/hash/indifferent_access_spec.rb", "spec/hash/keys_spec.rb", "spec/hash/reverse_merge_spec.rb", "spec/hash/slice_spec.rb", "spec/hash/zip_spec.rb", "spec/hashlike/behave_same_as_hash_spec.rb", "spec/hashlike/deep_hash_spec.rb", "spec/hashlike/hashlike_behavior_spec.rb", "spec/hashlike/hashlike_via_accessors_spec.rb", "spec/hashlike_spec.rb", "spec/logger/log_spec.rb", "spec/metaprogramming/aliasing_spec.rb", "spec/metaprogramming/cattr_accessor_spec.rb", "spec/metaprogramming/class_attribute_spec.rb", "spec/metaprogramming/delegation_spec.rb", "spec/metaprogramming/mattr_accessor_spec.rb", "spec/metaprogramming/singleton_class_spec.rb", "spec/numeric/clamp_spec.rb", "spec/object/blank_spec.rb", "spec/object/try_dup_spec.rb", "spec/object/try_spec.rb", "spec/receiver/acts_as_hash_spec.rb", "spec/receiver_spec.rb", "spec/spec_helper.rb", "spec/string/constantize_spec.rb", "spec/string/human_spec.rb", "spec/string/inflections_spec.rb", "spec/string/inflector_test_cases.rb", "spec/string/truncate_spec.rb", "spec/struct/acts_as_hash_fuzz_spec.rb", "spec/struct/acts_as_hash_spec.rb", "spec/support/hashlike_fuzzing_helper.rb", "spec/support/hashlike_helper.rb", "spec/support/hashlike_struct_helper.rb", "spec/support/hashlike_via_delegation.rb", "spec/support/kcode_test_helper.rb", "spec/support/matchers/be_array_eql.rb", "spec/support/matchers/be_hash_eql.rb", "spec/support/matchers/enumerate_method.rb", "spec/support/matchers/evaluate_to_true.rb"]
+  s.test_files = ["spec/array/compact_blank_spec.rb", "spec/array/extract_options_spec.rb", "spec/datetime/flat_spec.rb", "spec/datetime/parse_spec.rb", "spec/dsl_object_spec.rb", "spec/enumerable/sum_spec.rb", "spec/hash/compact_spec.rb", "spec/hash/deep_compact_spec.rb", "spec/hash/deep_merge_spec.rb", "spec/hash/indifferent_access_spec.rb", "spec/hash/keys_spec.rb", "spec/hash/reverse_merge_spec.rb", "spec/hash/slice_spec.rb", "spec/hash/zip_spec.rb", "spec/hashlike/behave_same_as_hash_spec.rb", "spec/hashlike/deep_hash_spec.rb", "spec/hashlike/hashlike_behavior_spec.rb", "spec/hashlike/hashlike_via_accessors_spec.rb", "spec/hashlike_spec.rb", "spec/logger/log_spec.rb", "spec/metaprogramming/aliasing_spec.rb", "spec/metaprogramming/cattr_accessor_spec.rb", "spec/metaprogramming/class_attribute_spec.rb", "spec/metaprogramming/delegation_spec.rb", "spec/metaprogramming/mattr_accessor_spec.rb", "spec/metaprogramming/singleton_class_spec.rb", "spec/numeric/clamp_spec.rb", "spec/object/blank_spec.rb", "spec/object/try_dup_spec.rb", "spec/object/try_spec.rb", "spec/receiver/acts_as_hash_spec.rb", "spec/receiver_spec.rb", "spec/spec_helper.rb", "spec/string/constantize_spec.rb", "spec/string/human_spec.rb", "spec/string/inflections_spec.rb", "spec/string/inflector_test_cases.rb", "spec/string/truncate_spec.rb", "spec/struct/acts_as_hash_fuzz_spec.rb", "spec/struct/acts_as_hash_spec.rb", "spec/support/hashlike_fuzzing_helper.rb", "spec/support/hashlike_helper.rb", "spec/support/hashlike_struct_helper.rb", "spec/support/hashlike_via_delegation.rb", "spec/support/kcode_test_helper.rb", "spec/support/matchers/be_array_eql.rb", "spec/support/matchers/be_hash_eql.rb", "spec/support/matchers/enumerate_method.rb", "spec/support/matchers/evaluate_to_true.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
@@ -151,12 +153,16 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, ["~> 1.6"])
       s.add_development_dependency(%q<rspec>, ["~> 2.5"])
       s.add_development_dependency(%q<yard>, ["~> 0.6"])
+      s.add_development_dependency(%q<cucumber>, ["~> 1"])
+      s.add_development_dependency(%q<aruba>, ["~> 0.4"])
     else
       s.add_dependency(%q<json>, [">= 0"])
       s.add_dependency(%q<bundler>, ["~> 1"])
       s.add_dependency(%q<jeweler>, ["~> 1.6"])
       s.add_dependency(%q<rspec>, ["~> 2.5"])
       s.add_dependency(%q<yard>, ["~> 0.6"])
+      s.add_dependency(%q<cucumber>, ["~> 1"])
+      s.add_dependency(%q<aruba>, ["~> 0.4"])
     end
   else
     s.add_dependency(%q<json>, [">= 0"])
@@ -164,6 +170,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, ["~> 1.6"])
     s.add_dependency(%q<rspec>, ["~> 2.5"])
     s.add_dependency(%q<yard>, ["~> 0.6"])
+    s.add_dependency(%q<cucumber>, ["~> 1"])
+    s.add_dependency(%q<aruba>, ["~> 0.4"])
   end
 end
 
