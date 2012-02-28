@@ -9,6 +9,8 @@ group :development do
   gem 'jeweler',   "~> 1.6"
   gem 'rspec',     "~> 2.5"
   gem 'yard',      "~> 0.6"
+  gem 'cucumber',  "~> 1"
+  gem 'aruba',     "~> 0.4"
 end
 
 group :docs do
@@ -18,6 +20,6 @@ end
 group :test do
   gem 'spork',     ">= 0.9.0", :platform => :mri
   gem 'rcov',      ">= 0.9.9", :platform => :ruby_18
-  gem 'simplecov', ">= 0.5"    :platform => :ruby_19
+  gem 'simplecov', ">= 0.5",   :platform => :ruby_19
   gem 'watchr'
 end
