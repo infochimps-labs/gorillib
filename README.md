@@ -1,7 +1,7 @@
 
 ## Gorillib: infochimps' lightweight subset of ruby convenience methods
 
-We love the conveniences provided by `active_support` and `extlib`, we just don't love them at the same time and on top of each other. active_support is slow to load, has many dependencies, and is all intertwingled. We had too many collisions between `active_support` 2.x and 3.x and `extlib`. 
+We love the conveniences provided by `active_support` and `extlib`, we just don't love them at the same time and on top of each other. active_support is slow to load, has many dependencies, and is all intertwingled. We had too many collisions between `active_support` 2.x and 3.x and `extlib`.
 
 What gorillib gives you is clarity over what features are brought in. If you want to *just* get `Object#blank?`, just `require 'gorillib/object/blank'`. No dependencies, no codependents.
 
@@ -17,7 +17,7 @@ Gorillib has at least one powerful addition to the canon: the receiver mixin.
 * lightweight
 * gives you weak type safety but doesn't jack around with setters/getters.
 * object/hash semantics
-  
+
 ### require 'gorillib'
 
 * `require 'gorrillib/base'`
@@ -75,7 +75,7 @@ requires @gorillib/base@ and the following additional libraries:
 
 * *gorillib/enumerable/sum*
   - Enumerable  sum
-  
+
 ### gorillib/hash
 
 * *gorillib/hash/compact*

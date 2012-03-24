@@ -4,9 +4,9 @@
 
 #### New functionality
 
-* `pathname/path_to` -- templated file paths
-
-* `serialization/to_zaml` -- predictable, structured YAML writer
+* `pathname/path_to`            -- templated file paths
+* `serialization/to_zaml`       -- predictable, structured YAML writer
+* `test_helpers/capture_output` -- swallows $stdout/$stderr for testing purposes
 
 #### Renamed
 
@@ -15,13 +15,12 @@
 
 #### Removed:
 
+* `receiver` and `receiver/*`                 -- see `property` and others
 * `hash/tree_merge` and `hashlike/tree_merge` -- use overlays
 * `hash/indifferent_access`                   -- use `mash`
 * `metaprogramming/cattr_accessor`            -- use `class_attribute`
 * `metaprogramming/mattr_accessor`            -- discouraged
-* `receiver` and `receiver/*`                 -- see `property` and others
 * `struct/*`                                  -- discouraged
-
 
 ## Version 0.x
 

@@ -3,7 +3,7 @@ require 'stringio'
 ::Enumerator = Enumerable::Enumerator if (RUBY_VERSION < '1.9') && (not defined?(::Enumerator))
 
 module HashlikeFuzzingHelper
-  
+
   #
   # Fuzz testing for hashlike behavior. This throws a whole bunch of
   #
@@ -51,9 +51,9 @@ module HashlikeFuzzingHelper
     ['a', 'b', 'z'], ['a', 'b', 'a', :c, 'a'],
     [[1, 2, [3, 4]]], [[1, [2, 3, [4, 5, 6]]]]
   ]
-  
+
   INPUTS_WHEN_FULLY_HASHLIKE = INPUTS_FOR_ALL_HASHLIKES + INPUTS_WHEN_ARBITRARY_KEYS_ALLOWED + INPUTS_WHEN_INDIFFERENT_ACCESS
-  
+
   #
   # Hacky methods to do comparison
   #
@@ -90,38 +90,36 @@ module HashlikeFuzzingHelper
         input.last.is_a?(Proc) && (input.last.arity == 1))
       return
     end
-    
-    old_stderr = $stderr
-    $stderr = StringIO.new('', 'w')
-    obj_1.should_receive(:warn){|str| stderr_output << str }.at_most(:once)
-    begin
-      expected = send_to(obj_1, method_to_test, input)
-    rescue Exception => e
-      expected = e
-    end
-    expected_stderr = $stderr.string
 
-    $stderr = StringIO.new('', 'w')
-    obj_1.should_receive(:warn){|str| stderr_output << str }.at_most(:once)
-    case expected
-    when Exception
-      lambda{ send_to(obj_2, method_to_test, input) }.should raise_error(expected.class, err_regex(expected))
-    when Enumerator
-      actual = send_to(obj_2, method_to_test, input)
-      actual.should be_a(Enumerator)
-      actual.inspect.gsub(/[\"\:]/, '').gsub(/0x[a-f\d]+/,'').should == expected.inspect.gsub(/[\"\:]/, '').gsub(/0x[a-f\d]+/,'')
-    else # run the method
-      actual = send_to(obj_2, method_to_test, input)
-      if expected.is_a?(Hash) && (RUBY_VERSION < '1.9')
-        actual.should be_hash_eql(expected)
-      elsif expected.is_a?(Array) && (RUBY_VERSION < '1.9')
-        actual.should be_array_eql(expected)
-      else
-        actual.should == expected
+    quiet_output do
+      obj_1.should_receive(:warn){|str| stderr_output << str }.at_most(:once)
+      begin
+        expected = send_to(obj_1, method_to_test, input)
+      rescue Exception => e
+        expected = e
       end
+      expected_stderr = $stderr.string
+
+      obj_1.should_receive(:warn){|str| stderr_output << str }.at_most(:once)
+      case expected
+      when Exception
+        lambda{ send_to(obj_2, method_to_test, input) }.should raise_error(expected.class, err_regex(expected))
+      when Enumerator
+        actual = send_to(obj_2, method_to_test, input)
+        actual.should be_a(Enumerator)
+        actual.inspect.gsub(/[\"\:]/, '').gsub(/0x[a-f\d]+/,'').should == expected.inspect.gsub(/[\"\:]/, '').gsub(/0x[a-f\d]+/,'')
+      else # run the method
+        actual = send_to(obj_2, method_to_test, input)
+        if expected.is_a?(Hash) && (RUBY_VERSION < '1.9')
+          actual.should be_hash_eql(expected)
+        elsif expected.is_a?(Array) && (RUBY_VERSION < '1.9')
+          actual.should be_array_eql(expected)
+        else
+          actual.should == expected
+        end
+      end
+      $stderr.string.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '').should == expected_stderr.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '')
     end
-    $stderr.string.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '').should == expected_stderr.sub(/.*\.rb:\d+:(?:in `send\w*':)? /, '')
-    $stderr = old_stderr
   end
 
 end

@@ -1,4 +1,6 @@
-unless defined?(HASHLIKE_BEHAVIOR_SPEC)
+require 'gorillib/test_helpers/capture_output'
+RSpec.configure{|c| c.include Gorillib::TestHelpers }
+
 describe '', :hashlike_spec => true do
 
   # ===========================================================================
@@ -441,10 +443,12 @@ describe '', :hashlike_spec => true do
         ret_val.should      == :returned_as_default
       end
       it 'if block and default are both given, issues a warning and runs the block' do
-        set_in_block = nil
-        ret_val = @hshlike.fetch(:new_key, :spurious_default){|k| set_in_block = "got: #{k}" ; "hello!" }
-        ret_val.should      == "hello!"
-        set_in_block.should == "got: new_key"
+        quiet_output do
+          set_in_block = nil
+          ret_val = @hshlike.fetch(:new_key, :spurious_default){|k| set_in_block = "got: #{k}" ; "hello!" }
+          ret_val.should      == "hello!"
+          set_in_block.should == "got: new_key"
+        end
       end
     end
     it 'something something convert_key' unless ENV['QUIET_RSPEC']
@@ -818,7 +822,5 @@ describe '', :hashlike_spec => true do
     end
   end
 
-
-
-end
-end ; HASHLIKE_BEHAVIOR_SPEC = true
+  ::HASHLIKE_BEHAVIOR_SPEC = true
+end unless defined?(::HASHLIKE_BEHAVIOR_SPEC)

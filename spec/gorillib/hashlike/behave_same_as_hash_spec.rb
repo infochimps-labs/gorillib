@@ -3,6 +3,9 @@ require 'enumerator'
 require 'gorillib/hashlike'
 require 'gorillib/enumerable/sum'
 
+require 'gorillib/test_helpers/capture_output'
+RSpec.configure{|c| c.include Gorillib::TestHelpers }
+
 require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_fuzzing_helper')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
