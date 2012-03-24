@@ -44,7 +44,7 @@ describe 'metaprogramming' do
 
   describe 'alias_method_chain' do
 
-    it 'does not have an effect if already provided by another library.'
+    it 'does not have an effect if already provided by another library.' unless ENV['QUIET_RSPEC']
 
     it 'creates a with_ and without_ method that chain' do
       @instance.should respond_to(:bar)

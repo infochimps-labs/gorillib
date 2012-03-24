@@ -100,6 +100,6 @@ describe Gorillib::Hashlike do
     end
 
   else
-    it 'skipping full specs -- set environment variable FULL_SPECS=true to run all specs'
+    it 'skipping lengthy example-based testing -- set environment variable FULL_SPECS=true to run all specs'
   end
 end

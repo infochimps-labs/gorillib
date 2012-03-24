@@ -5,26 +5,29 @@
 
 Gem::Specification.new do |s|
   s.name = "gorillib"
-  s.version = "0.1.8"
+  s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
-  s.date = "2011-12-11"
+  s.date = "2012-03-24"
   s.description = "Gorillib: infochimps lightweight subset of ruby convenience methods"
   s.email = "coders@infochimps.org"
   s.extra_rdoc_files = [
-    "LICENSE.textile",
-    "README.textile"
+    "LICENSE.md",
+    "README.md"
   ]
   s.files = [
     ".gitignore",
     ".rspec",
-    "CHANGELOG.textile",
+    "CHANGELOG.md",
     "Gemfile",
-    "LICENSE.textile",
-    "README.textile",
+    "Guardfile",
+    "LICENSE.md",
+    "README.md",
     "Rakefile",
     "VERSION",
+    "examples/dsl_object/dm.rb",
+    "examples/dsl_object/fiddle.rb",
     "gorillib.gemspec",
     "lib/gorillib.rb",
     "lib/gorillib/array/compact_blank.rb",
@@ -84,8 +87,6 @@ Gem::Specification.new do |s|
     "lib/gorillib/string/truncate.rb",
     "lib/gorillib/struct/acts_as_hash.rb",
     "lib/gorillib/struct/hashlike_iteration.rb",
-    "notes/fancy_hashes_and_receivers.textile",
-    "notes/hash_rdocs.textile",
     "spec/array/compact_blank_spec.rb",
     "spec/array/extract_options_spec.rb",
     "spec/datetime/flat_spec.rb",

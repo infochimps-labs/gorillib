@@ -12,7 +12,7 @@ describe 'metaprogramming' do
       @object = @class.new
     end
 
-    it 'does not have an effect if already provided by another library.'
+    it 'does not have an effect if already provided by another library.' unless ENV['QUIET_RSPEC']
 
     it 'uses mattr default' do
       @class.foo.should be_nil

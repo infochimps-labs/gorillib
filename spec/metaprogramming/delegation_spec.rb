@@ -69,7 +69,7 @@ describe 'metaprogramming' do
       @david = Someone.new("David", Somewhere.new("Paulina", "Chicago"))
     end
 
-    it 'does not have an effect if already provided by another library.'
+    it 'does not have an effect if already provided by another library.' unless ENV['QUIET_RSPEC']
 
     it 'delegates to methods' do
       @david.street.should == "Paulina"

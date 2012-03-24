@@ -239,7 +239,7 @@ describe Gorillib::Struct::ActsAsHash do
         set_in_block.should == "got: is_missing"
       end
     end
-    it 'something something convert_key'
+    it 'something something convert_key' unless ENV['QUIET_RSPEC']
   end
 
   describe '#key' do

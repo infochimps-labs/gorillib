@@ -14,7 +14,7 @@ describe '' do
 
     it 'returns nil on a missing (but valid) key' do
       @hshlike[:new_key].should == nil
-    end    
+    end
   end
 
   shared_examples_for :references_string_and_symbol_keys_equivalently do
@@ -48,7 +48,7 @@ describe '' do
       obj = Object.new
       @hshlike[obj] = :i_haz_obj ; @hshlike[obj].should == :i_haz_obj; @hshlike.delete(obj).should == :i_haz_obj
       @hshlike.should be_hash_eql(HashlikeHelper::BASE_HSH)
-    end    
+    end
   end
 
   shared_examples_for :accepts_arbitrary_keys do
@@ -56,7 +56,7 @@ describe '' do
       @hshlike[:fnord] = 69
       @hshlike[:fnord].should == 69
       @hshlike.delete(:fnord).should == 69
-      @hshlike[:boink].should be_nil     
+      @hshlike[:boink].should be_nil
     end
   end
 
@@ -100,7 +100,7 @@ describe '' do
   # ===========================================================================
   #
   # Iteration
-  
+
   shared_examples_for :with_no_block_returns_enumerator do |method_to_test|
     it('returns an enumerator'){ @hshlike.send(method_to_test).should enumerate_method(@hshlike, method_to_test) }
   end
@@ -163,7 +163,7 @@ describe '' do
     end
   end
 
-  shared_examples_for :each_key_on_stringlike_keys do 
+  shared_examples_for :each_key_on_stringlike_keys do
     it 'calls block once for each key in hsh' do
       seen_keys = []
       @hshlike.each_key{|k| seen_keys << k }
@@ -299,7 +299,7 @@ describe '' do
       seen_args.should be_array_eql([[:a, nil, :aa], [:b, nil, nil], [:c, nil, :cc], [1, nil, 2]])
     end
   end
-  
+
   # ===========================================================================
   #
   # Retrieval and Membership
@@ -307,7 +307,7 @@ describe '' do
   shared_examples_for :hashlike_values do
     it 'returns a new array populated with the values from hsh' do
       @hshlike.values.should be_array_eql([100, 200, 300, nil, false])
-    end    
+    end
   end
 
   shared_examples_for :hashlike_values_at_or_of do |method_to_test|
@@ -330,7 +330,7 @@ describe '' do
     end
     it 'is zero for an empty hashlike' do
       @empty_hshlike.send(method_to_test).should == 0
-    end    
+    end
   end
 
   shared_examples_for :hashlike_has_key? do |method_to_test|
@@ -347,7 +347,7 @@ describe '' do
       @hshlike.should evaluate_to_true(method_to_test, :nil_val)
       @hshlike.should evaluate_to_true(method_to_test, :false_val)
     end
-    it 'something something convert_key'
+    it 'something something convert_key' unless ENV['QUIET_RSPEC']
   end
 
   shared_examples_for :hashlike_has_key_predefined_always_present do |method_to_test|
@@ -364,7 +364,7 @@ describe '' do
       @hshlike.should evaluate_to_true(method_to_test, :nil_val)
       @hshlike.should evaluate_to_true(method_to_test, :false_val)
     end
-    it 'something something convert_key'
+    it 'something something convert_key' unless ENV['QUIET_RSPEC']
   end
 
   shared_examples_for :hashlike_has_key_string_and_symbol_equivalent do |method_to_test|
@@ -405,7 +405,7 @@ describe '' do
       @hshlike.send(method_to_test, false).should == true
       @hshlike.send(method_to_test, nil).should   == true
     end
-    it 'something something convert_key'
+    it 'something something convert_key' unless ENV['QUIET_RSPEC']
   end
 
   shared_examples_for :hashlike_has_value_on_complex_keys do |method_to_test|
@@ -447,7 +447,7 @@ describe '' do
         set_in_block.should == "got: new_key"
       end
     end
-    it 'something something convert_key'
+    it 'something something convert_key' unless ENV['QUIET_RSPEC']
   end
 
   shared_examples_for :hashlike_key do
@@ -463,7 +463,7 @@ describe '' do
       if (RUBY_VERSION >= '1.9')
         @hshlike.key(999).should == :a
       end
-    end    
+    end
   end
 
   shared_examples_for :hashlike_assoc do
@@ -474,7 +474,7 @@ describe '' do
     it 'returns nil if missing' do
       @hshlike.assoc(:i_am_missing).should be_nil
     end
-    it 'something something convert_key'
+    it 'something something convert_key' unless ENV['QUIET_RSPEC']
   end
 
   shared_examples_for :hashlike_rassoc do
@@ -485,7 +485,7 @@ describe '' do
     end
     it 'returns nil if missing' do
       @hshlike.rassoc(:i_am_missing).should be_nil
-    end    
+    end
   end
 
   shared_examples_for :hashlike_empty? do
@@ -496,7 +496,7 @@ describe '' do
       @empty_hshlike.empty?.should == false
     end
   end
-  
+
   # ===========================================================================
   #
   # Update, merge!, merge
@@ -537,7 +537,7 @@ describe '' do
       obj = Object.new
       lambda{ @hshlike.send(method_to_test, obj) }.should raise_error(TypeError, "can't convert Object into Hash")
     end
-    it 'something something convert_key'
+    it 'something something convert_key' unless ENV['QUIET_RSPEC']
   end
 
   shared_examples_for :merging_method_with_normal_keys do |method_to_test|
@@ -617,7 +617,7 @@ describe '' do
       ret_val = @hshlike.send(method_to_test, {:a => "aaa", :b => 200, :nil_val => "here", :new_key => "zzz" })
       ret_val.should equal(@hshlike)
       @hshlike.should be_hash_eql({:a=>"aaa", :b=>200, :c=>300, :nil_val=>"here", :false_val=>false, :new_key=>"zzz"})
-    end    
+    end
   end
 
   shared_examples_for :merging_method_returning_new do |method_to_test|
@@ -741,7 +741,7 @@ describe '' do
       ret_val.should be_hash_eql(@empty_hshlike)
       ret_val.should be_empty
       @hshlike.should be_empty
-    end    
+    end
   end
 
   # ===========================================================================
@@ -753,7 +753,7 @@ describe '' do
       ret_val = @hshlike.to_hash
       ret_val.should be_an_instance_of(Hash)
       ret_val.should == HashlikeHelper::BASE_HSH
-    end    
+    end
   end
 
   shared_examples_for :hashlike_invert do
@@ -818,7 +818,7 @@ describe '' do
     end
   end
 
-  
-  
+
+
 end
 end ; HASHLIKE_BEHAVIOR_SPEC = true

@@ -8,7 +8,7 @@ describe 'metaprogramming' do
       @sub = Class.new(@klass)
     end
 
-    it 'does not have an effect if already provided by another lib.'
+    it 'does not have an effect if already provided by another lib.' unless ENV['QUIET_RSPEC']
 
     it 'defaults to nil' do
       @klass.setting.should be_nil

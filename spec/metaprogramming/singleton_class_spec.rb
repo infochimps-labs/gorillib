@@ -7,6 +7,6 @@ describe 'Singleton Class' do
     class << o; self end.should == o.singleton_class
   end
 
-  it 'does not have an effect if already provided by another library.'
+  it 'does not have an effect if already provided by another library.' unless ENV['QUIET_RSPEC']
 
 end
