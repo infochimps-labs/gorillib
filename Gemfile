@@ -12,7 +12,6 @@ group :development do
 end
 
 group :docs do
-  gem 'RedCloth'
 end
 
 group :test do

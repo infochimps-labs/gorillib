@@ -1,10 +1,16 @@
-h3. 2011-12-11 - Version 0.1.8: Gemfile fixes; Log.dump shows caller
+## Version 1.0
+
+### 2012-04 - Version 1.0.0: DSL Magic
+
+## Version 0.x
+
+### 2011-12-11 - Version 0.1.8: Gemfile fixes; Log.dump shows caller
 
 * Gorillib has no real dependencies on spork, rcov, Redcloth, etc; these are only useful for rake tasks. Dialed down the urgency of version req's on rspec, yard, etc, and moved the esoterica (spork, rcov, watchr, RedCloth) into bundler groups. Bundler will still install them if you 'bundle install' from the gorillib directory, but the gemspec no longer forces upstream requirers to consider them dependencies
 * Log.dump adds the immediate caller to the end of its output
 * fix to Gemfile so that early versions of jruby don't hate on it
 
-h3. 2011-08-21 - Version 0.1.6: Serialization and DeepHash
+### 2011-08-21 - Version 0.1.6: Serialization and DeepHash
 
 * Serialization with #to_wire -- like #to_hash, but hands #to_wire down the line to any element that contains it (as opposed to `#to_hash`, which should just do that)
 * Hashlike#tree_merge: combined into the one version; gave it a block in the middle to do any fancy footwork
@@ -13,27 +19,27 @@ h3. 2011-08-21 - Version 0.1.6: Serialization and DeepHash
 
 Will soon be deprecating Receiver, in favor of the far more powerful Icss::ReceiverModel in the icss library.
 
-h3. 2011-06-29 - Version 0.1.3: Fancier receivers
+### 2011-06-29 - Version 0.1.3: Fancier receivers
 
 * can now mix activemodel into a receiver, getting all its validation and other awesomeness
 * added receiver_model as an experimental 'I'm a fancy cadillac-style receiver'
 
-h3. 2011-06-24 Version 0.1.2: Receiver body fixes
+### 2011-06-24 Version 0.1.2: Receiver body fixes
 
 * Better @Object.try@ (via active_support)
 * Receiver body can now be an interpolated string or a hash; this lets you use anonymous classes. Added tuple methods (does an in-order traversal).
 * Bugfix for inclusion order in ActsAsHash
 
-h3. Version 0.1.0: Hashlike refactor, Receiver arrives
+### Version 0.1.0: Hashlike refactor, Receiver arrives
 
-v0.1.0 brings
+v0.1.0 brings:
+
 * Receiver module
 * refeactoring of hash decorations into a new hashlike class
 * ability to inject hashlike behavior into Struct
 
-h3. Version 0.0.7: full test coverage!
+### Version 0.0.7: full test coverage!
 
-<pre>
         lib/
         |-- gorillib.rb
         `-- gorillib
@@ -78,4 +84,4 @@ h3. Version 0.0.7: full test coverage!
                 |-- human.rb
                 |-- inflections.rb
                 `-- truncate.rb
-</pre>
+

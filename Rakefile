@@ -37,20 +37,19 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
-RSpec::Core::RakeTask.new(:rcov) do |spec|
-  Bundler.setup(:default, :development, :test)
-  spec.pattern = 'spec/**/*_spec.rb'
-  spec.rcov = true
-  spec.rcov_opts = %w[ --exclude .rvm --no-comments --text-summary]
-end
-
-task :default => :spec
+# RSpec::Core::RakeTask.new(:rcov) do |spec|
+#   Bundler.setup(:default, :development, :test)
+#   spec.pattern = 'spec/**/*_spec.rb'
+#   spec.rcov = true
+#   spec.rcov_opts = %w[ --exclude .rvm --no-comments --text-summary]
+# end
 
 require 'yard'
 YARD::Rake::YardocTask.new do
   Bundler.setup(:default, :development, :docs)
-  require 'redcloth'
 end
 
 # App-specific tasks
 Dir[File.dirname(__FILE__)+'/lib/tasks/**/*.rake'].sort.each{|f| load f }
+
+task :default => :spec
