@@ -266,7 +266,7 @@ describe Gorillib::Struct::ActsAsHash do
   # ===========================================================================
   #
   # Update, merge!, merge
-
+  #
 
   describe 'update' do
     it_should_behave_like :merging_method, :update

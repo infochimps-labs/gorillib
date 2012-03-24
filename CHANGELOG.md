@@ -2,6 +2,19 @@
 
 ### 2012-04 - Version 1.0.0: DSL Magic
 
+* 
+
+* moved `gorillib/serialization` to `gorillib/serialization/to_wire`
+
+Removed:
+
+* `hash/tree_merge.rb` and `hashlike/tree_merge.rb` -- use overlays
+* `metaprogramming/cattr_accessor.rb` -- use `class_attribute`
+* `metaprogramming/mattr_accessor.rb` -- discouraged
+* `receiver.rb` and `receiver/*` -- see `property` and others
+* `struct/*.rb` -- discouraged
+
+
 ## Version 0.x
 
 ### 2011-12-11 - Version 0.1.8: Gemfile fixes; Log.dump shows caller
