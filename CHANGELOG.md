@@ -2,17 +2,25 @@
 
 ### 2012-04 - Version 1.0.0: DSL Magic
 
-* 
+#### New functionality
+
+* `pathname/path_to` -- templated file paths
+
+* `serialization/to_zaml` -- predictable, structured YAML writer
+
+#### Renamed
 
 * moved `gorillib/serialization` to `gorillib/serialization/to_wire`
+* renamed `datetime/flat` to `datetime/to_flat`
 
-Removed:
+#### Removed:
 
-* `hash/tree_merge.rb` and `hashlike/tree_merge.rb` -- use overlays
-* `metaprogramming/cattr_accessor.rb` -- use `class_attribute`
-* `metaprogramming/mattr_accessor.rb` -- discouraged
-* `receiver.rb` and `receiver/*` -- see `property` and others
-* `struct/*.rb` -- discouraged
+* `hash/tree_merge` and `hashlike/tree_merge` -- use overlays
+* `hash/indifferent_access`                   -- use `mash`
+* `metaprogramming/cattr_accessor`            -- use `class_attribute`
+* `metaprogramming/mattr_accessor`            -- discouraged
+* `receiver` and `receiver/*`                 -- see `property` and others
+* `struct/*`                                  -- discouraged
 
 
 ## Version 0.x

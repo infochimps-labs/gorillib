@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/metaprogramming/delegation'
 
 module One
@@ -63,7 +63,7 @@ end
 #
 # Tests start
 
-describe 'metaprogramming' do
+describe 'metaprogramming', :metaprogramming_spec => true do
   describe 'delegation' do
     before do
       @david = Someone.new("David", Somewhere.new("Paulina", "Chicago"))

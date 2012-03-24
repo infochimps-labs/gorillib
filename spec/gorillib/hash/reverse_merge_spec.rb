@@ -1,7 +1,7 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hash/reverse_merge'
 
-describe Hash do
+describe Hash, :hashlike_spec => true do
   describe 'reverse_merge' do
 
     before do

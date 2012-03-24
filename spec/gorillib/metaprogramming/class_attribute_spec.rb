@@ -1,7 +1,7 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/metaprogramming/class_attribute'
 
-describe 'metaprogramming' do
+describe 'metaprogramming', :metaprogramming_spec => true do
   describe 'class_attribute' do
     before do
       @klass = Class.new { class_attribute :setting }

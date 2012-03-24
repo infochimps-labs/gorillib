@@ -1,5 +1,5 @@
 unless defined?(HASHLIKE_BEHAVIOR_SPEC)
-describe '' do
+describe '', :hashlike_spec => true do
 
   # ===========================================================================
   #

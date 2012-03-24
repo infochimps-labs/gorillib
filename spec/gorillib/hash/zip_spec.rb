@@ -1,7 +1,7 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hash/zip'
 
-describe Hash do
+describe Hash, :hashlike_spec => true do
   describe '#zip' do
     it 'builds a hash from keys and values' do
       Hash.zip([:a, :b, :c], [1, 2, 3]).should == { :a => 1, :b => 2, :c => 3 }

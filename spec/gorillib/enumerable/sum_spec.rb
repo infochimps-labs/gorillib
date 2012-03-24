@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/enumerable/sum'
 
 Payment = Struct.new(:price)
@@ -6,7 +6,7 @@ class SummablePayment < Payment
   def +(p) self.class.new(price + p.price) end
 end
 
-describe Enumerable do
+describe Enumerable, :simple_spec => true do
   describe '#sum' do
     it 'sums lists of numbers to a number' do
       [5, 15, 10].sum        .should == 30

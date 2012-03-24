@@ -1,8 +1,8 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
-require 'gorillib/datetime/flat'
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
+require 'gorillib/datetime/to_flat'
 require 'gorillib/datetime/parse'
 
-describe DateTime do
+describe Time, :datetime_spec => true do
   describe '#parse_safely' do
     before do
       @time_utc  = Time.parse("2011-02-03T04:05:06 UTC")

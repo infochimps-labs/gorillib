@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/string/constantize'
 
 module Ace
@@ -17,7 +17,7 @@ end
 
 module InflectorTest
 
-  describe 'String' do
+  describe 'String', :string_spec => true do
     describe '#constantize' do
       it "works from within instance" do
         @obj = Ace::Base::Case.new

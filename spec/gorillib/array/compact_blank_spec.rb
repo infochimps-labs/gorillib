@@ -1,7 +1,7 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/array/compact_blank'
 
-describe Array do
+describe Array, :simple_spec => true do
 
   describe '#compact_blank' do
     it 'with empty' do

@@ -1,7 +1,7 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hash/compact'
 
-describe Hash do
+describe Hash, :hashlike_spec => true do
   describe '#compact' do
     it 'scrubs nil' do
       hsh = { 1 => nil }

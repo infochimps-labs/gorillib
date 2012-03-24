@@ -4,7 +4,7 @@ require 'gorillib/hash/reverse_merge'
 require 'gorillib/hash/deep_merge'
 require 'gorillib/hash/deep_dup'
 
-describe Gorillib::HashWithIndifferentAccess do
+describe Gorillib::HashWithIndifferentAccess, :hashlike_spec => true do
   class IndifferentHash < Gorillib::HashWithIndifferentAccess
   end
 

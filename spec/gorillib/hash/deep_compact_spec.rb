@@ -1,8 +1,8 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hash/deep_compact'
 require 'gorillib/array/deep_compact'
 
-describe Hash do
+describe Hash, :hashlike_spec => true do
   describe 'array/deep_compact and hash/deep_compact' do
     it "should respond to the method deep_compact!" do
       { }.should respond_to :deep_compact!
@@ -19,7 +19,7 @@ describe Hash do
   end
 end
 
-describe Array do
+describe Array, :hashlike_spec => true do
   describe 'array/deep_compact and hash/deep_compact' do
     it "should respond to the method deep_compact!" do
       [ ].should respond_to :deep_compact!

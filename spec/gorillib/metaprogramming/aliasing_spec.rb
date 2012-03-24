@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/metaprogramming/aliasing'
 
 module BarMethodAliaser
@@ -32,7 +32,7 @@ module BarMethods
   end
 end
 
-describe 'metaprogramming' do
+describe 'metaprogramming', :metaprogramming_spec => true do
   before do
     Object.const_set :FooClassWithBarMethod, Class.new{ def bar() 'bar' end }
     @instance = FooClassWithBarMethod.new

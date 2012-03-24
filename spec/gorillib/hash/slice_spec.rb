@@ -1,9 +1,9 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hash/slice'
 
 class HashSubclass < Hash ; end
 
-describe Hash do
+describe Hash, :hashlike_spec => true do
   describe '#slice' do
     it 'should return a new hash with only the given keys' do
       original = { :a => 'x', :b => 'y', :c => 10 }

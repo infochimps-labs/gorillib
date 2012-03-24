@@ -1,10 +1,11 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require File.expand_path('inflector_test_cases', File.dirname(__FILE__))
 require 'gorillib/string/inflections'
 
 include InflectorTestCases
 
-describe String do
+describe String, :string_spec => true do
+
   describe 'camelize' do
     CamelToUnderscore.each do |cameled, underscored|
       it underscored do

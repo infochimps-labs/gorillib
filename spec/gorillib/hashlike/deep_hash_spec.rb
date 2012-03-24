@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hashlike/deep_hash'
 
 class AwesomeHash < Hash
@@ -6,7 +6,7 @@ class AwesomeHash < Hash
 end
 class AwesomeHashSubclass < AwesomeHash ; end
 
-describe Gorillib::Hashlike::DeepHash do
+describe Gorillib::Hashlike::DeepHash, :hashlike_spec => true do
 
   before(:each) do
     @deep_hash = AwesomeHash.new({ :nested_1 => { :nested_2 => { :leaf_3 => "val3" }, :leaf_2 => ['arr'] }, :leaf_at_top => 'val1b' })

@@ -1,7 +1,7 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/object/try_dup'
 
-describe "try_dup" do
+describe 'try_dup', :simple_spec => true do
   it "returns a duplicate version on regular objects" do
     obj = Object.new
     oth = obj.try_dup

@@ -1,9 +1,9 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/hashlike'
 require 'gorillib/hashlike/hashlike_via_accessors'
 require GORILLIB_ROOT_DIR('spec/support/hashlike_via_delegation')
 require GORILLIB_ROOT_DIR('spec/support/hashlike_helper')
-require GORILLIB_ROOT_DIR('spec/hashlike/hashlike_behavior_spec')
+require GORILLIB_ROOT_DIR('spec/gorillib/hashlike/hashlike_behavior_spec')
 
 class SimpleHashlikeViaAccessors
   attr_accessor :a, :b, :c, :nil_val, :false_val, :new_key
@@ -11,7 +11,7 @@ class SimpleHashlikeViaAccessors
   include Gorillib::Hashlike
 end
 
-describe Gorillib::Hashlike::HashlikeViaAccessors do
+describe Gorillib::Hashlike::HashlikeViaAccessors, :hashlike_spec => true do
 
   before do
     @hshlike                 = SimpleHashlikeViaAccessors.new.merge(HashlikeHelper::HASH_TO_TEST_HL_V_A.dup)

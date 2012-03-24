@@ -1,8 +1,8 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/logger/log'
 
 
-describe 'Logger' do
+describe 'Logger', :simple_spec => true do
   # so we can practice loading and unloading
   def logger_code_file
     GORILLIB_ROOT_DIR('lib/gorillib/logger/log.rb')

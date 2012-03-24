@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'enumerator'
 require 'gorillib/hashlike'
 require 'gorillib/enumerable/sum'
@@ -13,7 +13,7 @@ class InternalHashWithEquality < InternalHash
   def ==(other_hash)     @myhsh == other_hash ; end
 end
 
-describe Gorillib::Hashlike do
+describe Gorillib::Hashlike, :hashlike_spec => true do
 
   if ENV['FULL_SPECS']
 

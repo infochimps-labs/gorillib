@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/array/extract_options'
 
 class HashSubclass < Hash
@@ -10,7 +10,7 @@ class ExtractableHashSubclass < Hash
   end
 end
 
-describe Array do
+describe Array, :simple_spec => true do
   describe '#extract_options!' do
     it 'pulls empty hash from empty array' do
       [].extract_options!.should == {}

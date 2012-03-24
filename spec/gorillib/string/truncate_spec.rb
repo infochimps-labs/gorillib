@@ -1,8 +1,9 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require GORILLIB_ROOT_DIR('spec/support/kcode_test_helper')
 require 'gorillib/string/truncate'
 
-describe String do
+describe String, :string_spec => true do
+
   describe '#truncate' do
     it 'leaves a short string alone' do
       "Hello World!".truncate(12).should == "Hello World!"
@@ -25,14 +26,6 @@ describe String do
             should == "\354\225\210\353\205\225\355..."
         end
       end
-
-      # # FIXME: breaks on ruby 1.8
-      # it 'works with unicode when kcode=u' do
-      #   Gorillib::KcodeTestHelper.with_kcode('u') do
-      #     "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 \354\225\204\353\235\274\353\246\254\354\230\244".truncate(10).
-      #       should == "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 ..."
-      #   end
-      # end
     else # ruby 1.9
       it 'works with unicode' do
         "\354\225\204\353\246\254\353\236\221 \354\225\204\353\246\254 \354\225\204\353\235\274\353\246\254\354\230\244".force_encoding('UTF-8').truncate(10).
@@ -40,4 +33,5 @@ describe String do
       end
     end
   end
+
 end

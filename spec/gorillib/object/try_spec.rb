@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/object/try'
 
 class Foo
@@ -7,7 +7,7 @@ class Foo
   end
 end
 
-describe Object do
+describe Object, :simple_spec => true do
   describe '#try' do
     it 'returns nil if item does not #respond_to? method' do
       Foo.new.try(:i_am_not_a_method).should be_nil

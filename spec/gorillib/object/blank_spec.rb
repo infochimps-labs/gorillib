@@ -1,7 +1,7 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 require 'gorillib/object/blank'
 
-describe 'object/blank' do
+describe 'object/blank', :simple_spec => true do
   describe Object do
     it 'should provide blank?' do
       Object.new.should respond_to(:blank?)
