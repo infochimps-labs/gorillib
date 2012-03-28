@@ -168,6 +168,15 @@ module Gorillib
         #   meta_module.module_eval{ attr_accessor(field.name) }
         # end
 
+        # def add_field_accessor(field_name, schema)
+        #   visibility = schema[:accessor] || :public
+        #   reader_meth = field_name ; writer_meth = "#{field_name}=" ; attr_name = "@#{field_name}"
+        #   unless (visibility == :none)
+        #     define_metamodel_method(reader_meth, visibility){    instance_variable_get(attr_name)    }
+        #     define_metamodel_method(writer_meth, visibility){|v| instance_variable_set(attr_name, v) }
+        #   end
+        # end
+
       protected
 
         # Methods deprecated on the Object class which can be safely overridden
