@@ -24,6 +24,13 @@ module Gorillib
       def field field_name, type, schema={}
       end
 
+      def has_field?(name)
+        fields.has_key?(name.to_sym)
+      end
+
+
+
+
       #
       #     ruby type   kind        avro type     json type   example
       #     ----------  --------    ---------     ---------   ---------

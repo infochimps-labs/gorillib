@@ -1,3 +1,27 @@
+## Goals:
+
+* lightweight -- if you only want to say `field :foo, Integer` you don't need to get the kitchen sink.
+* supports attr_accessor-like fields and DSL-like fields
+* cascading type conversion
+* no magic on initialize, getters or setters
+* can be mixed in to a Hash-like (get/set elements) or a normal object (get/set instance variables)
+* compatible with ActiveModel
+* compatible with Avro
+* no method_missing
+
+
+### Features
+
+* `field` to define an attribute
+* attribute defaults
+* model validation, including required attributes
+* type conversion
+* hooks
+* sort ordering
+* 
+
+
+## Types
 
 These are types:
 
