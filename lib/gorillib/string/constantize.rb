@@ -1,21 +1,28 @@
+require 'gorillib/string/inflector'
 class String
 
-  # Constantize tries to find a declared constant with the name specified
+  # +constantize+ tries to find a declared constant with the name specified
   # in the string. It raises a NameError when the name is not in CamelCase
-  # or is not initialized.
+  # or is not initialized.  See Gorillib::Model::Inflector.constantize
   #
-  # @example
-  #   "Module".constantize #=> Module
-  #   "Class".constantize #=> Class
-  #
-  # This is the extlib version of String#constantize, which has different
-  # behavior wrt using lexical context: see active_support/inflector/methods.rb
-  #
+  # Examples
+  #   "Module".constantize  # => Module
+  #   "Class".constantize   # => Class
+  #   "blargle".constantize # => NameError: wrong constant name blargle
   def constantize
-    unless /\A(?:::)?([A-Z]\w*(?:::[A-Z]\w*)*)\z/ =~ self
-      raise NameError, "#{self.inspect} is not a valid constant name!"
-    end
-
-    Object.module_eval("::#{$1}", __FILE__, __LINE__)
+    Gorillib::Model::Inflector.constantize(self)
   end unless method_defined?(:constantize)
+
+  # +safe_constantize+ tries to find a declared constant with the name specified
+  # in the string. It returns nil when the name is not in CamelCase
+  # or is not initialized.  See Gorillib::Model::Inflector.safe_constantize
+  #
+  # Examples
+  #   "Module".safe_constantize  # => Module
+  #   "Class".safe_constantize   # => Class
+  #   "blargle".safe_constantize # => nil
+  def safe_constantize
+    Gorillib::Model::Inflector.safe_constantize(self)
+  end unless method_defined?(:safe_constantize)
+
 end
