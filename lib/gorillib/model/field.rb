@@ -23,7 +23,7 @@ module Gorillib
         @model   = model
         @name    = name.to_sym
         @type    = type
-        @options = Mash.new
+        @options = {}
         receive!(hsh)
       end
 
@@ -33,6 +33,22 @@ module Gorillib
         @default = @options[:default]
       end
 
+      def doc
+        @options[:doc] || "#{name} attribute"
+      end
+
+      INSCRIBED_METHOD_TYPES = [:read, :write, :unset]
+      
+      def visibility(meth_type)
+        raise ArgumentError, "method type must be one of #{INSCRIBED_METHOD_TYPES.join(', ')}" unless INSCRIBED_METHOD_TYPES.include?(meth_type)
+        case @options[meth_type]
+        when true  then :public
+        when nil   then :public
+        when false then :none
+        else            @options[meth_type]
+        end
+      end
+      
       # Compare field definitions
       #
       # @example
@@ -50,6 +66,10 @@ module Gorillib
 
       def [](key)
         @options[key.to_sym]
+      end
+
+      def to_hash
+        @options
       end
 
       # The field name
@@ -74,8 +94,8 @@ module Gorillib
       #
       # @since 0.6.0
       def inspect
-        args = [name.inspect, type.to_s, to_hash.map{|key, val| "#{key.inspect} => #{val.inspect}" }.sort]
-        "field #{args.join(", ")}"
+        args = [name.inspect, type.to_s, to_hash.map{|key, val| "#{key.inspect} => #{val.inspect}" }].reject(&:blank?)
+        "field(#{args.join(", ")})"
       end
 
     protected
@@ -85,7 +105,7 @@ module Gorillib
 
       module Valid
         VALID_NAME_RE = /\A[A-Za-z_][A-Za-z0-9_]+\z/
-        def validate_name!(name)
+        def self.validate_name!(name)
           raise TypeError,     "can't convert #{name.class} into Symbol" unless name.respond_to? :to_sym
           raise ArgumentError, "Name must start with [A-Za-z_] and subsequently contain only [A-Za-z0-9_]" unless name =~ VALID_NAME_RE
         end

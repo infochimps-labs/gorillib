@@ -13,7 +13,6 @@
 A model class    has fields
 A model instance has attributes that correspond to those fields
 
-
     `.receive`            .new, #receive!
     `#receive!`           `receive_attribute` on each attribute in the hash; `receive_remaining` on the leftovers
     `#receive_attribute`  type converts val, calls `write_attribute`

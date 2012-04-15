@@ -1,5 +1,5 @@
-module Gorillib
-  module RecordType
+module Meta
+  module Type
 
     # Provides a set of class methods for defining a field schema and instance
     # methods for reading and writing attributes.
@@ -7,14 +7,87 @@ module Gorillib
     # @example Usage
     #   class Person
     #     include Gorillib::Meta::RecordType
-    #     field :name, String, :doc => 'Full name of person'
+    #
+    #     field :name,   String,  :doc => 'Full name of person'
+    #     field :height, Float,   :doc => 'Height in meters'
     #   end
     #
-    #   person = Person.new
+    #   person      = Person.new
     #   person.name = "Bob Dobbs, Jr"
+    #   puts person  #=> #<Person name="Bob Dobbs, Jr">
     #
-    module Attributes
-      extend ActiveSupport::Concern
+    module RecordType
+
+      extend Gorillib::Concern
+
+      # Returns a Hash of all attributes
+      #
+      # @example Get attributes
+      #   person.attributes # => { :name => "Ben Poweski" }
+      #
+      # @return [Hash{Symbol => Object}] The Hash of all attributes
+      #
+      # FIXME: should this include unset
+      #
+      def attributes
+        self.class.field_names.inject({}) do |hsh, fn|
+          hsh[fn] = read_attribute(fn) if attribute_set?(fn) ; hsh
+        end
+      end
+
+      # Read a value from the model's attributes.
+      #
+      # @example Reading an attribute
+      #   person.read_attribute(:name)
+      #
+      # @param [String, Symbol, #to_s] fn The name of the attribute to get.
+      #
+      # @return [Object] The value of the attribute.
+      #
+      # @raise [UnknownAttributeError] if the attribute is unknown
+      #
+      def read_attribute(fn)
+        if self.class.has_field?(fn)
+          send(fn.to_s)
+        else
+          raise UnknownFieldError, "unknown field: #{fn}"
+        end
+      end
+
+      # Write the value of a single attribute.
+      #
+      # @example Writing an attribute
+      #   person.write_attribute(:name, "Benjamin")
+      #
+      # @param [String, Symbol, #to_s] fn The fn of the attribute to update.
+      # @param [Object] value The value to set for the attribute.
+      #
+      # @raise [UnknownAttributeError] if the attribute is unknown
+      #
+      def write_attribute(fn, value)
+        if self.class.has_field?(fn)
+          send("#{fn}=", value)
+        else
+          raise UnknownAttributeError, "unknown attribute: #{fn}"
+        end
+      end
+
+      def unset_attribute(fn)
+        write_attribute(fn, nil)
+      end
+
+      def attribute_set?
+        true
+      end
+
+      def attribute_default(fn)
+        val = case field.default
+        case val
+        when nil  then nil
+        when Proc then (val.arity == 0) ? instance_exec(&val) : val.call(self, fn)
+        else           field.default
+        end
+      end
 
       # Two records are equal if they have the same class and their attributes
       # are equal.
@@ -27,23 +100,10 @@ module Gorillib
       # @return [true, false] True if attributes are equal and other is instance
       #   of the same Class, false if not.
       #
-      # @since 0.2.0
       def ==(other)
-        return false unless other.instance_of? self.class
+        return false unless other.instance_of?(self.class)
         attributes == other.attributes
       end
-
-      # Returns a Hash of all attributes
-      #
-      # @example Get attributes
-      #   person.attributes # => { :name => "Ben Poweski" }
-      #
-      # @return [Hash{Symbol => Object}] The Hash of all attributes
-      #
-      def attributes
-        Hash[ self.class.field_names.map{|key| [key, read_attribute(key)] } ]
-      end
-      alias_method :to_hash, :attributes
 
       # Returns the class name plus its attributes
       #
@@ -57,65 +117,11 @@ module Gorillib
         str
       end
 
-      # Read a value from the model's attributes.
-      #
-      # @example Read an attribute with read_attribute
-      #   person.read_attribute(:name)
-      # @example Read an attribute with bracket syntax
-      #   person[:name]
-      #
-      # @param [String, Symbol, #to_s] name The name of the attribute to get.
-      #
-      # @return [Object] The value of the attribute.
-      #
-      # @raise [UnknownAttributeError] if the attribute is unknown
-      #
-      def read_attribute(name)
-        if self.class.has_field?(name)
-          send(name.to_s)
-        else
-          raise UnknownFieldError, "unknown field: #{name}"
-        end
-      end
-      alias_method :[], :read_attribute
-
-      # Write the value of a single attribute
-      #
-      # @example Write the attribute with write_attribute
-      #   person.write_attribute(:name, "Benjamin")
-      # @example Write an attribute with bracket syntax
-      #   person[:name] = "Benjamin"
-      #
-      # @param [String, Symbol, #to_s] name The name of the attribute to update.
-      # @param [Object] value The value to set for the attribute.
-      #
-      # @raise [UnknownAttributeError] if the attribute is unknown
-      #
-      # @since 0.2.0
-      def write_attribute(name, value)
-        if self.class.has_field?(name)
-          send("#{name}=", value)
-        else
-          raise UnknownAttributeError, "unknown attribute: #{name}"
-        end
-      end
-      alias_method :[]=, :write_attribute
-
     protected
 
-      # Overrides ActiveModel::AttributeMethods
-      # @private
-      def attribute_method?(attr_name)
-        self.class.has_field?(attr_name)
-      end
-
       module ClassMethods
-        included do
-          class_attribute :fields unless self.respond_to?(:fields)
-          self.fields ||= Hash.new
-        end
 
-        # Defines an field
+        # Defines a new field
         #
         # For each field that is defined, a getter and setter will be added as
         # an instance method to the model. An Field instance will be added to
@@ -124,19 +130,31 @@ module Gorillib
         # @example
         #   field :height, Integer
         #
-        # @param [Symbol] name                   -- The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]`
+        # @param [Symbol] fn                     -- The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]`
         # @param [Class]  type                   -- The field's type (required)
         # @option options [String] doc           -- Documentation string for the field (optional)
         # @option options [Proc, Object] default -- Default value, or proc that instance can evaluate to find default value
         #
-        # @raise [DangerousAttributeError] if the attribute name conflicts with
+        # @macro [attach] property
+        #   @return [$2] the $1 property ($3)
+        #
+        # @raise [DangerousAttributeError] if the field name conflicts with
         #   existing methods
         #
-        def field(name, type, options={})
-          field_def = Gorillib::Model::Field.new(name, type, options)
-          fields[field_def.name] = field_def
+        def field(fn, type, options={})
+          field_def = ::Gorillib::Model::Field.new(fn, type, options)
+          @_fields[field_def.name] = field_def
           define_field_methods(field_def)
           field_def
+        end
+
+        def fields
+          fields = {}
+          self.ancestors.reverse.each do |ancestor|
+            next unless ancestor.instance_variable_defined?('@_fields')
+            fields.merge! ancestor.instance_variable_get('@_fields')
+          end
+          fields
         end
 
         # Array of field names as Symbols
@@ -154,52 +172,27 @@ module Gorillib
           "#{self.name}[#{ field_names.join(", ") }]"
         end
 
-        # def meta_module
-        #   "Meta::Type::#{self.name}Type"
-        # end
-        #
-        # def meta_module_method(name, &block)
-        # end
-        #
-        # def define_field_methods(field)
-        #   meta_module_method("receive_#{field}") do
-        #
-        #   end
-        #   meta_module.module_eval{ attr_accessor(field.name) }
-        # end
-
-        # def add_field_accessor(field_name, schema)
-        #   visibility = schema[:accessor] || :public
-        #   reader_meth = field_name ; writer_meth = "#{field_name}=" ; attr_name = "@#{field_name}"
-        #   unless (visibility == :none)
-        #     define_metamodel_method(reader_meth, visibility){    instance_variable_get(attr_name)    }
-        #     define_metamodel_method(writer_meth, visibility){|v| instance_variable_set(attr_name, v) }
-        #   end
-        # end
-
       protected
 
-        # Methods deprecated on the Object class which can be safely overridden
-        DEPRECATED_OBJECT_METHODS = %w[ id type ]
-
-        # Overrides ActiveModel::AttributeMethods
-        # @private
-        def instance_method_already_implemented?(method_name)
-          deprecated_object_method = DEPRECATED_OBJECT_METHODS.include?(method_name.to_s)
-          already_implemented = !deprecated_object_method && self.allocate.respond_to?(method_name, true)
-          raise DangerousAttributeError, %Q{An attribute method named "#{method_name}" would conflict with an existing method} if already_implemented
-          false
+        def define_field_methods(field)
+          ivar_name = "@#{field.name}"
+          define_metamodel_method(field.name,            field.visibility(:read )){    instance_variable_get(ivar_name)    }
+          define_metamodel_method("#{field.name}=",      field.visibility(:write)){|v| instance_variable_set(ivar_name, v) }
+          define_metamodel_method("unset_#{field.name}", field.visibility(:unset)){    remove_instance_variable(ivar_name) }
         end
 
       private
 
         # assign fields to subclasses
-        #
-        # FIXME: can't add fields to superclass after subclass was made
         def inherited(subclass)
           super
-          subclass.fields = fields.dup
+          subclass.instance_variable_set('@_fields', {})
         end
+      end
+
+      included do
+        extend Meta::Schema::NamedSchema
+        @_fields = {}
       end
     end
 

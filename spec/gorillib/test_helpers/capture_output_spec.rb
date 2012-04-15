@@ -68,13 +68,4 @@ describe Gorillib::TestHelpers, :simple_spec => true do
 
   end
 
-  it 'makes module_functions' do
-    klass = Class.new
-    klass.private_method_defined?(:capture_output).should be_false
-    klass.private_method_defined?(:quiet_output  ).should be_false
-    klass.send(:include, Gorillib::TestHelpers)
-    klass.private_method_defined?(:capture_output).should be_true
-    klass.private_method_defined?(:quiet_output  ).should be_true
-  end
-
 end

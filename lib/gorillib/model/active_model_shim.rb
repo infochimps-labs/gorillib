@@ -13,14 +13,23 @@ module Gorillib
     module ActiveModelShim
       extend  Gorillib::Concern
       extend  ActiveModel::Naming
-      include ActiveModel::Conversion
+      include Gorillib::Model::Conversion
       include ActiveModel::Validations
 
       # @return [false]
       def persisted?
         false
       end
-    end
+
+      # Overrides ActiveModel::AttributeMethods
+      # @private
+      def attribute_method?(attr_name)
+        self.class.has_field?(attr_name)
+      end
+
+      module ClassMethods
+      end # ActiveModelShim::ClassMethods
+    end # ActiveModelShim
 
   end
 end

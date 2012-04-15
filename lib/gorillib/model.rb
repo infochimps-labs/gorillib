@@ -1,7 +1,4 @@
 require "gorillib/metaprogramming/concern"
-require "gorillib/object/try_dup"
-
-require "gorillib/model/attributes"
 
 module Gorillib
   #
