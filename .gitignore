@@ -51,3 +51,4 @@ pkg/*
 .vendor
 .bundle
 Gemfile.lock
+old/*

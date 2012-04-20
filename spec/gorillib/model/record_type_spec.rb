@@ -13,71 +13,74 @@ require 'model_test_helpers'
 
 require 'pry'
 
-describe Gorillib::Model, :model_spec => true do
-  context '.field' do
+
+describe 'Gorillib::Record' do
+
+  describe 'Gorillib::RecordSchema' do
+    context ".metamodel" do
+      it "supplies the field-specific methods (`receive_foo`, etc)"
+      it "is injected right after the RecordType module"
+    end
+
+    context ".field" do
+      it "describes a property"
+      it "cannot override a parent's field"
+      context ":type option" do
+      end
+
+      context "on a non-builder model," do
+        it "supplies a reader method #foo to call read_attribute(:foo)"
+        it_behaves_like "... with right visibility"
+        it "supplies a writer method #foo= to call write_attribute(:foo)"
+        it_behaves_like "... with right visibility"
+      end
+    end
+
+    context ".fields" do
+      it 'is a hash of Gorillib::Model::Field objects'
+      it 'contains parent fields followed by own fields'
+    end
+
+    context '.receive' do
+      it 'creates a new instance using the given attributes'
+      it 'triggers the after_receive hooks'
+    end
+
+    context '.initialize' do
+      it 'recursively accepts the given attributes'
+      it 'calls super'
+    end
+
   end
 
-  context '.fields' do
-    it 'has no fields by default' do
-      poppa_smurf.fields.should == {}
-    end
+  context '#receive'
 
-    it 'inherits parent fields' do
-      poppa_smurf.field :height, Integer
-      smurfette.field   :pulchritude, Float
-      poppa_smurf.fields.keys.should == [ :height ]
-      smurfette.fields.keys.should   == [ :height, :pulchritude ]
-    end
-
-    it 'raises an error if a field is redefined' do
-      poppa_smurf.field :height, Integer
-      poppa_smurf.send(:define_method, :boogie){ 'na na na' }
-      ->{ smurfette.field   :height, Float }.should raise_error(::Gorillib::Model::DangerousFieldError, /A field named 'height'.*conflict/)
-      ->{ smurfette.field   :boogie, Float }.should raise_error(::Gorillib::Model::DangerousFieldError, /A field named 'boogie'.*conflict/)
-    end
-  end
+  context '#update_attributes'
 
 end
 
-describe Meta::Schema::NamedSchema, :model_spec => true do
-
-  context '.metamodel' do
-    it 'defines a new module named Meta::[KlassName]Type' do
-      defined?(::Meta::Gorillib::Scratch::PoppaSmurfType).should be_false
-      poppa_smurf.metamodel.should == ::Meta::Gorillib::Scratch::PoppaSmurfType
-    end
-    it 'includes metamodule in host class' do
-      poppa_smurf.metamodel
-      poppa_smurf.should            < ::Meta::Gorillib::Scratch::PoppaSmurfType
-    end
+shared_examples_for 'primitive attribute behavior' do
+  it '#read_attribute returns nil if unset'
+  it '#read_attribute returns the given value after a #write_attribute'
+  it 'after a #write_attribute, the attribute is set' do
+    unset.should == false
   end
+  it "#write_attribute updates an existing value"
+  it "#unset_attribute clears the attribute"
+  it "#unset_attribute means the attribute is not set"
+  it "#unset_attribute works even if already unset"
+end
 
-  context '#define_metamodel_method' do
-    before{ Meta::Schema::NamedSchema.send(:public, :define_metamodel_method) }
+describe "[mixin for attr_accessor strategy]" do
+  it 'read_attribute  gets an instance variable'
+  it 'write_attribute sets an instance variable'
+  it 'unset_attribute removes the instance variable'
+  it 'supplies primitive attribute behavior'
+end
 
-    it 'adds method to metamodel' do
-      poppa_smurf.define_metamodel_method(:smurf){ 'smurfy!' }
-      poppa_smurf.public_instance_methods.should include(:smurf)
-      poppa_smurf.metamodel.public_instance_methods.should include(:smurf)
-      poppa_smurf.new.smurf.should == 'smurfy!'
-    end
-
-    context 'visibility' do
-      it 'raises an error if an illegal visibility is given' do
-        poppa_smurf.define_metamodel_method(:smurf, :public){ 'public' }
-        poppa_smurf.public_instance_methods.should include(:smurf)
-      end
-      it 'raises an error if an illegal visibility is given' do
-        poppa_smurf.define_metamodel_method(:smurf, :private){ 'private' }
-        poppa_smurf.private_instance_methods.should include(:smurf)
-      end
-      it 'raises an error if an illegal visibility is given' do
-        poppa_smurf.define_metamodel_method(:smurf, :protected){ 'protected' }
-        poppa_smurf.protected_instance_methods.should include(:smurf)
-      end
-      it 'raises an error if an illegal visibility is given' do
-        ->{ poppa_smurf.define_metamodel_method(:smurf, :smurfily){ } }.should raise_error(ArgumentError, /^Visibility must be.*'smurfily'/)
-      end
-    end
-  end
+describe "[mixin for hash-access strategy]" do
+  it 'read_attribute  calls []'
+  it 'write_attribute calls []='
+  it 'unset_attribute calls #delete'
+  it 'supplies primitive attribute behavior'
 end

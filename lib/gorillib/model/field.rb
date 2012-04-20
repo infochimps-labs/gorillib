@@ -7,38 +7,62 @@ module Gorillib
     class Field
       remove_possible_method(:type)
 
-      # [Gorillib::Model] Model owning this field
-      attr_reader :model
-      # [Symbol] The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]` (required)
-      attr_reader :name
-      # [Class] The field's type (required)
-      attr_reader :type
-      # [String] Documentation string for the field (optional)
+      class_attribute :allowed_attr_names
+      self.allowed_attr_names = [:doc, :default, :reader, :writer, :unsetter]
+
+      # [Gorillib::Model]    Model owning this field
+      attr_reader   :model
+      # [Symbol]             The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]` (required)
+      attr_reader   :name
+      # [Class]              The field's type (required)
+      attr_reader   :type
+      # [String]             Documentation string for the field (optional)
       attr_accessor :doc
-      # [Proc, Object] Default value, or proc that instance can evaluate to find default value
+      # [Proc, Object]       Default value, or proc that instance can evaluate to find default value
       attr_accessor :default
+
+      # * aliases
+      # * order
+      # * dirty
+      # * lazy
+      # * mass assignable
+      # * identifier / index
+      # * hook
+      # * validates / required
+      #   - presence     => true
+      #   - uniqueness   => true
+      #   - numericality => true             # also :==, :>, :>=, :<, :<=, :odd?, :even?, :equal_to, :less_than, etc
+      #   - length       => { :<  => 7 }     # also :==, :>=, :<=, :is, :minimum, :maximum
+      #   - format       => { :with => /.*/ }
+      #   - inclusion    => { :in => [1,2,3] }
+      #   - exclusion    => { :in => [1,2,3] }
 
       def initialize(name, type, model, hsh={})
         Valid.validate_name!(name)
         @model   = model
         @name    = name.to_sym
         @type    = type
-        @options = {}
         receive!(hsh)
       end
 
       def receive!(hsh)
         @options.merge!(hsh)
-        @doc     = @options[:doc]
-        @default = @options[:default]
+        self.doc     = @options[:doc]
+        self.default = @options[:default]
       end
 
+      def to_hash
+        @options
+      end
+
+      # __________________________________________________________________________
+
       def doc
-        @options[:doc] || "#{name} attribute"
+        @doc || "#{name} attribute"
       end
 
       INSCRIBED_METHOD_TYPES = [:read, :write, :unset]
-      
+
       def visibility(meth_type)
         raise ArgumentError, "method type must be one of #{INSCRIBED_METHOD_TYPES.join(', ')}" unless INSCRIBED_METHOD_TYPES.include?(meth_type)
         case @options[meth_type]
@@ -48,40 +72,11 @@ module Gorillib
         else            @options[meth_type]
         end
       end
-      
-      # Compare field definitions
-      #
-      # @example
-      #   field_a <=> field_b
-      #
-      # @param [Gorillib::Model::Field, Object] other The other
-      #   field definition to compare with.
-      #
-      # @return [-1, 0, 1, nil]
-      def <=>(other)
-        return nil unless other.is_a?(Gorillib::Model::Field)
-        return nil if name == other.name && to_hash != other.to_hash
-        self.name.to_s <=> other.name.to_s
-      end
-
-      def [](key)
-        @options[key.to_sym]
-      end
-
-      def to_hash
-        @options
-      end
 
       # The field name
       # @return [String] the field name
       def to_s
         name.to_s
-      end
-
-      # The field name
-      # @return [Symbol] the field name
-      def to_sym
-        name
       end
 
       # Returns the code that would generate the field definition
@@ -100,9 +95,6 @@ module Gorillib
 
     protected
 
-      # The field's options
-      attr_reader :options
-
       module Valid
         VALID_NAME_RE = /\A[A-Za-z_][A-Za-z0-9_]+\z/
         def self.validate_name!(name)
@@ -110,7 +102,7 @@ module Gorillib
           raise ArgumentError, "Name must start with [A-Za-z_] and subsequently contain only [A-Za-z0-9_]" unless name =~ VALID_NAME_RE
         end
       end
-      
+
     end
   end
 end

@@ -52,7 +52,7 @@ requires @gorillib/base@ and the following additional libraries:
 * `gorillib/metaprogramming/singleton_class`
 * `gorillib/metaprogramming/remove_method`
 
----------------------------------------------------------------------------
+__________________________________________________________________________
 
 ### gorillib/array
 
@@ -145,31 +145,6 @@ requires @gorillib/base@ and the following additional libraries:
   - Array	as_sentence
 * *gorillib/string/truncate*
   - String	truncate
-
----------------------------------------------------------------------------
-
-## Maybe and No
-
-#### Maybe
-
-* *Mash*
-* *Receiver*
-* *Struct*
-* *gorillib/string/escaping*: _DEPENDENCIES_: htmlentities, addressable/uri
-  - String	 xml_escape
-  - String	 url_escape
-  - String	 escape_regexp, unescape_regexp
-* *extlib/module/find_const*
-  - Module      find_const
-
-#### No
-
-* String        classify -- this singularizes. You want camelize unless you're in ActiveSupport
-* Object        tap     isn't necessary -- included in 1.8.7+
-* Symbol        to_proc isn't necessary -- included in 1.8.7+
-* Class         class_inheritable_attribute -- use class_attribute instead
-* Object        to_flat on anything but Time and Date -- poorly-defined
-* Object        returning -- deprecated in favor of #tap
 
 ---------------------------------------------------------------------------
 

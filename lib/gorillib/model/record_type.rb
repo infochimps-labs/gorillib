@@ -27,11 +27,11 @@ module Meta
       #
       # @return [Hash{Symbol => Object}] The Hash of all attributes
       #
-      # FIXME: should this include unset
+      # FIXME: should this be made to only include unset attributes? or to return UnsetNull for unset attributes?
       #
       def attributes
         self.class.field_names.inject({}) do |hsh, fn|
-          hsh[fn] = read_attribute(fn) if attribute_set?(fn) ; hsh
+          hsh[fn] = read_attribute(fn) ; hsh
         end
       end
 
@@ -81,11 +81,11 @@ module Meta
       end
 
       def attribute_default(fn)
-        val = case field.default
+        val = field.default
         case val
         when nil  then nil
         when Proc then (val.arity == 0) ? instance_exec(&val) : val.call(self, fn)
-        else           field.default
+        else           val.try_dup
         end
       end
 
