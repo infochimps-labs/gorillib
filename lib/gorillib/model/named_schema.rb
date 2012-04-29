@@ -1,5 +1,5 @@
-module Meta
-  module Schema
+module Gorillib
+  module Model
 
     #
     # Provides
@@ -17,35 +17,23 @@ module Meta
       #
       def metamodel
         return @metamodel if @metamodel
-        @metamodel = Meta::Schema::NamedSchema.get_nested_module("Meta::#{self.name}Type")
+        @metamodel = ::Gorillib::Model::NamedSchema.get_nested_module("Meta::#{self.name}Type")
         self.class_eval{ include(@metamodel) }
         @metamodel
       end
 
-    protected
-
-      ALLOWED_VISIBILITIES = [:public, :private, :protected].freeze
-
-      # OPTIMIZE: apparently `define_method(:foo){ ... }` is slower than `def foo() ... end`
-      def define_metamodel_method(method_name, visibility=:public, &block)
-        return if visibility == :none || visibility == false
-        raise ArgumentError, "Visibility must be one of #{ ALLOWED_VISIBILITIES.join(', ') }, got '#{ visibility }'" unless ALLOWED_VISIBILITIES.include?(visibility)
-        instance_method_already_implemented?(method_name)
+      #
+      # QUESTION: should visibility=false *remove* the method from the metamodel?
+      def define_metamodel_method(method_name, visibility=:public, clobber=false, &block)
+        if (visibility == false) then return               ; end
+        if (visibility == true)  then visibility = :public ; end
+        return if (not clobber) && instance_method_already_implemented?(method_name)
+        Validate.included_in!("visibility", visibility, [:public, :private, :protected])
         metamodel.module_eval{ define_method(method_name, &block) }
         metamodel.module_eval "#{visibility} :#{method_name}", __FILE__, __LINE__
       end
 
-      # These methods are deprecated on the Object class and so can be safely overridden
-      DEPRECATED_OBJECT_METHODS = %w[ id type ]
-
-      # Overrides ActiveModel::AttributeMethods
-      # @private
-      def instance_method_already_implemented?(method_name)
-        deprecated_object_method = DEPRECATED_OBJECT_METHODS.include?(method_name.to_s)
-        already_implemented = (not deprecated_object_method) && self.allocate.respond_to?(method_name, true)
-        raise ::Gorillib::Model::DangerousFieldError, "A field named '#{method_name}' would conflict with an existing method" if already_implemented
-        false
-      end
+    protected
 
       # Returns a module for the given names, rooted at Object (so
       # implicity with '::').
@@ -61,6 +49,12 @@ module Meta
             parent_module.const_set(module_name.to_sym, Module.new)
           end
         end
+      end
+
+      # Overrides ActiveModel::AttributeMethods
+      # @private
+      def instance_method_already_implemented?(method_name)
+        warn "The field named '#{method_name}' overrides an existing method" if self.allocate.respond_to?(method_name, true)
       end
 
     end

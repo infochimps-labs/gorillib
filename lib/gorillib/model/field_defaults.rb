@@ -58,3 +58,14 @@ module Gorillib
 
   end
 end
+
+
+
+    # def attribute_default(field_name)
+    #   val = field.default
+    #   case val
+    #   when nil  then nil
+    #   when Proc then (val.arity == 0) ? instance_exec(&val) : val.call(self, field_name)
+    #   else           val.try_dup
+    #   end
+    # end
