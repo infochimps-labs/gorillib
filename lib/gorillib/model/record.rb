@@ -190,11 +190,10 @@ module Gorillib
       # @return Gorillib::Model::Field
       def field(field_name, type, options={})
         options = options.symbolize_keys
-        clobber = options.delete(:clobber)
         fld = ::Gorillib::Model::Field.new(field_name, type, self, options)
         @_own_fields[fld.name] = fld
         _reset_descendant_fields
-        fld.send(:inscribe_methods, self, clobber)
+        fld.send(:inscribe_methods, self)
         fld
       end
 

@@ -24,10 +24,9 @@ module Gorillib
 
       #
       # QUESTION: should visibility=false *remove* the method from the metamodel?
-      def define_metamodel_method(method_name, visibility=:public, clobber=false, &block)
+      def define_metamodel_method(method_name, visibility=:public, &block)
         if (visibility == false) then return               ; end
         if (visibility == true)  then visibility = :public ; end
-        return if (not clobber) && instance_method_already_implemented?(method_name)
         Validate.included_in!("visibility", visibility, [:public, :private, :protected])
         metamodel.module_eval{ define_method(method_name, &block) }
         metamodel.module_eval "#{visibility} :#{method_name}", __FILE__, __LINE__
@@ -51,11 +50,9 @@ module Gorillib
         end
       end
 
-      # Overrides ActiveModel::AttributeMethods
-      # @private
-      def instance_method_already_implemented?(method_name)
-        warn "The field named '#{method_name}' overrides an existing method" if self.allocate.respond_to?(method_name, true)
-      end
+      # def instance_method_already_implemented?(method_name)
+      #   warn "The field named '#{method_name}' overrides an existing method" if self.allocate.respond_to?(method_name, true)
+      # end
 
     end
   end

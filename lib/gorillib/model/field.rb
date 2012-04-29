@@ -76,11 +76,11 @@ module Gorillib
       #
       #
       #
-      def inscribe_methods(record, clobber)
+      def inscribe_methods(record)
         fn = self.name
-        record.define_metamodel_method(fn,              visibility(:reader),   clobber  ){      read_attribute(fn)       }
-        record.define_metamodel_method("#{fn}=",        visibility(:writer),   clobber  ){|val| write_attribute(fn, val) }
-        record.define_metamodel_method("receive_#{fn}", visibility(:receiver), clobber){|val| write_attribute(fn, val) }
+        record.define_metamodel_method(fn,              visibility(:reader)  ){      read_attribute(fn)       }
+        record.define_metamodel_method("#{fn}=",        visibility(:writer)  ){|val| write_attribute(fn, val) }
+        record.define_metamodel_method("receive_#{fn}", visibility(:receiver)){|val| write_attribute(fn, val) }
       end
 
       #
@@ -104,13 +104,13 @@ module Gorillib
       # @macro [attach] field
       #   @attribute $1
       #   @return [$2] the $1 field $*
-      field :name, String, :writer => false, :doc => "The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]` (required)", :clobber => true
+      field :name, String, :writer => false, :doc => "The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]` (required)"
 
       # Factory for the field's values
-      field :type, Class, :clobber => true
+      field :type, Class
 
       # Field's description
-      field :doc, String, :clobber => true
+      field :doc, String
 
       # remove the attr_reader method (needed for scaffolding), leaving the metamodel method to remain
       remove_possible_method(:name)
