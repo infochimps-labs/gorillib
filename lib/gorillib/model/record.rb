@@ -29,7 +29,7 @@ module Gorillib
     # @example Get attributes
     #   person.attributes # => { :name => "Ben Poweski" }
     #
-    # @return [Hash<Symbol => Object>] The Hash of all attributes
+    # @return [{Symbol => Object}] The Hash of all attributes
     def attributes
       self.class.field_names.inject({}) do |hsh, fn|
         hsh[fn] = read_attribute(fn) ; hsh
@@ -110,7 +110,7 @@ module Gorillib
     # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
     # or some such. Use `#update!` if your data is already type safe.
     #
-    # @param [Hash<Symbol => Object>] hsh The values to receive
+    # @param [{Symbol => Object}] hsh The values to receive
     # @return [Gorillib::Record] the object itself
     def receive!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
@@ -130,7 +130,7 @@ module Gorillib
     # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
     # or some such. Use `#update!` if your data is already type safe.
     #
-    # @param [Hash<Symbol => Object>] hsh The values to update with
+    # @param [{Symbol => Object}] hsh The values to update with
     # @return [Gorillib::Record] the object itself
     def update!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
@@ -201,7 +201,7 @@ module Gorillib
         fld
       end
 
-      # @return [Hash<Symbol, Gorillib::Model::Field>]
+      # @return [{Symbol => Gorillib::Model::Field}]
       def fields
         return @_fields if defined?(@_fields)
         @_fields = ancestors.reverse.inject({}){|acc, ancestor| acc.merge!(ancestor.try(:_own_fields) || {}) }
