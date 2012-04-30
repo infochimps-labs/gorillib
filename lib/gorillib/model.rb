@@ -1,12 +1,12 @@
 require "gorillib/metaprogramming/concern"
+require "gorillib/metaprogramming/remove_method"
+require "gorillib/metaprogramming/class_attribute"
 
 module Gorillib
-  #
-  #
-  # class
-  module Model
-    extend Gorillib::Concern
 
+  module Model
+
+  protected
 
   end
 end

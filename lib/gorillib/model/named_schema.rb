@@ -16,7 +16,7 @@ module Gorillib
       # "Meta::Geo::PlaceType"
       #
       def metamodel
-        return @metamodel if @metamodel
+        return @metamodel if defined?(@metamodel)
         @metamodel = ::Gorillib::Model::NamedSchema.get_nested_module("Meta::#{self.name}Type")
         self.class_eval{ include(@metamodel) }
         @metamodel

@@ -21,8 +21,6 @@ module Gorillib
         false
       end
 
-      # Overrides ActiveModel::AttributeMethods
-      # @private
       def attribute_method?(attr_name)
         self.class.has_field?(attr_name)
       end

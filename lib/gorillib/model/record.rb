@@ -29,10 +29,7 @@ module Gorillib
     # @example Get attributes
     #   person.attributes # => { :name => "Ben Poweski" }
     #
-    # @return [Hash{Symbol => Object}] The Hash of all attributes
-    #
-    # FIXME: should this be made to only include unset attributes? or to return UnsetNull for unset attributes?
-    #
+    # @return [Hash<Symbol => Object>] The Hash of all attributes
     def attributes
       self.class.field_names.inject({}) do |hsh, fn|
         hsh[fn] = read_attribute(fn) ; hsh
@@ -46,13 +43,11 @@ module Gorillib
     #
     # @param [String, Symbol, #to_s] field_name Name of the attribute to get.
     #
-    # @return [Object] The value of the attribute.
-    #
     # @raise [UnknownAttributeError] if the attribute is unknown
-    #
+    # @return [Object] The value of the attribute, or nil if it is unset
     def read_attribute(field_name)
       check_field(field_name)
-      instance_variable_get("@#{field_name}")
+      instance_variable_get("@#{field_name}") if instance_variable_defined?("@#{field_name}")
     end
 
     # Write the value of a single attribute.
@@ -61,13 +56,13 @@ module Gorillib
     #   person.write_attribute(:name, "Benjamin")
     #
     # @param [String, Symbol, #to_s] field_name Name of the attribute to update.
-    # @param [Object] value The value to set for the attribute.
+    # @param [Object] val The value to set for the attribute.
     #
     # @raise [UnknownAttributeError] if the attribute is unknown
-    #
-    def write_attribute(field_name, value)
+    # @return [Object] the attribute's value
+    def write_attribute(field_name, val)
       check_field(field_name)
-      instance_variable_set("@#{field_name}", value)
+      instance_variable_set("@#{field_name}", val)
     end
 
     # Unset an attribute. Subsequent reads of the attribute will return `nil`,
@@ -81,9 +76,17 @@ module Gorillib
     #
     # @param [String, Symbol, #to_s] field_name Name of the attribute to unset.
     #
+    # @raise [UnknownAttributeError] if the attribute is unknown
+    # @return [Object] the former value if it was set, nil if it was unset
     def unset_attribute(field_name)
       check_field(field_name)
-      remove_instance_variable("@#{field_name}")
+      if instance_variable_defined?("@#{field_name}")
+        val = instance_variable_get("@#{field_name}") 
+        remove_instance_variable("@#{field_name}")
+        return val
+      else
+        return nil
+      end
     end
 
     # True if the attribute is set.
@@ -92,6 +95,7 @@ module Gorillib
     #
     # @param [String, Symbol, #to_s] field_name Name of the attribute to check.
     #
+    # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [true, false]
     def attribute_set?(field_name)
       check_field(field_name)
@@ -106,6 +110,7 @@ module Gorillib
     # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
     # or some such. Use `#update!` if your data is already type safe.
     #
+    # @param [Hash<Symbol => Object>] hsh The values to receive
     # @return [Gorillib::Record] the object itself
     def receive!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
@@ -125,6 +130,7 @@ module Gorillib
     # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
     # or some such. Use `#update!` if your data is already type safe.
     #
+    # @param [Hash<Symbol => Object>] hsh The values to update with
     # @return [Gorillib::Record] the object itself
     def update!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
@@ -144,11 +150,9 @@ module Gorillib
     # @example Compare for equality.
     #   model == other
     #
-    # @param [ActiveAttr::Attributes, Object] other The other model to compare
+    # @param [Gorillib::Model, Object] other The other model to compare
     #
-    # @return [true, false] True if attributes are equal and other is instance
-    #   of the same Class, false if not.
-    #
+    # @return [true, false] True if attributes are equal and other is instance of the same Class
     def ==(other)
       return false unless other.instance_of?(self.class)
       attributes == other.attributes
@@ -199,7 +203,7 @@ module Gorillib
 
       # @return [Hash<Symbol, Gorillib::Model::Field>]
       def fields
-        return @_fields if @_fields
+        return @_fields if defined?(@_fields)
         @_fields = ancestors.reverse.inject({}){|acc, ancestor| acc.merge!(ancestor.try(:_own_fields) || {}) }
       end
 

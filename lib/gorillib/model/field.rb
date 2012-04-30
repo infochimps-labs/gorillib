@@ -14,12 +14,12 @@ module Gorillib
       # [Gorillib::Model] Model owning this field
       attr_reader :model
 
-      # [Hash] extended options
+      # [Hash] all options passed to the field not recognized by one of its own current fields
       attr_reader :extended_options
 
       # Note: `Gorillib::Model::Field` is assembled in two pieces, so that it
-      # can behave as a record itself. This, and some fudge defined in
-      # #initialize, define enough of the functionality to make it work.
+      # can behave as a record itself. Defining `name` along with some fudge in
+      # #initialize provide enough functionality to bootstrap.
 
       attr_reader :name
 
@@ -118,8 +118,6 @@ module Gorillib
     end
   end
 end
-
-
 
 # * aliases
 # * order
