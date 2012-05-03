@@ -54,15 +54,16 @@ module Gorillib
         slice!(*self.keys - allowed_keys)
       end unless method_defined?(:extract!)
 
-      # Return a hash that includes everything but the given keys. This is useful for
-      # limiting a set of parameters to everything but a few known toggles:
+      # Return a hash that includes everything but the given keys.
       #
+      # @example Exclude a blacklist of parameters
       #   @person.update_attributes(params[:person].except(:admin))
       #
       # If the receiver responds to +convert_key+, the method is called on each of the
       # arguments. This allows +except+ to play nice with hashes with indifferent access
       # for instance:
       #
+      # @example mash, hash, it does the right thing:
       #   {:a => 1}.to_mash.except(:a)  # => {}
       #   {:a => 1}.to_mash.except('a') # => {}
       #
@@ -74,6 +75,25 @@ module Gorillib
       def except!(*keys)
         keys.each{|key| delete(key) }
         self
+      end
+
+      def only(*allowed)
+        dup.only!(*allowed)
+      end
+
+      # Create a hash with *only* key/value pairs in receiver and +allowed+
+      #
+      # @example Limit a set of parameters to everything but a few known toggles:
+      #   { :one => 1, :two => 2, :three => 3 }.only(:one)    #=> { :one => 1 }
+      #
+      # @param [Array[String, Symbol]] *allowed The hash keys to include.
+      #
+      # @return [Hash] A new hash with only the selected keys.
+      #
+      # @api public
+      def only!(*allowed)
+        allowed = allowed.to_set
+        select!{|key, val| allowed.include?(key) }
       end
 
     end
