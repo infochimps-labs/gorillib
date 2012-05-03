@@ -7,35 +7,40 @@ class Array
   # * Otherwise, if the argument responds to +to_ary+ it is invoked, and its result returned.
   # * Otherwise, returns an array with the argument as its single element.
   #
-  #   Array.wrap(nil)       # => []
-  #   Array.wrap([1, 2, 3]) # => [1, 2, 3]
-  #   Array.wrap(0)         # => [0]
+  # @example nil: an empty list
+  #     Array.wrap(nil)       # => []
+  # @example an array: itself
+  #     Array.wrap([1, 2, 3]) # => [1, 2, 3]
+  # @example an atom: array of length 1
+  #     Array.wrap(0)         # => [0]
   #
-  # This method is similar in purpose to <tt>Kernel#Array</tt>, but there are some differences:
+  # This method is similar in purpose to `Kernel#Array`, but there are some differences:
   #
-  # * If the argument responds to +to_ary+ the method is invoked. <tt>Kernel#Array</tt>
-  # moves on to try +to_a+ if the returned value is +nil+, but <tt>Array.wrap</tt> returns
+  # * If the argument responds to +to_ary+ the method is invoked. `Kernel#Array`
+  # moves on to try +to_a+ if the returned value is +nil+, but `Array.wrap` returns
   # such a +nil+ right away.
-  # * If the returned value from +to_ary+ is neither +nil+ nor an +Array+ object, <tt>Kernel#Array</tt>
-  # raises an exception, while <tt>Array.wrap</tt> does not, it just returns the value.
+  # * If the returned value from +to_ary+ is neither +nil+ nor an +Array+ object, `Kernel#Array`
+  # raises an exception, while `Array.wrap` does not, it just returns the value.
   # * It does not call +to_a+ on the argument, though special-cases +nil+ to return an empty array.
   #
   # The last point is particularly worth comparing for some enumerables:
   #
-  #   Array(:foo => :bar)      # => [[:foo, :bar]]
-  #   Array.wrap(:foo => :bar) # => [{:foo => :bar}]
+  # @example It does not molest hashes
+  #     Array(:foo => :bar)      # => [[:foo, :bar]]
+  #     Array.wrap(:foo => :bar) # => [{:foo => :bar}]
   #
-  #   Array("foo\nbar")        # => ["foo\n", "bar"], in Ruby 1.8
-  #   Array.wrap("foo\nbar")   # => ["foo\nbar"]
+  # @example It does not do insane things to strings
+  #     Array("foo\nbar")        # => ["foo\n", "bar"], in Ruby 1.8
+  #     Array.wrap("foo\nbar")   # => ["foo\nbar"]
   #
   # There's also a related idiom that uses the splat operator:
   #
-  #   [*object]
+  #     [*object]
   #
-  # which returns <tt>[nil]</tt> for +nil+, and calls to <tt>Array(object)</tt> otherwise.
+  # which returns `[nil]` for +nil+, and calls to `Array(object)` otherwise.
   #
   # Thus, in this case the behavior is different for +nil+, and the differences with
-  # <tt>Kernel#Array</tt> explained above apply to the rest of +object+s.
+  # `Kernel#Array` explained above apply to the rest of +object+s.
   def self.wrap(object)
     if object.nil?
       []

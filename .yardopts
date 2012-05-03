@@ -1,0 +1,9 @@
+--readme   README.md
+--markup   markdown
+-
+VERSION
+CHANGELOG.md
+LICENSE.md
+README.md
+notes/*.md
+

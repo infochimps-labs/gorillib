@@ -1,5 +1,4 @@
-
-## Gorillib: infochimps' lightweight subset of ruby convenience methods
+# Gorillib: infochimps' lightweight subset of ruby convenience methods
 
 We love the conveniences provided by `active_support` and `extlib`, we just don't love them at the same time and on top of each other. active_support is slow to load, has many dependencies, and is all intertwingled. We had too many collisions between `active_support` 2.x and 3.x and `extlib`.
 
@@ -151,6 +150,6 @@ __________________________________________________________________________
 ## Credits & Copyright
 
 Most of this code is ripped from active_support and extlib -- their license
-carries over. Everything else is Copyright (c) 2011 Infochimps. See LICENSE.txt
+carries over. Everything else is Copyright (c) 2011 Infochimps. See LICENSE.md
 for further details.
 
