@@ -1,9 +1,5 @@
 module Gorillib
   module Model
-
-    #
-    # Provides
-    #
     module NamedSchema
 
       #
@@ -16,14 +12,14 @@ module Gorillib
       # "Meta::Geo::PlaceType"
       #
       def metamodel
-        return @metamodel if defined?(@metamodel)
-        @metamodel = ::Gorillib::Model::NamedSchema.get_nested_module("Meta::#{self.name}Type")
-        self.class_eval{ include(@metamodel) }
-        @metamodel
+        return @_metamodel if defined?(@_metamodel)
+        @_metamodel = ::Gorillib::Model::NamedSchema.get_nested_module("Meta::#{self.name}Type")
+        self.class_eval{ include(@_metamodel) }
+        @_metamodel
       end
 
-      #
-      # QUESTION: should visibility=false *remove* the method from the metamodel?
+    protected
+
       def define_metamodel_method(method_name, visibility=:public, &block)
         if (visibility == false) then return               ; end
         if (visibility == true)  then visibility = :public ; end
@@ -31,8 +27,6 @@ module Gorillib
         metamodel.module_eval{ define_method(method_name, &block) }
         metamodel.module_eval "#{visibility} :#{method_name}", __FILE__, __LINE__
       end
-
-    protected
 
       # Returns a module for the given names, rooted at Object (so
       # implicity with '::').
@@ -49,11 +43,7 @@ module Gorillib
           end
         end
       end
-
-      # def instance_method_already_implemented?(method_name)
-      #   warn "The field named '#{method_name}' overrides an existing method" if self.allocate.respond_to?(method_name, true)
-      # end
-
+      
     end
   end
 end

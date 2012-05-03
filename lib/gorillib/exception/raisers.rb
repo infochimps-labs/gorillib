@@ -15,7 +15,7 @@ ArgumentError.class_eval do
   #   end
   #
   def self.wrong_number(expected, got)
-
+    raise
   end
 
   def self.check_arity!(args, allowed_arity)

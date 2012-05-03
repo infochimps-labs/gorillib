@@ -1,9 +1,6 @@
-require 'gorillib'
+require 'gorillib/object/blank'
 require 'gorillib/hash/keys'
-require 'gorillib/hash/slice'
 require 'gorillib/object/try'
-require 'gorillib/array/compact_blank'
-require 'gorillib/logger/log'
 
 module Gorillib
 
@@ -31,7 +28,7 @@ module Gorillib
     #
     # @return [{Symbol => Object}] The Hash of all attributes
     def attributes
-      self.class.field_names.inject({}) do |hsh, fn|
+      self.class.field_names.inject(Hash.new) do |hsh, fn|
         hsh[fn] = read_attribute(fn) ; hsh
       end
     end
@@ -47,7 +44,11 @@ module Gorillib
     # @return [Object] The value of the attribute, or nil if it is unset
     def read_attribute(field_name)
       check_field(field_name)
-      instance_variable_get("@#{field_name}") if instance_variable_defined?("@#{field_name}")
+      if instance_variable_defined?("@#{field_name}")
+        instance_variable_get("@#{field_name}")
+      else
+        read_unset_attribute(field_name)
+      end
     end
 
     # Write the value of a single attribute.
@@ -115,12 +116,15 @@ module Gorillib
     def receive!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
       Gorillib::Model::Validate.hashlike!("attributes hash", hsh)
+      hsh = hsh.symbolize_keys
       self.class.fields.each do |attr, field|
         if    hsh.has_key?(attr)      then val = hsh[attr]
         elsif hsh.has_key?(attr.to_s) then val = hsh[attr.to_s]
         else next ; end
-        self.send(:"receive_#{attr}", val)
+        self.public_send(:"receive_#{attr}", val)
       end
+      @extra_attributes ||= Hash.new
+      @extra_attributes.merge!( hsh.reject{|attr,val| self.class.has_field?(attr) } )
       self
     end
 
@@ -161,12 +165,22 @@ module Gorillib
     # @return [String] Human-readable presentation of the attributes
     def inspect
       str = "#<" << self.class.name
-      str << " " << attributes.map{|attr, val| "#{attr}:#{attribute_set?(attr) ? val.inspect : '~'}" }.join(", ") if attributes.present?
+      str << " " << attributes.map{|attr, val| "#{attr}=#{attribute_set?(attr) ? val.inspect : '~'}" }.join(", ") if attributes.present?
       str << ">"
       str
     end
 
   protected
+
+    # This is called by `read_attribute` if an attribute is unset; you should
+    # not call this directly.  You might use this to provide defaults, or lazy
+    # access, or layered resolution.
+    #
+    # @param [String, Symbol, #to_s] field_name Name of the attribute to unset.
+    # @return [nil] Ze goggles! Zey do nussing!
+    def read_unset_attribute(field_name)
+      nil
+    end
 
     # @return [true] if the field exists
     # @raise [UnknownFieldError] if the field is missing 
@@ -217,6 +231,16 @@ module Gorillib
         fields.keys
       end
 
+      #
+      # Receive external data, type-converting and creating contained models as necessary
+      #
+      # @return [Gorillib::Record] the new object
+      def receive(*args)
+        obj = new
+        obj.receive!(*args)
+        obj
+      end
+
       # @return Class name and its attributes
       #
       # @example Inspect the model's definition.
@@ -233,10 +257,10 @@ module Gorillib
       # are added after the child class is defined.
       def _reset_descendant_fields
         ObjectSpace.each_object(::Class) do |klass|
-          klass.send(:remove_instance_variable, '@_fields') if klass <= self && klass.instance_variable_defined?('@_fields')
+          klass.__send__(:remove_instance_variable, '@_fields') if klass <= self && klass.instance_variable_defined?('@_fields')
         end
       end
-      
+
       def inherited(base)
         base.instance_eval do
           @_own_fields ||= {}

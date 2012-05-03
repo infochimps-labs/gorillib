@@ -15,18 +15,19 @@ module Gorillib
       attr_reader :model
 
       # [Hash] all options passed to the field not recognized by one of its own current fields
-      attr_reader :extended_options
+      attr_reader :extra_attributes
 
       # Note: `Gorillib::Model::Field` is assembled in two pieces, so that it
-      # can behave as a record itself. Defining `name` along with some fudge in
-      # #initialize provide enough functionality to bootstrap.
+      # can behave as a record itself. Defining `name` here, along with some
+      # fudge in #initialize, provides enough functionality to bootstrap.
+      # The fields are then defined properly at the end of the file.
 
       attr_reader :name
 
-      # @param [#to_sym] name Field name
-      # @param [#receive] type Factory for field values
-      # @param [Gorillib::Record] model Field's owner
-      # @param [Hash] options Extended attributes
+      # @param [#to_sym]                name    Field name
+      # @param [#receive]               type    Factory for field values. To accept any object as-is, specify `Object` as the type.
+      # @param [Gorillib::Record]       model   Field's owner
+      # @param [Hash{Symbol => Object}] options Extended attributes
       # @option options [String] doc Description of the field's purpose
       # @option options [true, false, :public, :protected, :private] :reader   Visibility for the reader (`#foo`) method; `false` means don't create one.
       # @option options [true, false, :public, :protected, :private] :writer   Visibility for the writer (`#foo=`) method; `false` means don't create one.
@@ -37,10 +38,9 @@ module Gorillib
         @model            = model
         @name             = name.to_sym
         @type             = type
-        @visibility       = options.extract!(:reader, :writer, :receiver)
+        @visibility       = [:reader, :writer, :receiver].inject({}){|acc,meth| acc[meth] = options.delete(meth) if options.has_key?(meth) ; acc }
+        @doc              = options.delete(:name){ "#{name} field" }
         receive!(options)
-        @doc            ||= "#{name} field"
-        @extended_options = options.slice!(self.class.field_names)
       end
 
       # __________________________________________________________________________
@@ -52,16 +52,16 @@ module Gorillib
 
       # @return [String] Human-readable presentation of the field definition
       def inspect
-        args = [name.inspect, type.to_s] # , attributes.compact.map{|key, val| "#{key.inspect} => #{val.inspect}" }]
+        args = [name.inspect, type.to_s]
         "field(#{args.join(", ")})"
       end
 
       def to_hash
-        attributes.merge!(@visibility).merge!(@extended_options)
+        attributes.merge!(@visibility).merge!(@extra_attributes)
       end
 
       def ==(val)
-        super && (val.extended_options == self.extended_options) && (val.model == self.model)
+        super && (val.extra_attributes == self.extra_attributes) && (val.model == self.model)
       end
 
       def self.receive(hsh)
@@ -78,9 +78,9 @@ module Gorillib
       #
       def inscribe_methods(record)
         fn = self.name
-        record.define_metamodel_method(fn,              visibility(:reader)  ){      read_attribute(fn)       }
-        record.define_metamodel_method("#{fn}=",        visibility(:writer)  ){|val| write_attribute(fn, val) }
-        record.define_metamodel_method("receive_#{fn}", visibility(:receiver)){|val| write_attribute(fn, val) }
+        record.__send__(:define_metamodel_method, fn,              visibility(:reader)  ){      read_attribute(fn)       }
+        record.__send__(:define_metamodel_method, "#{fn}=",        visibility(:writer)  ){|val| write_attribute(fn, val) }
+        record.__send__(:define_metamodel_method, "receive_#{fn}", visibility(:receiver)){|val| write_attribute(fn, val) }
       end
 
       #
