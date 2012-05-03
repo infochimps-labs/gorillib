@@ -1,10 +1,10 @@
 module Gorillib
-  module Model
+  module Record
     module NamedSchema
 
       #
       # Returns the metamodel -- a module extending the type, on which all the
-      # model methods are inscribed. This allows you to override the model methods
+      # record methods are inscribed. This allows you to override the record methods
       # and call +super()+ to get the generic behavior.
       #
       # The metamodel is named for the including class, but with 'Meta::'
@@ -43,7 +43,7 @@ module Gorillib
           end
         end
       end
-      
+
     end
   end
 end

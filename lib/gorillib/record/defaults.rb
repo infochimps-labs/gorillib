@@ -1,5 +1,5 @@
 module Gorillib
-  module Model
+  module Record
 
     # FieldDefaults allows defaults to be declared for your fields
     #

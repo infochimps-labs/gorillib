@@ -36,6 +36,11 @@ NoMethodError.class_eval do
     self.new(MESSAGE % [meth, obj, obj.class])
   end
 
+  def self.unimplemented_method(obj)
+    file, line, meth = caller_parts
+    self.new("#{MESSAGE} -- not implemented yet" % [meth, obj, obj.class])
+  end
+
   def self.abstract(obj)
     file, line, meth = caller_parts
     self.new("#{MESSAGE} -- must be implemented by the subclass" % [meth, obj, obj.class])

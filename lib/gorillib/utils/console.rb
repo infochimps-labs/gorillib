@@ -85,6 +85,18 @@ class Cls3
   def some_method ; "Cls3#some_method on #{self}" ; end
 end
 
+def create_class(name, *args, &block)
+  Object.class_eval do
+    remove_const(name) if self.const_defined?(name)
+    const_set(name, Class.new(*args, &block))
+  end
+end
+
+def example_singleton(name, *args)
+  require 'singleton'
+  create_class(name, *args){ include ::Singleton }
+end
+
 class Module
 
   #

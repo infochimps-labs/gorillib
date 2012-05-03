@@ -1,5 +1,5 @@
-require 'gorillib/test_helpers/capture_output'
-require 'gorillib/test_helpers/nuke_constants'
+require 'gorillib/utils/capture_output'
+require 'gorillib/utils/nuke_constants'
 
 module Gorillib::TestHelpers
 end

@@ -1,7 +1,7 @@
 require 'dm-core'
 module Ironfan
 class Ironfan::Cluster
-  include LayeredModel
+  include LayeredRecord
   layer :cloud
   layer :facet
   layer :server
@@ -19,13 +19,13 @@ class Ironfan::Cluster
 end
 
 class Ironfan::Facet
-  include LayeredModel
+  include LayeredRecord
   #
   property :instances, Integer, :description => 'number of servers in this facet'
 end
 
 class Ironfan::Server
-  include LayeredModel
+  include LayeredRecord
   #
   property :cluster,     Ironfan::Cluster
   property :facet,       Ironfan::Facet

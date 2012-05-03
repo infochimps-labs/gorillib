@@ -1,6 +1,6 @@
 module Gorillib
 
-  module Model
+  module Builder
     module Configurable
     end
   end

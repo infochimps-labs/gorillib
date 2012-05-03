@@ -1,5 +1,5 @@
 require File.expand_path('../../spec_helper', File.dirname(__FILE__))
-require 'gorillib/test_helpers/capture_output'
+require 'gorillib/utils/capture_output'
 
 describe Gorillib::TestHelpers, :simple_spec => true do
 

@@ -1,20 +1,20 @@
-require File.expand_path('../../spec_helper', File.dirname(__FILE__))
+require File.expand_path('../spec_helper', File.dirname(__FILE__))
 #
 require 'gorillib/metaprogramming/concern'
 require 'gorillib/metaprogramming/remove_method'
 require "gorillib/object/try_dup"
 #
-require 'gorillib/model/errors'
-require 'gorillib/model/field'
-require 'gorillib/model/named_type'
-require 'gorillib/model/record_type'
+require 'gorillib/record/errors'
+require 'gorillib/record/field'
+require 'gorillib/record/named_type'
+require 'gorillib/record/record_type'
 #
-require 'model_test_helpers'
+require 'record_test_helpers'
 
 require 'pry'
 
 
-describe 'Gorillib::Record' do
+describe Gorillib::Record do
 
   describe 'Gorillib::RecordSchema' do
     context ".metamodel" do
@@ -28,7 +28,7 @@ describe 'Gorillib::Record' do
       context ":type option" do
       end
 
-      context "on a non-builder model," do
+      context "on a non-builder record," do
         it "supplies a reader method #foo to call read_attribute(:foo)"
         it_behaves_like "... with right visibility"
         it "supplies a writer method #foo= to call write_attribute(:foo)"
@@ -37,7 +37,7 @@ describe 'Gorillib::Record' do
     end
 
     context ".fields" do
-      it 'is a hash of Gorillib::Model::Field objects'
+      it 'is a hash of Gorillib::Record::Field objects'
       it 'contains parent fields followed by own fields'
     end
 

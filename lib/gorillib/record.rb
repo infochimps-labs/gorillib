@@ -33,7 +33,7 @@ module Gorillib
       end
     end
 
-    # Read a value from the model's attributes.
+    # Read a value from the record's attributes.
     #
     # @example Reading an attribute
     #   person.read_attribute(:name)
@@ -82,7 +82,7 @@ module Gorillib
     def unset_attribute(field_name)
       check_field(field_name)
       if instance_variable_defined?("@#{field_name}")
-        val = instance_variable_get("@#{field_name}") 
+        val = instance_variable_get("@#{field_name}")
         remove_instance_variable("@#{field_name}")
         return val
       else
@@ -105,7 +105,7 @@ module Gorillib
 
     #
     # Accept the given attributes, converting each value to the appropriate
-    # type, constructing included models and collections, and other triggers as
+    # type, constructing included records and collections, and other triggers as
     # defined.
     #
     # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
@@ -115,7 +115,7 @@ module Gorillib
     # @return [Gorillib::Record] the object itself
     def receive!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash", hsh)
+      Gorillib::Record::Validate.hashlike!("attributes hash", hsh)
       hsh = hsh.symbolize_keys
       self.class.fields.each do |attr, field|
         if    hsh.has_key?(attr)      then val = hsh[attr]
@@ -138,7 +138,7 @@ module Gorillib
     # @return [Gorillib::Record] the object itself
     def update!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash", hsh)
+      Gorillib::Record::Validate.hashlike!("attributes hash", hsh)
       self.class.fields.each do |attr, field|
         if    hsh.has_key?(attr)      then val = hsh[attr]
         elsif hsh.has_key?(attr.to_s) then val = hsh[attr.to_s]
@@ -152,9 +152,9 @@ module Gorillib
     # are equal.
     #
     # @example Compare for equality.
-    #   model == other
+    #   record == other
     #
-    # @param [Gorillib::Model, Object] other The other model to compare
+    # @param [Gorillib::Record, Object] other The other record to compare
     #
     # @return [true, false] True if attributes are equal and other is instance of the same Class
     def ==(other)
@@ -183,10 +183,10 @@ module Gorillib
     end
 
     # @return [true] if the field exists
-    # @raise [UnknownFieldError] if the field is missing 
+    # @raise [UnknownFieldError] if the field is missing
     def check_field(field_name)
       return true if self.class.has_field?(field_name)
-      raise UnknownFieldError, "unknown field: #{field_name}" 
+      raise UnknownFieldError, "unknown field: #{field_name}"
     end
 
     module ClassMethods
@@ -194,7 +194,7 @@ module Gorillib
       # Defines a new field
       #
       # For each field that is defined, a getter and setter will be added as
-      # an instance method to the model. An Field instance will be added to
+      # an instance method to the record. An Field instance will be added to
       # result of the fields class method.
       #
       # @example
@@ -205,17 +205,17 @@ module Gorillib
       # @option options [String] doc           Documentation string for the field (optional)
       # @option options [Proc, Object] default Default value, or proc that instance can evaluate to find default value
       #
-      # @return Gorillib::Model::Field
+      # @return Gorillib::Record::Field
       def field(field_name, type, options={})
         options = options.symbolize_keys
-        fld = ::Gorillib::Model::Field.new(field_name, type, self, options)
+        fld = ::Gorillib::Record::Field.new(field_name, type, self, options)
         @_own_fields[fld.name] = fld
         _reset_descendant_fields
         fld.send(:inscribe_methods, self)
         fld
       end
 
-      # @return [{Symbol => Gorillib::Model::Field}]
+      # @return [{Symbol => Gorillib::Record::Field}]
       def fields
         return @_fields if defined?(@_fields)
         @_fields = ancestors.reverse.inject({}){|acc, ancestor| acc.merge!(ancestor.try(:_own_fields) || {}) }
@@ -232,7 +232,7 @@ module Gorillib
       end
 
       #
-      # Receive external data, type-converting and creating contained models as necessary
+      # Receive external data, type-converting and creating contained records as necessary
       #
       # @return [Gorillib::Record] the new object
       def receive(*args)
@@ -243,7 +243,7 @@ module Gorillib
 
       # @return Class name and its attributes
       #
-      # @example Inspect the model's definition.
+      # @example Inspect the record's definition.
       #   Person.inspect #=> Person[first_name, last_name]
       def inspect
         "#{self.name}[#{ field_names.join(", ") }]"
@@ -271,7 +271,7 @@ module Gorillib
 
     def self.included(base)
       base.instance_eval do
-        extend Gorillib::Model::NamedSchema
+        extend Gorillib::Record::NamedSchema
         extend Gorillib::Record::ClassMethods
         @_own_fields ||= {}
       end

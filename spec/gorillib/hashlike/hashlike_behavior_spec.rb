@@ -1,4 +1,4 @@
-require 'gorillib/test_helpers/capture_output'
+require 'gorillib/utils/capture_output'
 RSpec.configure{|c| c.include Gorillib::TestHelpers }
 
 describe '', :hashlike_spec => true do
