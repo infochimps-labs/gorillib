@@ -145,11 +145,32 @@ __________________________________________________________________________
 * *gorillib/string/truncate*
   - String	truncate
 
----------------------------------------------------------------------------
+__________________________________________________________________________
 
-## Credits & Copyright
+## Colophon
+
+### Credits & Copyright
 
 Most of this code is ripped from active_support and extlib -- their license
 carries over. Everything else is Copyright (c) 2011 Infochimps. See LICENSE.md
 for further details.
 
+### Issues, Patches and Pull Requests
+
+Find this repo useful? Thanks! We love you! Find this repo *nearly* useful? Awesome! We'd love to have your help improving it. One way to help is to file an articulate well-reasoned bug report, feature proposal, or short story about gorillib on the [Gorillib issue tracker](http://github.com/infochimps-labs/gorillib/issues). An even better way to help is to create a Patch or Pull Request
+
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add tests for it. This is important so I don't break it in a future version unintentionally.
+* Commit, but please do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Send a pull request to github.com/infochimps-labs
+* If you'd like, drop a line to the mailing list for infochimps open-source projects, infochimps-code@googlegroups.com
+
+You might enjoy reading:
+
+* [Style Guide for Ruby](https://github.com/infochimps-labs/style_guide/blob/master/style-guide-ruby.md)
+* [Style Guide for README files](https://github.com/infochimps-labs/style_guide/blob/master/style-guide-for-readme-files.md) (aka our README README)
+* [Style Guide for Repo Organization](https://github.com/infochimps-labs/style_guide/blob/master/style-guide-for-repo-organization.md)
+* [The Name of the Wind](http://www.patrickrothfuss.com/content/books.asp), by Patrick Rothfuss.
+
+(Don't let the existence of a style guide -- or really any sense of modesty -- keep you from submitting a patch. If it departs from the norm we'll either fix it up, or in some cases propose tweaks, but at least others hitting the same issue can enjoy its benefits. We'd rather have worky code with a section that reads like cobol-accented perl than something broken)
