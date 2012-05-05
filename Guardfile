@@ -5,8 +5,9 @@
 #   watch(%r{notes/.+\.(md|txt)}) { "notes" }
 # end
 
-# '--format doc' for more verbose
-rspec_opts = '--format progress ' # --tag model_spec'
+# '--format doc'     for more verbose, --format progress for less
+# '--tag record_spec' to only run tests tagged :record_spec
+rspec_opts = '--format progress --tag record_spec'
 
 guard 'rspec', :version => 2, :cli => rspec_opts do
   watch(%r{^spec/.+_spec\.rb$})
