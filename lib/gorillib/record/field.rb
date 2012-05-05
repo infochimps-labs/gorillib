@@ -78,9 +78,9 @@ module Gorillib
       #
       def inscribe_methods(record)
         fn = self.name
-        record.__send__(:define_metamodel_method, fn,              visibility(:reader)  ){      read_attribute(fn)       }
-        record.__send__(:define_metamodel_method, "#{fn}=",        visibility(:writer)  ){|val| write_attribute(fn, val) }
-        record.__send__(:define_metamodel_method, "receive_#{fn}", visibility(:receiver)){|val| write_attribute(fn, val) }
+        record.__send__(:define_meta_module_method, fn,              visibility(:reader)  ){      read_attribute(fn)       }
+        record.__send__(:define_meta_module_method, "#{fn}=",        visibility(:writer)  ){|val| write_attribute(fn, val) }
+        record.__send__(:define_meta_module_method, "receive_#{fn}", visibility(:receiver)){|val| write_attribute(fn, val) }
       end
 
       #
@@ -112,7 +112,7 @@ module Gorillib
       # Field's description
       field :doc, String
 
-      # remove the attr_reader method (needed for scaffolding), leaving the metamodel method to remain
+      # remove the attr_reader method (needed for scaffolding), leaving the meta_module method to remain
       remove_possible_method(:name)
 
     end

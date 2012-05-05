@@ -3,29 +3,29 @@ module Gorillib
     module NamedSchema
 
       #
-      # Returns the metamodel -- a module extending the type, on which all the
+      # Returns the meta_module -- a module extending the type, on which all the
       # record methods are inscribed. This allows you to override the record methods
       # and call +super()+ to get the generic behavior.
       #
-      # The metamodel is named for the including class, but with 'Meta::'
-      # prepended and 'Type' appended -- so Geo::Place has metamodel
+      # The meta_module is named for the including class, but with 'Meta::'
+      # prepended and 'Type' appended -- so Geo::Place has meta_module
       # "Meta::Geo::PlaceType"
       #
-      def metamodel
-        return @_metamodel if defined?(@_metamodel)
-        @_metamodel = ::Gorillib::Model::NamedSchema.get_nested_module("Meta::#{self.name}Type")
-        self.class_eval{ include(@_metamodel) }
-        @_metamodel
+      def meta_module
+        return @_meta_module if defined?(@_meta_module)
+        @_meta_module = ::Gorillib::Record::NamedSchema.get_nested_module("Meta::#{self.name}Type")
+        self.class_eval{ include(@_meta_module) }
+        @_meta_module
       end
 
     protected
 
-      def define_metamodel_method(method_name, visibility=:public, &block)
+      def define_meta_module_method(method_name, visibility=:public, &block)
         if (visibility == false) then return               ; end
         if (visibility == true)  then visibility = :public ; end
         Validate.included_in!("visibility", visibility, [:public, :private, :protected])
-        metamodel.module_eval{ define_method(method_name, &block) }
-        metamodel.module_eval "#{visibility} :#{method_name}", __FILE__, __LINE__
+        meta_module.module_eval{ define_method(method_name, &block) }
+        meta_module.module_eval "#{visibility} :#{method_name}", __FILE__, __LINE__
       end
 
       # Returns a module for the given names, rooted at Object (so
