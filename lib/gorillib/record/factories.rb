@@ -2,18 +2,44 @@ require 'gorillib/object/blank'
 require 'gorillib/array/extract_options'
 require 'gorillib/metaprogramming/class_attribute'
 require 'gorillib/hash/slice'
-require 'gorillib/type/extended'
-require 'set'
+require 'gorillib/object/try_dup'
+require 'gorillib/collection'
+require 'gorillib/string/inflector'
 
-require 'pathname'
-require 'time'
+# require 'gorillib/type/extended'
+# require 'set'
+# require 'pathname'
+# require 'time'
 
 module Gorillib
 
   module Factory
     class FactoryMismatchError < ArgumentError ; end
 
+    def factory_for(type)
+      case
+      when type.is_a?(Proc) || type.is_a?(Method)     then return Gorillib::Factory::ApplyProcFactory.new(type)
+      when type.respond_to?(:receive)                 then return type
+      when Gorillib::Factory.factories.include?(type) then return Gorillib::Factory.factories[type] 
+      else raise "Don't know what factory makes a #{type}"
+      end
+    end
+    module_function :factory_for
+
+    def self.factories
+      @factories ||= Gorillib::Collection.new.tap{|f| f.key_method = :name }
+    end
+
+    def self.register_factory(factory, *handles)
+      if handles.blank?
+        handles = [factory.handle, factory.product]
+      end
+      handles.each{|handle| factories[handle] = factory }
+    end
+    
     class BaseFactory
+      include Gorillib::Factory
+      
       # [Class] The type of objects produced by this factory
       class_attribute :product
 
@@ -31,9 +57,14 @@ module Gorillib
       def initialize(options={})
         @product       = options.delete(:product)       if options.has_key?(:product)
         @blankish_vals = options.delete(:blankish_vals) if options.has_key?(:blankish_vals)
-        options.slice(*redefinable_methods).each do |meth, value_or_block|
+        options.extract!(*redefinable_methods).each do |meth, value_or_block|
           redefine(meth, value_or_block)
         end
+        warn "Unknown options #{options.keys}" unless options.empty?
+      end
+
+      def self.handle
+        Gorillib::Inflector.underscore(product.name).to_sym
       end
 
       def self.receive(*args, &block)
@@ -66,7 +97,7 @@ module Gorillib
           case
           when block_given? then raise ArgumentError, "Pass a block or a value, not both"
           when val.is_a?(Proc) || val.is_a?(Method) then block = val
-          else block = ->(*){ val }
+          else block = ->(*){ val.try_dup }
           end
         end
         define_singleton_method(meth, &block)
@@ -80,6 +111,10 @@ module Gorillib
         message ||= "item cannot be converted to #{product}"
         message <<  (" got #{obj.inspect}" rescue ' (and is uninspectable)')
         raise FactoryMismatchError, message, *args
+      end
+
+      def self.register_factory!(*args)
+        Gorillib::Factory.register_factory(self, *args)
       end
     end
 
@@ -103,21 +138,19 @@ module Gorillib
       end
     end
 
-    class IdentityFactory < BaseFactory
-      def native?(obj)
-        true
-      end
-      def blankish?(obj)
-        false
-      end
+    class IdenticalFactory < BaseFactory
+      self.redefinable_methods = []
+      self.blankish_vals       = []
+      def native?(obj)   true  ; end
+      def blankish?(obj) false ; end
+      
       def receive(obj)
-        return nil  if blankish?(obj)
         obj
-      rescue NoMethodError => err
-        mismatched!(obj, err.message, err.backtrace)
       end
+
+      register_factory!(:identical, :whatever)
     end
-    ::Whatever = IdentityFactory
+    ::Whatever = IdenticalFactory
 
     # __________________________________________________________________________
     #
@@ -151,42 +184,51 @@ module Gorillib
       self.blankish_vals -= [""]
       def native?(obj)      obj.respond_to?(:to_str)  end
       def convert(obj)      obj.to_s                  end
+      register_factory!
     end
 
     class BinaryFactory < StringFactory
       def convert(obj)
         super.force_encoding("BINARY")
       end
+      register_factory!(:binary)
     end
 
     class SymbolFactory < ConvertingFactory
       self.product = Symbol
       def convert(obj)      obj.to_sym                end
+      register_factory!
     end
 
     class RegexpFactory < ConvertingFactory
       self.product = Regexp
       def convert(obj)      Regexp.new(obj)           end
+      register_factory!
     end
 
     class IntegerFactory < ConvertingFactory
       self.product = Integer
       def convert(obj)      obj.to_i                  end
+      register_factory!
     end
     class BignumFactory < IntegerFactory
       self.product = Bignum
+      register_factory!
     end
     class FloatFactory < ConvertingFactory
       self.product = Float
       def convert(obj)      obj.to_f                  end
+      register_factory!
     end
     class ComplexFactory < ConvertingFactory
       self.product = Complex
       def convert(obj)      obj.to_c                  end
+      register_factory!
     end
     class RationalFactory < ConvertingFactory
       self.product = Rational
       def convert(obj)      obj.to_r                  end
+      register_factory!
     end
 
     class TimeFactory < ConvertingFactory
@@ -194,18 +236,20 @@ module Gorillib
       def convert(obj)
         Time.parse(obj).utc
       end
+      register_factory!
     end
 
     # __________________________________________________________________________
     
-    class ClassFactory  < NonConvertingFactory ; self.product = Class      ; end
-    class ModuleFactory < NonConvertingFactory ; self.product = Module     ; end
-    class TrueFactory   < NonConvertingFactory ; self.product = TrueClass  ; end
-    class FalseFactory  < NonConvertingFactory ; self.product = FalseClass ; end
+    class ClassFactory  < NonConvertingFactory ; self.product = Class      ; register_factory! ; end
+    class ModuleFactory < NonConvertingFactory ; self.product = Module     ; register_factory! ; end
+    class TrueFactory   < NonConvertingFactory ; self.product = TrueClass  ; register_factory!(:true, TrueClass) ; end
+    class FalseFactory  < NonConvertingFactory ; self.product = FalseClass ; register_factory!(:false, FalseClass) ; end
 
     class NilFactory    < NonConvertingFactory
       self.product       = NilClass
       self.blankish_vals = []
+      register_factory!(:nil, NilClass)
     end
 
     class BooleanFactory < ConvertingFactory
@@ -213,6 +257,7 @@ module Gorillib
       self.blankish_vals = [nil]
       def native?(obj)     obj.equal?(true) || obj.equal?(false) ; end
       def convert(obj)     (obj.to_s == "false") ? false : true ; end
+      register_factory!(:boolean)
     end
 
     #
@@ -220,13 +265,13 @@ module Gorillib
     #
 
     class EnumerableFactory < ConvertingFactory
-      # [#receive] factory for converting objects
+      # [#receive] factory for converting items
       attr_reader :items_factory
-      self.redefinable_methods += [:convert_value, :empty_product]
-      self.blankish_vals = Set.new([ nil, [] ])
+      self.redefinable_methods += [:empty_product]
+      self.blankish_vals = Set.new([ nil ])
 
-      def initialize(items_factory=IdentityFactory, options={})
-        @items_factory = items_factory
+      def initialize(options={})
+        @items_factory = factory_for( options.delete(:items){ IdenticalFactory.new } )
         super(options)
       end
 
@@ -238,52 +283,54 @@ module Gorillib
         product.new
       end
 
-      def convert_value(val)
-        items_factory.receive(val)
-      end
-
       def convert(obj)
+        clxn = empty_product
         obj.each do |val|
-          empty_product << val
+          clxn << items_factory.receive(val)
         end
+        clxn
       end
     end
 
     class ArrayFactory < EnumerableFactory
       self.product = Array
+      register_factory!
     end
 
     class SetFactory < EnumerableFactory
       self.product = Set
-      self.blankish_vals += [ Set.new ]
+      register_factory!
     end
 
     class HashFactory < EnumerableFactory
-      self.redefinable_methods += [:convert_key]
+      # [#receive] factory for converting keys
+      attr_reader :keys_factory
       self.product = Hash
-      self.blankish_vals += [ {} ]
 
-      def convert_key(val)
-        val.to_sym
+      def initialize(options={})
+        @keys_factory = factory_for( options.delete(:keys){ Whatever.new } )
+        super(options)
       end
 
       def convert(obj)
         hsh = empty_product
         obj.each_pair do |key, val|
-          hsh[convert_key(key)] = convert_value(val)
+          hsh[keys_factory.receive(key)] = items_factory.receive(val)
         end
         hsh
       end
+      register_factory!
     end
 
     class RangeFactory < NonConvertingFactory
-      self.product       = NilClass
+      self.product       = Range
       self.blankish_vals = [ nil, [] ]
+      register_factory!
     end
 
     # __________________________________________________________________________
 
-    class AppliedFactory < ConvertingFactory
+    class ApplyProcFactory < ConvertingFactory
       attr_reader :callable
       self.blankish_vals = Set.new([nil])
 
@@ -295,12 +342,13 @@ module Gorillib
         @callable = callable
         super(options)
       end
-      def native(val)
+      def native?(val)
         false
       end
       def convert(obj)
         callable.call(obj)
       end
+      register_factory!(:proc)
     end
 
 

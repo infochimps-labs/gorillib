@@ -4,11 +4,11 @@ require 'gorillib/metaprogramming/class_attribute'
 module Gorillib
   class Collection
     # [String, Symbol] Method invoked on a new item to generate its collection key; :to_key by default
-    attr_reader :key_method
+    attr_accessor :key_method
     # The default `key_method` invoked on a new item to generate its collection key
     DEFAULT_KEY_METHOD = :to_key
 
-    # [Class, #receive] Factory for generating a new collection item. Object by default (meaning items are adopted as-is
+    # [Class, #receive] Factory for generating a new collection item.
     class_attribute :factory, :instance_writer => false
     singleton_class.class_eval{ protected :factory= }
     
@@ -18,7 +18,7 @@ module Gorillib
 
     delegate :[], :[]=, :delete, :fetch,                  :to => :clxn
     delegate :keys, :values, :each_pair, :each_value,     :to => :clxn
-    delegate :has_key?, :length, :size, :empty?, :blank?, :to => :clxn
+    delegate :has_key?, :include?, :length, :size, :empty?, :blank?, :to => :clxn
 
     def initialize(clxn={}, factory=nil, key_method=DEFAULT_KEY_METHOD)
       @key_method  = key_method
@@ -68,7 +68,7 @@ module Gorillib
     # @return [String] string describing the collection's array representation
     def to_s           ; to_a.to_s           ; end
     # @return [String] string describing the collection's array representation
-    def inspect        ; to_a.inspect        ; end
+    def inspect        ; clxn.inspect        ; end
     # @return [Array] serializable array representation of the collection
     def as_json(*args) ; to_a.as_json(*args) ; end
     # @return [String] JSON serialization of the collection's array representation

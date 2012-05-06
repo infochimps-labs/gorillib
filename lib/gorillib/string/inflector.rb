@@ -1,4 +1,3 @@
-module Gorillib ; module String ; end ; end
 # String inflections define new methods on the String class to transform names for different purposes.
 #
 #   "ScaleScore".underscore # => "scale_score"
@@ -10,7 +9,7 @@ module Gorillib ; module String ; end ; end
 # * underscore
 # * demodulize
 #
-module Gorillib::String::Inflector
+module Gorillib::Inflector
   extend self
 
   # By default, +camelize+ converts strings to UpperCamelCase. If the argument to +camelize+
@@ -79,7 +78,7 @@ module Gorillib::String::Inflector
   # Removes the module part from the expression in the string:
   #
   # @example
-  #   "Gorillib::String::Inflections".demodulize #=> "Inflections"
+  #   "Gorillib::Inflections".demodulize #=> "Inflections"
   #   "Inflections".demodulize                   #=> "Inflections"
   #
   # See also +deconstantize+.
