@@ -34,6 +34,7 @@ class ItsATrap < BasicObject
   def inspect() "~#{@obj.inspect}~" ; end
   def to_s()    @obj.to_s        ; end
   alias_method :pretty_inspect, :inspect
+  def methods() @obj.methods ; end
 
   # These are defined on BasicObject, delegate them along with the rest
   #   BasicObject.instance_methods
@@ -57,11 +58,11 @@ private
   end
 
   def __describe_and_send__(meth, *args, &block)
-    pref         = "%-3d %-14s %-21s" % [@call_count, __id__, self.to_s]
+    pref         = "%-3d %-14s %-15s" % [@call_count, __id__, self.to_s[0..14]]
     @call_count += 1
-    $stderr.puts   "%s %-10s <-  %-30s %s -- %s" % [pref, meth, args.inspect, block, ::Kernel.caller.first]
+    $stderr.puts   "%s %-15s <-  %-30s %s -- %s" % [pref, meth.to_s[0..14], args.map(&:inspect).join(','), block, ::Kernel.caller.first]
     ret = @obj.__send__(meth, *args, &block)
-    $stderr.puts   "%s %-10s  -> %s"             % [pref, meth, ret.inspect] if @show_ret
+    $stderr.puts   "%s %-15s  -> %s"             % [pref, meth.to_s[0..14], ret.inspect] if @show_ret
     ret
   end
 end

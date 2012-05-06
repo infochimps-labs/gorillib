@@ -1,8 +1,17 @@
 require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 
+require 'gorillib/object/blank'
+require 'gorillib/object/try_dup'
+require 'gorillib/hash/slice'
+require 'gorillib/metaprogramming/class_attribute'
+require 'gorillib/string/inflector'
+#
+require 'gorillib/collection'
+#
 require 'gorillib/record/factories'
 
-describe '', :record_spec => false do
+
+describe '', :record_spec => true do
   let(:inst    ){ mock('any object') }
   let(:example_class){  Class.new }
   let(:example_module){ Module.new }

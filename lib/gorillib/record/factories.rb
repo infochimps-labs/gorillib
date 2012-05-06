@@ -260,7 +260,7 @@ module Gorillib
       self.blankish_vals = Set.new([ nil ])
 
       def initialize(options={})
-        @items_factory = Gorillib::Factory( options.delete(:items){ IdenticalFactory.new } )
+        @items_factory = Gorillib::Factory.factory_for( options.delete(:items){ IdenticalFactory.new } )
         super(options)
       end
 

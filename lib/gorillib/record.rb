@@ -1,5 +1,7 @@
+require 'set'
 require 'gorillib/object/blank'
 require 'gorillib/object/try'
+require 'gorillib/object/try_dup'
 require 'gorillib/array/extract_options'
 require 'gorillib/hash/keys'
 require 'gorillib/hash/slice'
@@ -185,16 +187,6 @@ module Gorillib
 
   protected
 
-    # This is called by `read_attribute` if an attribute is unset; you should
-    # not call this directly.  You might use this to provide defaults, or lazy
-    # access, or layered resolution.
-    #
-    # @param [String, Symbol, #to_s] field_name Name of the attribute to unset.
-    # @return [nil] Ze goggles! Zey do nussing!
-    def read_unset_attribute(field_name)
-      nil
-    end
-
     # @return [true] if the field exists
     # @raise [UnknownFieldError] if the field is missing
     def check_field(field_name)
@@ -219,7 +211,7 @@ module Gorillib
       # @option options [Proc, Object] default Default value, or proc that instance can evaluate to find default value
       #
       # @return Gorillib::Record::Field
-      def field(field_name, type, options={})
+      def _field(field_name, type, options={})
         options = options.symbolize_keys
         field_type = options.delete(:field_type){ ::Gorillib::Record::Field }
         fld = field_type.new(field_name, type, self, options)
@@ -227,6 +219,11 @@ module Gorillib
         _reset_descendant_fields
         fld.send(:inscribe_methods, self)
         fld
+      end
+
+      # FIXME: kludge
+      def field(field_name, type, options={})
+        _field(field_name, type, options.merge(:field_type => ::Gorillib::Record::Field))
       end
 
       # @return [{Symbol => Gorillib::Record::Field}]
@@ -251,6 +248,8 @@ module Gorillib
       # @return [Gorillib::Record] the new object
       def receive(*args)
         return nil if args.present? && args.first.nil?
+        raw = args.first
+        return raw if raw.is_a?(self)
         obj = new
         obj.receive!(*args)
         obj

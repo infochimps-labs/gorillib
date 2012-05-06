@@ -1,7 +1,11 @@
 require File.expand_path('../spec_helper', File.dirname(__FILE__))
 #
+require 'gorillib/string/simple_inflector'
+require 'gorillib/hash/compact'
+#
 require 'gorillib/record'
 require 'gorillib/record/field'
+require 'gorillib/record/defaults'
 require 'gorillib/builder'
 require 'gorillib/builder/field'
 #
@@ -14,71 +18,159 @@ describe Gorillib::Builder, :record_spec => true do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:example_class) do
-    class Gorillib::Test::ExampleBuilder
+    class Gorillib::Test::Engine
       include Gorillib::Builder
-      member :my_field,  :whatever
-      member :str_field, String
-      member :sym_field, Symbol
+      field     :carburetor,   Symbol, :default => :stock
+      field     :volume,       Integer
+      field     :cylinders,    Integer
       self
     end
+    class Gorillib::Test::Car
+      include Gorillib::Builder
+      field    :name,          Symbol
+      field    :make_model,    String
+      field    :year,          Integer
+      field    :doors,         Integer
+      member   :engine,        Gorillib::Test::Engine
+      self
+    end
+    class Gorillib::Test::Garage
+      include Gorillib::Builder
+      collection :cars,       Gorillib::Test::Car
+      self
+    end
+    Gorillib::Test::Car
   end
-  let(:example_inst ){ subject.receive(:my_field => 69) }
+  let(:car_class){    example_class ; Gorillib::Test::Car    }
+  let(:garage_class){ example_class ; Gorillib::Test::Garage }
+  let(:wildcat) do
+    car_class.receive( :name => :wildcat,
+      :make_model => 'Buick Wildcat', :year => 1968, :doors => 2,
+      :engine => { :volume => 455, :cylinders => 8 } )
+  end
+  let(:ford_39) do
+    car_class.receive( :name => :ford_39,
+      :make_model => 'Ford Tudor Sedan', :year => 1939, :doors => 2, )
+  end
+  let(:garage) do
+    garage_class.new
+  end
+  subject{ car_class }
   let(:example_val  ){ mock('example val') }
-  subject{ example_class }
 
-  context 'examples' do
-    let(:nested_class){ Class.new(example_class){ field :another_record, self } }
-    subject{ nested_class }
+  context 'examples:' do
     it 'type-converts values' do
-      obj = example_class.receive({
-          :my_field => 'accepted as-is', :str_field => :bob, :sym_field => 'converted_to_sym'
-        })
-      obj.attributes.should == { :my_field => 'accepted as-is', :str_field => 'bob', :sym_field=>:converted_to_sym }
+      obj = subject.receive(     :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2" )
+      obj.attributes.should == { :name => :wildcat,  :make_model => 'Buick Wildcat', :year =>  1968,  :doors =>  2, :engine => nil }
     end
     it 'handles nested structures' do
-      obj      = nested_class.receive({ :my_field => 69 })
-      obj.attributes.should == { :my_field => 69, :str_field => nil, :sym_field=>nil, :another_record => nil }
-      deep_obj = nested_class.receive(:my_field => 111, :str_field => 'deep, man',
-        :another_record => { :my_field => 69, :another_record => nil })
-      deep_obj.attributes.should == { :my_field => 111, :str_field => 'deep, man', :sym_field=>nil, :another_record => obj }
+      obj = subject.receive(
+        :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2",
+        :engine => { :carburetor => 'edelbrock', :volume => "455", :cylinders => '8' })
+      obj.attributes.except(:engine).should == {
+        :name => :wildcat,  :make_model => 'Buick Wildcat', :year =>  1968,  :doors =>  2 }
+      obj.engine.attributes.should == {
+        :carburetor => :edelbrock, :volume => 455, :cylinders => 8 }
     end
-
-    it 'example' do
-      example_inst.receive!(:another_record => { :my_field => 69, :str_field => "deep", :sym_field=>:bob, })
-      p example_inst
-      example_inst.another_record do
-        p self
+    it 'lets you dive down' do
+      wildcat.engine.attributes.should == { :carburetor => :stock, :volume => 455, :cylinders => 8 }
+      wildcat.engine(:cylinders => 6) do
+        volume   383
       end
-      p example_inst.another_record.sym_field # .should == :voila
+      wildcat.engine.attributes.should == { :carburetor => :stock, :volume => 383, :cylinders => 6}
+    end
+    it 'lazily autovivifies members' do
+      ford_39.read_attribute(:engine).should be_nil
+      ford_39.engine(:cylinders => 6)
+      ford_39.engine.attributes.should == { :carburetor => :stock, :volume => nil, :cylinders => 6}
     end
   end
 
-  context ".member" do
+  context ".field" do
     it "describes an attribute" do
-      example_inst.attributes.should == { :my_field => 69, :str_field=>nil, :sym_field=>nil }
-      example_inst.write_attribute(:my_field, 3).should == 3
-      example_inst.attributes.should == { :my_field => 3, :str_field=>nil, :sym_field=>nil }
-      example_inst.read_attribute(:my_field).should == 3
+      car_class.should have_field(:name)
+      obj = car_class.new
+      obj.read_attribute(:name).should be_nil
+      obj.attribute_set?(:name).should be_false
+      obj.write_attribute(:name, :bob).should == :bob
+      obj.read_attribute(:name).should == :bob
+      obj.attribute_set?(:name).should be_true
+      obj.receive_name('bob').should == obj
+      obj.read_attribute(:name).should == :bob
     end
     it "calling the getset method #foo with no args calls read_attribute(:foo)" do
-      example_inst.should_receive(:read_attribute).with(:my_field).and_return(example_val)
-      example_inst.my_field.should == example_val
+      wildcat.write_attribute(:doors, example_val)
+      wildcat.should_receive(:read_attribute).with(:doors).at_least(:once).and_return(example_val)
+      wildcat.doors.should == example_val
     end
     it "calling the getset method #foo with an argument calls write_attribute(:foo)" do
-      example_inst.should_receive(:write_attribute).with(:my_field, example_val).and_return(7)
-      ( example_inst.my_field(example_val) ).should == 7
+      wildcat.write_attribute(:doors, 'gone')
+      wildcat.should_receive(:write_attribute).with(:doors, example_val).and_return('returned')
+      result = wildcat.doors(example_val)
+      result.should == 'returned'
     end
-    it "calling the getset method #foo with multiple arguments is an error" do
-      ->{ example_inst.my_field(1, 2) }.should raise_error(ArgumentError, "wrong number of arguments (2 for 0..1)")
-    end
-    it "does not create a writer method #foo=" do
-      example_inst.should     respond_to(:my_field)
-      example_inst.should_not respond_to(:my_field=)
-    end
+    # it "calling the getset method #foo with multiple arguments is an error" do
+    #   ->{ wildcat.my_field(1, 2) }.should raise_error(ArgumentError, "wrong number of arguments (2 for 0..1)")
+    # end
+    # it "does not create a writer method #foo=" do
+    #   wildcat.should     respond_to(:my_field)
+    #   wildcat.should_not respond_to(:my_field=)
+    # end
   end
 
-  context ".collection" do
+  # context ".member" do
+  #   it "describes an attribute" do
+  #     wildcat.attributes.should == { :my_field => 69, :str_field=>nil, :sym_field=>nil }
+  #     wildcat.write_attribute(:my_field, 3).should == 3
+  #     wildcat.attributes.should == { :my_field => 3, :str_field=>nil, :sym_field=>nil }
+  #     wildcat.read_attribute(:my_field).should == 3
+  #   end
+  #   it "calling the getset method #foo with no args calls read_attribute(:foo)" do
+  #     wildcat.write_attribute(:my_field, example_val)
+  #     # wildcat.should_receive(:read_attribute).with(:my_field).at_least(:once).and_return(example_val)
+  #     wildcat.my_field.should == example_val
+  #   end
+  #   it "calling the getset method #foo with an argument calls write_attribute(:foo)" do
+  #     wildcat.should_receive(:write_attribute).with(:my_field, example_val).and_return(7)
+  #     ( wildcat.my_field(example_val) ).should == 7
+  #   end
+  #   it "calling the getset method #foo with multiple arguments is an error" do
+  #     ->{ wildcat.my_field(1, 2) }.should raise_error(ArgumentError, "wrong number of arguments (2 for 0..1)")
+  #   end
+  #   it "does not create a writer method #foo=" do
+  #     wildcat.should     respond_to(:my_field)
+  #     wildcat.should_not respond_to(:my_field=)
+  #   end
+  # end
 
+  context 'collections' do
+    subject{ garage }
+    it 'a collection holds named objects' do
+      garage.cars.should be_empty
+
+      # create a car with a hash of attributes
+      garage.car(:cadzilla, :make_model => 'Cadillac, Mostly')
+      # ...and retrieve it by name
+      cadzilla = garage.car(:cadzilla)
+
+      # add a car explicitly
+      garage.car(:wildcat,  wildcat)
+      garage.car(:wildcat).should     equal(wildcat)
+
+      # duplicate a car
+      garage.car(:ford_39, ford_39.attributes.compact)
+      garage.car(:ford_39).should     ==(ford_39)
+      garage.car(:ford_39).should_not equal(ford_39)
+
+      # examine the whole collection
+      garage.cars.keys.should == [:cadzilla, :wildcat, :ford_39]
+      garage.cars.should == Gorillib::Collection.receive([cadzilla, wildcat, ford_39], car_class, :name)
+    end
+    it 'lazily autovivifies collection items' do
+      garage.cars.should be_empty
+      garage.car(:chimera).should be_a(car_class)
+      garage.cars.should == Gorillib::Collection.receive([{:name => :chimera}], car_class, :name)
+    end
   end
 
 end

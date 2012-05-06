@@ -1,3 +1,5 @@
+module Gorillib ; end
+
 # String inflections define new methods on the String class to transform names for different purposes.
 #
 #   "ScaleScore".underscore # => "scale_score"
@@ -9,7 +11,7 @@
 # * underscore
 # * demodulize
 #
-module Gorillib::String::Inflector
+module Gorillib::Inflector
   extend self
 
   def self.pluralizations
@@ -17,7 +19,7 @@ module Gorillib::String::Inflector
   end
 
   def pluralize(str)
-    Gorillib::String::Inflector.pluralizations.fetch(str){ "#{str}s" }
+    Gorillib::Inflector.pluralizations.fetch(str){ "#{str}s" }
   end
 
   # The reverse of +pluralize+, returns the singular form of a word in a string.
@@ -29,8 +31,8 @@ module Gorillib::String::Inflector
   #   "bonus".singularize            # => "bonu"
   #   "boxes".singularize            # => "boxe"
   #   "CamelOctopi".singularize      # => "CamelOctopi"
-  def singularize(word)
-    Gorillib::String::Inflector.pluralizations.reverse.fetch(str){ str.gsub(/s$/, '') }
+  def singularize(str)
+    Gorillib::Inflector.pluralizations.invert.fetch(str){ str.gsub(/s$/, '') }
   end
 
   # Capitalizes the first word and turns underscores into spaces and strips a

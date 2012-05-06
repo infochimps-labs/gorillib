@@ -1,3 +1,5 @@
+module Gorillib ; end
+
 # String inflections define new methods on the String class to transform names for different purposes.
 #
 #   "ScaleScore".underscore # => "scale_score"

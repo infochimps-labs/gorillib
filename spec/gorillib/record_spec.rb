@@ -2,13 +2,14 @@ require File.expand_path('../spec_helper', File.dirname(__FILE__))
 #
 require 'gorillib/record'
 require 'gorillib/record/field'
+require 'gorillib/record/defaults'
 #
 require 'record_test_helpers'
 
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
-describe Gorillib::Record, :record_spec => false do
+describe Gorillib::Record, :record_spec => true do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:simple_record){ class Gorillib::Test::TestClass ; include Gorillib::Record ; field :my_field, Whatever ; self ; end }

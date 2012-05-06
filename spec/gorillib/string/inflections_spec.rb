@@ -6,7 +6,7 @@ include InflectorTestCases
 
 describe String, :string_spec => true do
 
-  describe 'camelize' do
+  describe '#camelize' do
     CamelToUnderscore.each do |cameled, underscored|
       it underscored do
         underscored.camelize.should == cameled

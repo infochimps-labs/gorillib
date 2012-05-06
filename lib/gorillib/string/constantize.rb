@@ -3,14 +3,14 @@ class String
 
   # +constantize+ tries to find a declared constant with the name specified
   # in the string. It raises a NameError when the name is not in CamelCase
-  # or is not initialized.  See Gorillib::String::Inflector.constantize
+  # or is not initialized.  See Gorillib::Inflector.constantize
   #
   # Examples
   #   "Module".constantize  # => Module
   #   "Class".constantize   # => Class
   #   "blargle".constantize # => NameError: wrong constant name blargle
   def constantize
-    Gorillib::String::Inflector.constantize(self)
+    Gorillib::Inflector.constantize(self)
   end unless method_defined?(:constantize)
 
   # +safe_constantize+ tries to find a declared constant with the name specified
@@ -22,7 +22,7 @@ class String
   #   "Class".safe_constantize   # => Class
   #   "blargle".safe_constantize # => nil
   def safe_constantize
-    Gorillib::String::Inflector.safe_constantize(self)
+    Gorillib::Inflector.safe_constantize(self)
   end unless method_defined?(:safe_constantize)
 
 end
