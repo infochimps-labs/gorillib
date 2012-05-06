@@ -38,7 +38,7 @@ module Gorillib
         Validate.identifier!(name)
         @record            = record
         @name             = name.to_sym
-        @type             = factory_for(type)
+        @type             = self.class.factory_for(type)
         @visibility       = [:reader, :writer, :receiver].inject({}){|acc,meth| acc[meth] = options.delete(meth) if options.has_key?(meth) ; acc }
         @doc              = options.delete(:name){ "#{name} field" }
         receive!(options)
@@ -51,7 +51,7 @@ module Gorillib
         name.to_s
       end
 
-      def factory_for(type)
+      def self.factory_for(type)
         Gorillib::Factory(type)
       end
 

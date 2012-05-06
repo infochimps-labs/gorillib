@@ -1,6 +1,27 @@
 module Gorillib
   module Record
 
+    Field.class_eval do
+      field :default, :whatever
+
+      # @returns [true, false] true if the field has a default value/proc set
+      def has_default?
+        attribute_set?(:default)
+      end
+    end
+
+    # This is called by `read_attribute` if an attribute is unset; you should
+    # not call this directly.  You might use this to provide defaults, or lazy
+    # access, or layered resolution.
+    #
+    # @param [String, Symbol, #to_s] field_name Name of the attribute to unset.
+    # @return [nil] Ze goggles! Zey do nussing!
+    def read_unset_attribute(field_name)
+      field = self.class.fields[field_name]
+      return unless field.has_default?
+      write_attribute(field.name, attribute_default(field))
+    end
+
     # FieldDefaults allows defaults to be declared for your fields
     #
     # Defaults are declared by passing the :default option to the field
@@ -11,8 +32,8 @@ module Gorillib
     #
     # @example Usage
     #   class Person
-    #     field :first_name, :default => "John"
-    #     field :last_name,  :default => "Doe"
+    #     field :first_name, String, :default => "John"
+    #     field :last_name,  String, :default => "Doe"
     #   end
     #
     #   person = Person.new
@@ -21,51 +42,32 @@ module Gorillib
     #
     # @example Dynamic Default
     #   class Event
-    #     field :start_date
-    #     field :end_date, :default => ->{ start_date }
+    #     field :start_date, Date
+    #     field :end_date,   Date, :default => ->{ start_date }
     #   end
     #
-    #   event = Event.receive(:start_date => Date.parse("2012-01-01"))
+    #   event = Event.receive(:start_date => "2012-01-01")
     #   event.end_date.to_s #=> "2012-01-01"
     #
-    module FieldDefaults
-      extend ActiveSupport::Concern
 
-      # Applies the default values to fields
-      #
-      # Applies all the default values to any fields not yet set
-      #
-      # FIXME: avoid any field setter logic, such as dirty tracking.
-      def apply_defaults!
-        fields.each do |field|
-          write_attribute(field.name, default_for(field)) unless attribute_set?(field.name)
-        end
-      end
+  protected
 
-    private
-
-      # Calculates a field default
-      #
-      # @private
-      def default_for(field)
-        if field.default.respond_to?(:call)
-          instance_exec(&default)
-        else
-          field.default.try_dup
-        end
+    # Calculates a field default
+    #
+    # @protected
+    def attribute_default(field)
+      return unless field.has_default?
+      val = field.default
+      case
+      when (val.is_a?(Proc) || val.is_a?(UnboundMethod)) && (val.arity == 0)
+        self.instance_exec(&val)
+      when val.respond_to?(:call)
+        val.call(self, field.name)
+      else
+        val.try_dup
       end
     end
 
   end
+
 end
-
-
-
-    # def attribute_default(field_name)
-    #   val = field.default
-    #   case val
-    #   when nil  then nil
-    #   when Proc then (val.arity == 0) ? instance_exec(&val) : val.call(self, field_name)
-    #   else           val.try_dup
-    #   end
-    # end
