@@ -19,11 +19,9 @@ ArgumentError.class_eval do
   end
 
   def self.check_arity!(args, allowed_arity)
-    allowed_arity = (0 .. allowed_arity) if allowed_arity.is_a?(Fixnum)
-    unless allowed_arity.include?(args.length)
-      self.new("wrong number of arguments (#{args.length} for #{allowed_arity})")
-    end
-    true
+    allowed_arity = (allowed_arity .. allowed_arity) if allowed_arity.is_a?(Fixnum)
+    return true if allowed_arity.include?(args.length)
+    raise self.new("wrong number of arguments (#{args.length} for #{allowed_arity})")
   end
 end
 

@@ -1,6 +1,18 @@
 require 'gorillib/object/blank'
-require 'gorillib/hash/keys'
 require 'gorillib/object/try'
+require 'gorillib/array/extract_options'
+require 'gorillib/hash/keys'
+require 'gorillib/hash/slice'
+require 'gorillib/string/inflector'
+require 'gorillib/exception/raisers'
+require 'gorillib/metaprogramming/concern'
+require 'gorillib/metaprogramming/class_attribute'
+#
+require 'gorillib/collection'
+require 'gorillib/record/factories'
+require 'gorillib/record/named_schema'
+require 'gorillib/record/validate'
+require 'gorillib/record/errors'
 
 module Gorillib
 
@@ -20,6 +32,7 @@ module Gorillib
   #   puts person  #=> #<Person name="Bob Dobbs, Jr">
   #
   module Record
+    extend Gorillib::Concern
 
     # Returns a Hash of all attributes
     #
@@ -109,7 +122,7 @@ module Gorillib
     # defined.
     #
     # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
-    # or some such. Use `#update!` if your data is already type safe.
+    # or some such. Use `#update_attributes` if your data is already type safe.
     #
     # @param [{Symbol => Object}] hsh The values to receive
     # @return [Gorillib::Record] the object itself
@@ -132,11 +145,11 @@ module Gorillib
     # Accept the given attributes, adopting each value directly.
     #
     # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
-    # or some such. Use `#update!` if your data is already type safe.
+    # or some such. Use `#update_attributes` if your data is already type safe.
     #
     # @param [{Symbol => Object}] hsh The values to update with
     # @return [Gorillib::Record] the object itself
-    def update!(hsh={})
+    def update_attributes(hsh)
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
       Gorillib::Record::Validate.hashlike!("attributes hash", hsh)
       self.class.fields.each do |attr, field|
@@ -164,7 +177,7 @@ module Gorillib
 
     # @return [String] Human-readable presentation of the attributes
     def inspect
-      str = "#<" << self.class.name
+      str = "#<" << self.class.name.to_s
       str << " " << attributes.map{|attr, val| "#{attr}=#{attribute_set?(attr) ? val.inspect : '~'}" }.join(", ") if attributes.present?
       str << ">"
       str
@@ -208,7 +221,8 @@ module Gorillib
       # @return Gorillib::Record::Field
       def field(field_name, type, options={})
         options = options.symbolize_keys
-        fld = ::Gorillib::Record::Field.new(field_name, type, self, options)
+        field_type = options.delete(:field_type){ ::Gorillib::Record::Field }
+        fld = field_type.new(field_name, type, self, options)
         @_own_fields[fld.name] = fld
         _reset_descendant_fields
         fld.send(:inscribe_methods, self)
@@ -236,6 +250,7 @@ module Gorillib
       #
       # @return [Gorillib::Record] the new object
       def receive(*args)
+        return nil if args.present? && args.first.nil?
         obj = new
         obj.receive!(*args)
         obj
@@ -246,7 +261,7 @@ module Gorillib
       # @example Inspect the record's definition.
       #   Person.inspect #=> Person[first_name, last_name]
       def inspect
-        "#{self.name}[#{ field_names.join(", ") }]"
+        "#{self.name || 'anon'}[#{ field_names.join(", ") }]"
       end
 
     protected
@@ -269,13 +284,12 @@ module Gorillib
       end
     end
 
-    def self.included(base)
+    self.included do |base|
       base.instance_eval do
         extend Gorillib::Record::NamedSchema
         extend Gorillib::Record::ClassMethods
         @_own_fields ||= {}
       end
-      super
     end
 
   end

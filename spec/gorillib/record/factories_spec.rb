@@ -2,7 +2,7 @@ require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 
 require 'gorillib/record/factories'
 
-describe 'a', :record_spec => true do
+describe '', :record_spec => false do
   let(:inst    ){ mock('any object') }
   let(:example_class){  Class.new }
   let(:example_module){ Module.new }
@@ -17,25 +17,28 @@ describe 'a', :record_spec => true do
   end
 
   describe Gorillib::Factory do
-    describe '.factory_for' do
+    describe 'Factory()' do
       it 'turns a proc into an ApplyProcFactory' do
-        ff = Gorillib::Factory.factory_for( ->(obj){ "bob says #{obj}" } )
+        ff = Gorillib::Factory( ->(obj){ "bob says #{obj}" } )
         ff.receive(3).should == "bob says 3"
       end
       it 'uses a factory directly' do
         ff = Gorillib::Factory::SymbolFactory.new
-        Gorillib::Factory.factory_for(ff).should == ff
-        Gorillib::Factory.factory_for(Gorillib::Factory::SymbolFactory).should == Gorillib::Factory::SymbolFactory
+        Gorillib::Factory(ff).should == ff
+        Gorillib::Factory(Gorillib::Factory::SymbolFactory).should == Gorillib::Factory::SymbolFactory
       end
       it 'looks up factories by handle' do
-        Gorillib::Factory.factory_for(:symbol   ).should == Gorillib::Factory::SymbolFactory
-        Gorillib::Factory.factory_for(:identical).should == Gorillib::Factory::IdenticalFactory
+        Gorillib::Factory(:symbol   ).should == Gorillib::Factory::SymbolFactory
+        Gorillib::Factory(:identical).should == Gorillib::Factory::IdenticalFactory
       end
       it 'looks up factories by class' do
-        Gorillib::Factory.factory_for(Symbol).should == Gorillib::Factory::SymbolFactory
-        Gorillib::Factory.factory_for(String).should == Gorillib::Factory::StringFactory
-        p Gorillib::Factory.factories
-
+        Gorillib::Factory(Symbol).should == Gorillib::Factory::SymbolFactory
+        Gorillib::Factory(String).should == Gorillib::Factory::StringFactory
+      end
+      it 'calls Gorillib::Factory.factory_for' do
+        x = mock
+        Gorillib::Factory.should_receive(:factory_for).with(x)
+        Gorillib::Factory(x)
       end
     end
   end
@@ -83,9 +86,9 @@ describe 'a', :record_spec => true do
   shared_examples_for :it_is_registered_as do |*keys|
     it "the factory for #{keys}" do
       keys.each do |key|
-        Gorillib::Factory.factory_for(key).should == described_class
+        Gorillib::Factory(key).should == described_class
       end
-      Gorillib::Factory.factories.to_hash.select{|key,val| val == described_class }.keys.should == keys
+      Gorillib::Factory.send(:factories).to_hash.select{|key,val| val == described_class }.keys.should == keys
     end
   end
 
@@ -123,7 +126,7 @@ describe 'a', :record_spec => true do
     it_behaves_like :it_converts,            1.0  => 1, 1.234567e6 => 1234567, Complex(1,0) => 1
     it_behaves_like :it_considers_blankish, nil, ""
     it_behaves_like :it_is_a_mismatch_for,  :foo, false, [], Complex(1,3)
-    it_behaves_like :it_is_registered_as, :integer, Integer
+    it_behaves_like :it_is_registered_as, :int, :integer, Integer
   end
 
   describe Gorillib::Factory::FloatFactory do
@@ -165,7 +168,6 @@ describe 'a', :record_spec => true do
     it_behaves_like :it_converts,           "true" => true,   :true  => true, [] => true, :foo => true, [] => true, Complex(1.5,3) => true, Object.new => true
     it_behaves_like :it_is_registered_as, :boolean
   end
-
 
   describe Gorillib::Factory::IdenticalFactory do
     it_behaves_like :it_considers_native,   true, false, nil, 3, '', 'a string', :a_symbol, [], {}, ->(){ 'a proc' }, Module.new, Complex(1,3), Object.new

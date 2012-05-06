@@ -23,6 +23,7 @@ module Gorillib
       # The fields are then defined properly at the end of the file.
 
       attr_reader :name
+      attr_reader :type
 
       # @param [#to_sym]                name    Field name
       # @param [#receive]               type    Factory for field values. To accept any object as-is, specify `Object` as the type.
@@ -37,7 +38,7 @@ module Gorillib
         Validate.identifier!(name)
         @record            = record
         @name             = name.to_sym
-        @type             = type
+        @type             = factory_for(type)
         @visibility       = [:reader, :writer, :receiver].inject({}){|acc,meth| acc[meth] = options.delete(meth) if options.has_key?(meth) ; acc }
         @doc              = options.delete(:name){ "#{name} field" }
         receive!(options)
@@ -48,6 +49,10 @@ module Gorillib
       # @return [String] the field name
       def to_s
         name.to_s
+      end
+
+      def factory_for(type)
+        Gorillib::Factory(type)
       end
 
       # @return [String] Human-readable presentation of the field definition
@@ -77,10 +82,15 @@ module Gorillib
       #
       #
       def inscribe_methods(record)
-        fn = self.name
-        record.__send__(:define_meta_module_method, fn,              visibility(:reader)  ){      read_attribute(fn)       }
-        record.__send__(:define_meta_module_method, "#{fn}=",        visibility(:writer)  ){|val| write_attribute(fn, val) }
-        record.__send__(:define_meta_module_method, "receive_#{fn}", visibility(:receiver)){|val| write_attribute(fn, val) }
+        fn   = self.name
+        type = self.type
+        record.__send__(:define_meta_module_method, fn,              visibility(:reader)  ) do       read_attribute(fn)       ; end
+        record.__send__(:define_meta_module_method, "#{fn}=",        visibility(:writer)  ) do |val| write_attribute(fn, val) ; end
+        record.__send__(:define_meta_module_method, "receive_#{fn}", visibility(:receiver)) do |val|
+          val = type.receive(val)
+          write_attribute(fn, val)
+          self
+        end
       end
 
       #
@@ -91,7 +101,7 @@ module Gorillib
       #
       def visibility(meth_type)
         Validate.included_in!("method type", meth_type, [:reader, :writer, :receiver])
-        @visibility[meth_type] || :public
+        @visibility.has_key?(meth_type) ? @visibility[meth_type] : :public
       end
 
     public

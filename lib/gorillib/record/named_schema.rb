@@ -2,6 +2,8 @@ module Gorillib
   module Record
     module NamedSchema
 
+    protected
+
       #
       # Returns the meta_module -- a module extending the type, on which all the
       # record methods are inscribed. This allows you to override the record methods
@@ -13,12 +15,14 @@ module Gorillib
       #
       def meta_module
         return @_meta_module if defined?(@_meta_module)
-        @_meta_module = ::Gorillib::Record::NamedSchema.get_nested_module("Meta::#{self.name}Type")
+        if self.name
+          @_meta_module = ::Gorillib::Record::NamedSchema.get_nested_module("Meta::#{self.name}Type")
+        else
+          @_meta_module = Module.new
+        end
         self.class_eval{ include(@_meta_module) }
         @_meta_module
       end
-
-    protected
 
       def define_meta_module_method(method_name, visibility=:public, &block)
         if (visibility == false) then return               ; end

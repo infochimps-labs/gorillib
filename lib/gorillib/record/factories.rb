@@ -1,45 +1,36 @@
-require 'gorillib/object/blank'
-require 'gorillib/array/extract_options'
-require 'gorillib/metaprogramming/class_attribute'
-require 'gorillib/hash/slice'
-require 'gorillib/object/try_dup'
-require 'gorillib/collection'
-require 'gorillib/string/inflector'
-
-# require 'gorillib/type/extended'
-# require 'set'
-# require 'pathname'
-# require 'time'
+def Gorillib::Factory(*args)
+  ::Gorillib::Factory.factory_for(*args)
+end
 
 module Gorillib
 
   module Factory
     class FactoryMismatchError < ArgumentError ; end
 
-    def factory_for(type)
-      case
-      when type.is_a?(Proc) || type.is_a?(Method)     then return Gorillib::Factory::ApplyProcFactory.new(type)
-      when type.respond_to?(:receive)                 then return type
-      when Gorillib::Factory.factories.include?(type) then return Gorillib::Factory.factories[type] 
-      else raise "Don't know what factory makes a #{type}"
+    class << self
+      def factory_for(type)
+        case
+        when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
+        when type.respond_to?(:receive)             then return type
+        when factories.include?(type)               then return factories[type]
+        else raise "Don't know which factory makes a #{type}"
+        end
+      end
+
+      def factories
+        @factories ||= Gorillib::Collection.new.tap{|f| f.key_method = :name }
+      end
+      private :factories
+
+      def register_factory(factory, *handles)
+        if handles.blank?
+          handles = [factory.handle, factory.product]
+        end
+        handles.each{|handle| factories[handle] = factory }
       end
     end
-    module_function :factory_for
 
-    def self.factories
-      @factories ||= Gorillib::Collection.new.tap{|f| f.key_method = :name }
-    end
-
-    def self.register_factory(factory, *handles)
-      if handles.blank?
-        handles = [factory.handle, factory.product]
-      end
-      handles.each{|handle| factories[handle] = factory }
-    end
-    
     class BaseFactory
-      include Gorillib::Factory
-      
       # [Class] The type of objects produced by this factory
       class_attribute :product
 
@@ -143,11 +134,9 @@ module Gorillib
       self.blankish_vals       = []
       def native?(obj)   true  ; end
       def blankish?(obj) false ; end
-      
       def receive(obj)
         obj
       end
-
       register_factory!(:identical, :whatever)
     end
     ::Whatever = IdenticalFactory
@@ -209,7 +198,7 @@ module Gorillib
     class IntegerFactory < ConvertingFactory
       self.product = Integer
       def convert(obj)      obj.to_i                  end
-      register_factory!
+      register_factory!(:int, :integer, Integer)
     end
     class BignumFactory < IntegerFactory
       self.product = Bignum
@@ -240,7 +229,7 @@ module Gorillib
     end
 
     # __________________________________________________________________________
-    
+
     class ClassFactory  < NonConvertingFactory ; self.product = Class      ; register_factory! ; end
     class ModuleFactory < NonConvertingFactory ; self.product = Module     ; register_factory! ; end
     class TrueFactory   < NonConvertingFactory ; self.product = TrueClass  ; register_factory!(:true, TrueClass) ; end
@@ -271,7 +260,7 @@ module Gorillib
       self.blankish_vals = Set.new([ nil ])
 
       def initialize(options={})
-        @items_factory = factory_for( options.delete(:items){ IdenticalFactory.new } )
+        @items_factory = Gorillib::Factory( options.delete(:items){ IdenticalFactory.new } )
         super(options)
       end
 
@@ -308,7 +297,7 @@ module Gorillib
       self.product = Hash
 
       def initialize(options={})
-        @keys_factory = factory_for( options.delete(:keys){ Whatever.new } )
+        @keys_factory = Gorillib::Factory( options.delete(:keys){ Whatever.new } )
         super(options)
       end
 
