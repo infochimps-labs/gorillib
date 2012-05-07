@@ -8,7 +8,7 @@ gem     'json'
 group :development do
   gem   'bundler',    "~> 1"
   gem   'pry'
-  # gem 'jeweler',    "~> 1.6"
+  gem 'jeweler',    "~> 1.6"
 end
 
 group :docs do
