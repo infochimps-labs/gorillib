@@ -56,7 +56,7 @@ module Gorillib
     end
 
     def add_collection_item(field, item_key=nil, attrs={}, &block)
-      attrs.merge!(key_method => item_key, self.class.handle => self)
+      attrs.merge!(key_method => item_key) if attrs.respond_to?(:merge!)
       val = field.type.receive(attrs)
       collection_of(field.name) << val
       val
@@ -78,27 +78,58 @@ module Gorillib
         new(*args, &block)
       end
 
+      # KLUDGE: no smell good, this
       def regular_field(*args)
         _field(*args)
       end
-
       def field(field_name, type, options={})
         _field(field_name, type, options.merge(:field_type => ::Gorillib::Builder::GetsetField))
       end
-
       def member(field_name, type, options={})
         _field(field_name, type, options.merge(:field_type => ::Gorillib::Builder::MemberField))
       end
-
       def collection(field_name, type, options={})
         _field(field_name, type, options.merge(:field_type => ::Gorillib::Builder::CollectionField))
       end
+      # /KLUDGE
+
+    protected
+
+      def define_attribute_getset(field)
+        define_meta_module_method(field.name, field.visibility(:reader)) do |*args, &block|
+          getset(field, *args, &block)
+        end
+      end
+
+      def define_member_getset(field)
+        define_meta_module_method(field.name, field.visibility(:reader)) do |*args, &block|
+          getset_member(field, *args, &block)
+        end
+      end
+
+      def define_collection_getset(field)
+        define_meta_module_method(field.singular_name, field.visibility(:collection_getset)) do |*args, &block|
+          getset_collection_item(field, *args, &block)
+        end
+      end
+
+      def define_collection_tester(field)
+        plural_name = field.plural_name
+        define_meta_module_method("has_#{field.singular_name}?", field.visibility(:collection_tester)) do |item_key|
+          collection_of(plural_name).include?(item_key)
+        end
+      end
+
     end
   end
 
   module FancyBuilder
     extend  Gorillib::Concern
     include Gorillib::Builder
+
+    def add_collection_item(field, item_key=nil, attrs={}, &block)
+      super(field, item_key, attrs.merge(self.class.handle => self), &block)
+    end
 
     module ClassMethods
       def belongs_to(field_name, type, options={})
@@ -120,6 +151,9 @@ module Gorillib
     class CollectionField < Gorillib::Record::Field
       field :singular_name, Symbol, :default => ->{ Gorillib::Inflector.singularize(name.to_s).to_sym }
 
+      self.visibilities = visibilities.merge(:writer => false, :tester => false,
+        :collection_getset => :public, :collection_tester => true)
+
       alias_method :plural_name, :name
       def singular_name
         @singular_name ||= Gorillib::Inflector.singularize(name.to_s).to_sym
@@ -129,73 +163,35 @@ module Gorillib
         :name
       end
 
-      #
-      #
-      #
       def inscribe_methods(record)
-        fn   = self.name
-        type = self.type
-        field = self
-        plural_name = self.plural_name
-        singular_name = self.singular_name
+        type           = self.type
         collection_key = self.collection_key
-
-        self.default = ->{ Gorillib::Collection.new(type, collection_key) }
-
-        record.__send__(:define_meta_module_method, plural_name,     visibility(:reader)  ) do
-          read_attribute(plural_name)
-        end
-        record.__send__(:define_meta_module_method, singular_name,   visibility(:reader)  ) do |*args, &block|
-          getset_collection_item(field, *args, &block)
-        end
-        record.__send__(:define_meta_module_method, "has_#{singular_name}?", visibility(:reader)  ) do |item_key|
-          collection_of(plural_name).include?(item_key)
-        end
-        record.__send__(:define_meta_module_method, "receive_#{fn}", visibility(:receiver)) do |val|
-          val = type.receive(val)
-          write_attribute(fn, val)
-          self
-        end
+        self.default   = ->{ Gorillib::Collection.new(type, collection_key) }
+        #
+        @visibilities[:writer] = false
+        super
+        record.__send__(:define_collection_getset,  self)
+        record.__send__(:define_collection_tester,  self)
       end
     end
 
-
     class GetsetField < Gorillib::Record::Field
-      #
-      #
-      #
+      self.visibilities = visibilities.merge(:writer => false, :tester => false)
+
       def inscribe_methods(record)
-        fn   = self.name
-        type = self.type
-        field = self
-        record.__send__(:define_meta_module_method, fn,              visibility(:reader)  ) do |*args, &block|
-          getset(field, *args, &block)
-        end
-        record.__send__(:define_meta_module_method, "receive_#{fn}", visibility(:receiver)) do |val|
-          val = type.receive(val)
-          write_attribute(fn, val)
-          self
-        end
+        @visibilities[:writer] = false
+        super
+        record.__send__(:define_attribute_getset,  self)
       end
     end
 
     class MemberField < Gorillib::Record::Field
-      #
-      #
-      #
-      def inscribe_methods(record)
-        fn   = self.name
-        type = self.type
-        field = self
+      self.visibilities = visibilities.merge(:writer => false, :tester => true)
 
-        record.__send__(:define_meta_module_method, fn,              visibility(:reader)  ) do |*args, &block|
-          getset_member(field, *args, &block)
-        end
-        record.__send__(:define_meta_module_method, "receive_#{fn}", visibility(:receiver)) do |val|
-          val = type.receive(val)
-          write_attribute(fn, val)
-          self
-        end
+      def inscribe_methods(record)
+        @visibilities[:writer] = false
+        super
+        record.__send__(:define_member_getset,  self)
       end
     end
 

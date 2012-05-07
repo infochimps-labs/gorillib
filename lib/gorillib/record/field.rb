@@ -25,6 +25,10 @@ module Gorillib
       attr_reader :name
       attr_reader :type
 
+      class_attribute :visibilities, :instance_writer => false
+      self.visibilities = { :reader => :public, :writer => :public, :receiver => :public, :tester => false }
+
+
       # @param [#to_sym]                name    Field name
       # @param [#receive]               type    Factory for field values. To accept any object as-is, specify `Object` as the type.
       # @param [Gorillib::Record]       record   Field's owner
@@ -39,7 +43,8 @@ module Gorillib
         @record            = record
         @name             = name.to_sym
         @type             = self.class.factory_for(type)
-        @visibility       = [:reader, :writer, :receiver].inject({}){|acc,meth| acc[meth] = options.delete(meth) if options.has_key?(meth) ; acc }
+        default_visabilities = visibilities
+        @visibilities     = default_visabilities.merge( options.extract!(*default_visabilities.keys) )
         @doc              = options.delete(:name){ "#{name} field" }
         receive!(options)
       end
@@ -76,23 +81,6 @@ module Gorillib
         new(name, type, record, hsh)
       end
 
-    protected
-
-      #
-      #
-      #
-      def inscribe_methods(record)
-        fn   = self.name
-        type = self.type
-        record.__send__(:define_meta_module_method, fn,              visibility(:reader)  ) do       read_attribute(fn)       ; end
-        record.__send__(:define_meta_module_method, "#{fn}=",        visibility(:writer)  ) do |val| write_attribute(fn, val) ; end
-        record.__send__(:define_meta_module_method, "receive_#{fn}", visibility(:receiver)) do |val|
-          val = type.receive(val)
-          write_attribute(fn, val)
-          self
-        end
-      end
-
       #
       # returns the visibility
       #
@@ -100,8 +88,20 @@ module Gorillib
       #   Foo.field :granuloxity, :reader => :protected, :writer => false
       #
       def visibility(meth_type)
-        Validate.included_in!("method type", meth_type, [:reader, :writer, :receiver])
-        @visibility.has_key?(meth_type) ? @visibility[meth_type] : :public
+        Validate.included_in!("method type", meth_type, @visibilities.keys)
+        @visibilities[meth_type]
+      end
+
+    protected
+
+      #
+      #
+      #
+      def inscribe_methods(record)
+        record.__send__(:define_attribute_reader,   self)
+        record.__send__(:define_attribute_writer,   self)
+        record.__send__(:define_attribute_tester,   self)
+        record.__send__(:define_attribute_receiver, self)
       end
 
     public

@@ -23,25 +23,47 @@ module Gorillib::Test
   class Component      < IronfanBuilder ; end
   class Aspect         < IronfanBuilder ; end
   class Machine        < IronfanBuilder ; end
-  class ChefNode       < IronfanBuilder ; end
+  class ChefNode       < IronfanBuilder ; def save() ; end ; end
+  class ChefClient     < IronfanBuilder ; def save() ; end ; end
+  class ChefRole       < IronfanBuilder ; def save() ; end ; end
 
+  module Ironfan
+    class << self
+      attr_reader :dry_run
+      attr_reader :config
+    end
+    @dry_run = false
+    @config  = {}
+  end
+
+  
   class ComputeBuilder < IronfanBuilder
     field         :environment, Symbol
     collection    :clouds,      Cloud
     collection    :volumes,    Volume
     collection    :components, Component
+
+    def run_list() ; end
   end
 
   class Cluster        < ComputeBuilder
     collection    :facets,    Facet
     belongs_to    :organization, Organization
 
-    def servers
-      organization.servers.where(:cluster_name => self.name)
-    end
+    def servers() organization.servers.where(:cluster_name => self.name) ; end
   end
 
+  module ComputeBuilder::Deprecated
+    def bogosity() ; end
+    def bogus?()   ; end
+    def raid_group() ; end
+    def root_volume() ; end
+    def role() ; end
+    def recipe() ; end
+    def role_implication() ; end
+  end
   module Cluster::Deprecated
+    attr_accessor :chef_roles
     def find_facet(facet_name)
       facets.fetch(facet_name){ raise("Facet '#{facet_name}' is not defined in cluster '#{self.name}'") }
     end

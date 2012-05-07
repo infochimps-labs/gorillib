@@ -14,7 +14,7 @@ require 'record_test_helpers'
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
-describe Gorillib::Builder, :record_spec => false do
+describe Gorillib::Builder, :record_spec => true do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:example_class) do

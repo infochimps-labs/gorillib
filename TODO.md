@@ -16,6 +16,9 @@ FIXME: naming of collection members -- who does it?
 
 FIXME: collection factory stuff is all screwy
 
+
+tester for a collection item -- `has_facet?` not `facet?`
+
 ### Collection
 
 FIXME: factory stuff is all screwy

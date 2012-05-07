@@ -19,17 +19,21 @@ describe Gorillib::Builder, :record_spec => true do
   def example_cluster
     Gorillib::Test.cluster
   end
-  
-  it 'is' do
-    p example_cluster
-    puts example_cluster.facets.inspect
-    puts example_cluster.facets.inspect(false)
-    webnode = example_cluster.facet(:webnode)
-    svr = webnode.servers.to_a.first
-    p svr
 
-    p webnode.cluster_name
-    p svr.facet_name
+  let(:ec_webnode  ){ example_cluster.facet(:webnode) }
+  let(:ec_webnode_a){ ec_webnode.server(:a) }
+  
+  it 'is awesome' do
+    p example_cluster
   end
 
+  context "collections get a {foo}_name accessor:" do
+    it("facet.cluster_name"){ ec_webnode.cluster_name.should == :yellowhat }
+    it("server.facet_name" ){ ec_webnode_a.facet_name.should == :webnode   }
+  end
+
+  context "collections get a `has_{foo}` tester:" do
+    it("server.facet?"    ){ ec_webnode_a.facet?.should be_true }
+    it("facet.has_server?"){ ec_webnode.should have_server(:a) }
+  end  
 end

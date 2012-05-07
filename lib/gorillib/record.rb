@@ -283,6 +283,37 @@ module Gorillib
         end
       end
 
+      def define_attribute_reader(field)
+        field_name = field.name
+        define_meta_module_method(field_name, field.visibility(:reader)) do
+          read_attribute(field_name)
+        end
+      end
+
+      def define_attribute_writer(field)
+        field_name = field.name
+        define_meta_module_method("#{field_name}=", field.visibility(:writer)) do |val|
+          write_attribute(field_name, val)
+        end
+      end
+
+      def define_attribute_tester(field)
+        field_name = field.name
+        define_meta_module_method("#{field_name}?", field.visibility(:tester)) do
+          attribute_set?(field_name)
+        end
+      end
+
+      def define_attribute_receiver(field)
+        field_name = field.name
+        type       = field.type
+        define_meta_module_method("receive_#{field_name}", field.visibility(:receiver)) do |val|
+          val = type.receive(val)
+          write_attribute(field_name, val)
+          self
+        end
+      end
+
       def inherited(base)
         base.instance_eval do
           @_own_fields ||= {}
