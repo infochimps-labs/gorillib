@@ -25,3 +25,8 @@ FIXME: factory stuff is all screwy
 FIXME: conversion stuff screwy to some extent
 
 FIXME: Should a collection be enumerable, and how?
+
+
+repeated logic in has_collection and builder stuff ...
+should you be able to decorate anything with a decorator? 
+with a field?

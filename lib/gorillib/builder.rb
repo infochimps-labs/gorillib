@@ -38,10 +38,10 @@ module Gorillib
       :name
     end
 
-    def getset_collection_item(field, item_key, attrs={}, &block)
+    def getset_collection_item(field, item_key, attrs={}, options={}, &block)
       val = read_collection_item(field.name, item_key)
       if val.blank?
-        val = add_collection_item(field, item_key, attrs)
+        val = add_collection_item(field, item_key, attrs, options)
       else
         val.receive!(attrs) if attrs.present?
       end
@@ -55,9 +55,10 @@ module Gorillib
       self.read_attribute(plural_name)
     end
 
-    def add_collection_item(field, item_key=nil, attrs={}, &block)
+    def add_collection_item(field, item_key=nil, attrs={}, options={}, &block)
       attrs.merge!(key_method => item_key) if attrs.respond_to?(:merge!)
-      val = field.type.receive(attrs)
+      factory = options.fetch(:factory){ field.type }
+      val = factory.receive(attrs)
       collection_of(field.name) << val
       val
     end
@@ -127,8 +128,17 @@ module Gorillib
     extend  Gorillib::Concern
     include Gorillib::Builder
 
-    def add_collection_item(field, item_key=nil, attrs={}, &block)
-      super(field, item_key, attrs.merge(self.class.handle => self), &block)
+    def add_collection_item(field, item_key=nil, attrs={}, options={}, &block)
+      super(field, item_key, attrs.merge(self.class.handle => self), options, &block)
+    end
+
+    def inspect(detailed=true)
+      str = super
+      detailed ? str : ([str[0..-2], " #{read_attribute(key_method)}>"].join)
+    end
+
+    included do |base|
+      base.field :name,  Symbol
     end
 
     module ClassMethods
@@ -143,6 +153,14 @@ module Gorillib
 
       def handle
         Gorillib::Inflector.underscore(Gorillib::Inflector.demodulize(self.name)).to_sym
+      end
+
+
+      def collects(type, clxn_name)
+        type_handle = type.handle
+        define_meta_module_method type_handle do |item_name, attrs={}, options={}, &block|
+          send(clxn_name, item_name, attrs.merge(:owner => self), options.merge(:factory => type), &block)
+        end
       end
     end
   end
