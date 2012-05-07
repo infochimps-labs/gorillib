@@ -7,7 +7,7 @@ require 'gorillib/record/defaults'
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
-describe Gorillib::Record, :record_spec => true do
+describe Gorillib::Record, :record_spec => false do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:car_class) do

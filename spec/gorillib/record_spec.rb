@@ -9,7 +9,7 @@ require 'record_test_helpers'
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
-describe Gorillib::Record, :record_spec => true do
+describe Gorillib::Record, :record_spec => false do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:simple_record){ class Gorillib::Test::TestClass ; include Gorillib::Record ; field :my_field, Whatever ; self ; end }

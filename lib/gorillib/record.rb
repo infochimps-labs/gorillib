@@ -178,11 +178,19 @@ module Gorillib
     end
 
     # @return [String] Human-readable presentation of the attributes
-    def inspect
+    def inspect(show_attrs=true)
       str = "#<" << self.class.name.to_s
-      str << " " << attributes.map{|attr, val| "#{attr}=#{attribute_set?(attr) ? val.inspect : '~'}" }.join(", ") if attributes.present?
+      if show_attrs && (attr_names = self.class.field_names).present?
+        str << " " << attr_names.map{|attr| "#{attr}=#{inspect_attr(attr)}" }.join(", ")
+      end
       str << ">"
       str
+    end
+
+    def inspect_attr(attr)
+      return '~' if not attribute_set?(attr)
+      val = read_attribute(attr)
+      val.is_a?(Gorillib::Record) || val.is_a?(Gorillib::Collection) ? val.inspect(false) : val.inspect
     end
 
   protected
@@ -195,6 +203,19 @@ module Gorillib
     end
 
     module ClassMethods
+
+      #
+      # Receive external data, type-converting and creating contained records as necessary
+      #
+      # @return [Gorillib::Record] the new object
+      def receive(*args)
+        return nil if args.present? && args.first.nil?
+        raw = args.first
+        return raw if raw.is_a?(self)
+        obj = new
+        obj.receive!(*args)
+        obj
+      end
 
       # Defines a new field
       #
@@ -240,19 +261,6 @@ module Gorillib
       # @return [Array<Symbol>] The attribute names
       def field_names
         fields.keys
-      end
-
-      #
-      # Receive external data, type-converting and creating contained records as necessary
-      #
-      # @return [Gorillib::Record] the new object
-      def receive(*args)
-        return nil if args.present? && args.first.nil?
-        raw = args.first
-        return raw if raw.is_a?(self)
-        obj = new
-        obj.receive!(*args)
-        obj
       end
 
       # @return Class name and its attributes

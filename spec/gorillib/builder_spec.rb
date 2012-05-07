@@ -1,20 +1,20 @@
 require File.expand_path('../spec_helper', File.dirname(__FILE__))
-#
-require 'gorillib/string/simple_inflector'
-require 'gorillib/hash/compact'
-#
+# related libs
 require 'gorillib/record'
 require 'gorillib/record/field'
 require 'gorillib/record/defaults'
+# libs under test
 require 'gorillib/builder'
 require 'gorillib/builder/field'
-#
+# testing helpers
+require 'gorillib/string/simple_inflector'
+require 'gorillib/hash/compact'
 require 'record_test_helpers'
 
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
-describe Gorillib::Builder, :record_spec => true do
+describe Gorillib::Builder, :record_spec => false do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:example_class) do

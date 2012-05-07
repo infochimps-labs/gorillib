@@ -1,4 +1,6 @@
 
+We need a convention for detailed inspection
+
 ### Record
 
 FIXME: registry creation

@@ -11,9 +11,8 @@ rspec_opts = '--format doc --tag record_spec'
 
 guard 'rspec', :version => 2, :cli => rspec_opts do
   watch(%r{^spec/.+_spec\.rb$})
-  watch(%r{^lib/(.+)\.rb$})            { |m| "spec/#{m[1]}_spec.rb" }
-  watch('spec/spec_helper.rb')         { "spec" }
-  watch(/spec\/support\/(.+)\.rb/)     { "spec" }
-  watch(%r{^examples/(\w+)\.rb$})      { |m| "spec/examples/#{m[1]}_spec.rb" }
-  watch(%r{^examples/(\w+)/(.+)\.rb$}) { |m| "spec/examples/#{m[1]}_spec.rb" }
+  watch(%r{^(examples/.+)\.rb})   {|m| "spec/#{m[1]}_spec.rb" }
+  watch(%r{^lib/gorillib/(.+)\.rb$})       {|m| ["spec/gorillib/#{m[1]}_spec.rb", "spec/examples/builder/ironfan_spec.rb"] }
+  watch('spec/spec_helper.rb')    {    "spec" }
+  watch(/spec\/support\/(.+)\.rb/){    "spec" }
 end

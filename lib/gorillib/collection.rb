@@ -83,11 +83,15 @@ module Gorillib
     # @return [String] string describing the collection's array representation
     def to_s           ; to_a.to_s           ; end
     # @return [String] string describing the collection's array representation
-    def inspect
+    def inspect(detailed=true)
       str = "c{ "
-      str << clxn.map do |key, val|
-        "%-20s\t%s" % [key, val.inspect]
-      end.join(",\n   ")
+      if detailed
+        str << clxn.map do |key, val|
+          "%-15s %s" % [key, val.inspect]
+        end.join(",\n   ")
+      else
+        str << keys.join(", ")
+      end
       str << " }"
     end
     # @return [Array] serializable array representation of the collection
