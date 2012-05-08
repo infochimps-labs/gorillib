@@ -36,7 +36,7 @@ module Gorillib::Test
     @config  = {}
   end
 
-  
+
   class ComputeBuilder < IronfanBuilder
     field         :environment, Symbol
     collection    :clouds,      Cloud
@@ -118,7 +118,11 @@ module Gorillib::Test
       volume(:logs) do
       end
       server(:a)
+
+      servers     # <Gorillib::Collection { :a => <Server name=:a ... > } >
+      server(:a)  # <Server name=:a ... > } >
     end
+
     facet(:dbnode) do
       environment nil
     end

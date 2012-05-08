@@ -186,6 +186,8 @@ module Gorillib
         collection_key = self.collection_key
         self.default   = ->{ Gorillib::Collection.new(type, collection_key) }
         #
+        raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
+        #
         @visibilities[:writer] = false
         super
         record.__send__(:define_collection_getset,  self)
