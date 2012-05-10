@@ -11,7 +11,7 @@ module Gorillib
     # [Class, #receive] Factory for generating a new collection item.
     class_attribute :factory, :instance_writer => false
     singleton_class.class_eval{ protected :factory= }
-    
+
     # [{Symbol => Object}] The actual store of items, but not for you to mess with
     attr_reader :clxn
     protected   :clxn
@@ -87,7 +87,7 @@ module Gorillib
       str = "c{ "
       if detailed
         str << clxn.map do |key, val|
-          "%-15s %s" % [key, val.inspect]
+          "%-15s %s" % ["#{key}:", val.inspect]
         end.join(",\n   ")
       else
         str << keys.join(", ")

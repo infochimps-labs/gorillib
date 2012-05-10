@@ -16,21 +16,21 @@ load GORILLIB_ROOT_DIR('examples/builder/workflow.rb')
 module WukongTest       ; end
 module Meta::WukongTest ; end
 
-describe Gorillib::Builder, :record_spec => true do
+describe Gorillib::Builder, :example_spec => true do
   after(:each){   WukongTest.nuke_constants ; Meta::WukongTest.nuke_constants }
   def example_workflow
-    WukongTest.workflow(:make_pie)
+    WukongTest.workflow(:cherry_pie)
   end
 
-  let(:ec_webnode  ){ example_cluster.facet(:webnode) }
-  let(:ec_webnode_a){ ec_webnode.server(:a) }
-
   it 'is awesome' do
+    # p WukongTest::Kitchen.utensils
+    # p WukongTest::Kitchen.ingredients
+
     p example_workflow
-
-    p WukongTest::Kitchen.utensils
-    p WukongTest::Kitchen.ingredients
-
+    example_workflow.stages.to_a.each do |stage|
+      p stage
+      p stage.stages
+    end
   end
 
   # context "collections get a {foo}_name accessor:" do
