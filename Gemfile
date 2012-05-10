@@ -3,6 +3,8 @@ source "http://rubygems.org"
 gem     'multi_json', "~> 1.1"
 gem     'json'
 
+gem     'wukong', :path => '../wukong'
+
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do

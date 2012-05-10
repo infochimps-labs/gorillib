@@ -27,6 +27,7 @@ module Gorillib
           handles = [factory.handle, factory.product]
         end
         handles.each{|handle| factories[handle] = factory }
+        p factories if factory.to_s =~ /stage/i
       end
     end
 

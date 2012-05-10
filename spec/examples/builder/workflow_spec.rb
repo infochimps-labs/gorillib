@@ -31,6 +31,9 @@ describe Gorillib::Builder, :example_spec => true do
       p stage
       p stage.stages
     end
+
+    puts
+    puts example_workflow.tree
   end
 
   # context "collections get a {foo}_name accessor:" do
