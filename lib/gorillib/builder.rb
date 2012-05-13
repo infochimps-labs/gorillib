@@ -1,11 +1,23 @@
+require 'gorillib/string/simple_inflector'
+require 'gorillib/record'
+require 'gorillib/record/field'
+require 'gorillib/record/defaults'
+
 module Gorillib
   module Builder
     extend  Gorillib::Concern
     include Gorillib::Record
 
     def initialize(attrs={}, &block)
-      receive!(attrs)
-      instance_exec(&block) if block_given?
+      receive!(attrs, &block)
+    end
+
+    def receive!(*args, &block)
+      super(*args)
+      if block_given?
+        (block.arity == 1) ? block.call(self) : self.instance_eval(&block)
+      end
+      self
     end
 
     def getset(field, *args, &block)
@@ -19,17 +31,34 @@ module Gorillib
     end
 
     def getset_member(field, *args, &block)
-      val = read_attribute(field.name)
-      if val.blank? && args.blank?
-        return nil
-      elsif val.blank?
-        val = field.type.receive(*args)
+      ArgumentError.check_arity!(args, 0..1)
+      attrs = args.first
+      if attrs.is_a?(field.type)        # actual object: assign it into field
+        val = attrs
         write_attribute(field.name, val)
-      else
-        val.receive!(*args) if args.present?
+      elsif attribute_set?(field.name)  # existing item: retrieve it, updating as directed
+        val = read_attribute(field.name)
+        val.receive!(*args, &block)
+      elsif attrs.blank?                # missing item (read): return nil
+        return nil
+      else                              # missing item (write): construct item and add to collection
+        val = field.type.receive(*args, &block)
+        write_attribute(field.name, val)
       end
-      if block_given?
-        (block.arity == 1) ? block.call(val) : val.instance_eval(&block)
+      val
+    end
+
+    def getset_collection_item(field, item_key, attrs={}, &block)
+      clxn = collection_of(field.plural_name)
+      if attrs.is_a?(field.type)     # actual object: assign it into collection
+        val = attrs
+        clxn[item_key] = val
+      elsif clxn.include?(item_key)  # existing item: retrieve it, updating as directed
+        val = clxn[item_key]
+        val.receive!(attrs, &block)
+      else                           # missing item: autovivify item and add to collection
+        val = field.type.receive({ key_method => item_key, :owner => self }.merge(attrs), &block)
+        clxn[item_key] = val
       end
       val
     end
@@ -38,46 +67,11 @@ module Gorillib
       :name
     end
 
-    def getset_collection_item(field, item_key, attrs={}, options={}, &block)
-      val = read_collection_item(field.name, item_key)
-      if val.blank?
-        val = add_collection_item(field, item_key, attrs, options)
-      else
-        val.receive!(attrs) if attrs.present?
-      end
-      if block_given?
-        (block.arity == 1) ? block.call(val) : val.instance_eval(&block)
-      end
-      val
-    end
-
     def collection_of(plural_name)
       self.read_attribute(plural_name)
     end
 
-    def add_collection_item(field, item_key=nil, attrs={}, options={}, &block)
-      attrs.merge!(key_method => item_key) if attrs.respond_to?(:merge!)
-      factory = options.fetch(:factory){ field.type }
-      val = factory.receive(attrs)
-      collection_of(field.name) << val
-      val
-    end
-
-    def read_collection_item(clxn_name, item_key, *args)
-      item = collection_of(clxn_name)[item_key]
-    end
-
     module ClassMethods
-
-      #
-      # Receive external data, type-converting and creating contained records as necessary
-      #
-      # @return [Gorillib::Record] the new object
-      def receive(*args, &block)
-        return nil        if args.present? && args.first.nil?
-        return args.first if args.present? && args.first.is_a?(self)
-        new(*args, &block)
-      end
 
       # KLUDGE: no smell good, this
       def regular_field(*args)
@@ -128,10 +122,6 @@ module Gorillib
     extend  Gorillib::Concern
     include Gorillib::Builder
 
-    def add_collection_item(field, item_key=nil, attrs={}, options={}, &block)
-      super(field, item_key, attrs.merge(self.class.handle => self), options, &block)
-    end
-
     def inspect(detailed=true)
       str = super
       detailed ? str : ([str[0..-2], " #{read_attribute(key_method)}>"].join)
@@ -151,15 +141,10 @@ module Gorillib
         field
       end
 
-      def handle
-        Gorillib::Inflector.underscore(Gorillib::Inflector.demodulize(self.name)).to_sym
-      end
-
-
       def collects(type, clxn_name)
         type_handle = type.handle
         define_meta_module_method type_handle do |item_name, attrs={}, options={}, &block|
-          send(clxn_name, item_name, attrs.merge(:owner => self), options.merge(:factory => type), &block)
+          send(clxn_name, item_name, attrs, options.merge(:factory => type), &block)
         end
       end
     end

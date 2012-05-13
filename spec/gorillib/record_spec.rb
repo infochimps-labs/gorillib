@@ -25,7 +25,7 @@ describe Gorillib::Record, :record_spec => true do
       self
     end
   end
-  let(:complex_subclass){ Class.new(complex_class){ field :zyzzyva, Integer; field :acme, Integer } }
+  let(:complex_subclass){ Gorillib::Test::TestSubclass = Class.new(complex_class){ field :zyzzyva, Integer; field :acme, Integer } }
   subject{ complex_class }
 
   context 'examples' do
@@ -82,6 +82,13 @@ describe Gorillib::Record, :record_spec => true do
     end
   end
 
+  context '.field' do
+    subject{           complex_class.new }
+    let(:sample_val){  'bob' }
+    let(:raw_val){     :bob  }
+    it_behaves_like 'a record field', :str_field
+  end
+
   context '#attributes' do
     it "maps field names to attribute values" do
       example_inst = subject.receive({:my_field=>7, :str_field=>'yo', :sym_field=>:sup})
@@ -104,33 +111,6 @@ describe Gorillib::Record, :record_spec => true do
     end
   end
 
-  context '#read_attribute' do
-    it "if set, returns the value" do
-      example_inst.read_attribute( :my_field).should == 69
-      example_inst.write_attribute(:my_field, example_val).should == example_val
-      example_inst.read_attribute(:my_field).should == example_val
-    end
-    it "if unset, calls #read_unset_attribute" do
-      example_inst.should_receive(:read_unset_attribute).with(:str_field).and_return(example_val)
-      example_inst.read_attribute(:str_field).should == example_val
-    end
-    it "raises an error if the field does not exist" do
-      ->{ example_inst.read_attribute(:fnord) }.should raise_error(Gorillib::Record::UnknownFieldError, /unknown field: fnord/)
-    end
-  end
-
-  context '#write_attribute' do
-    it "sets the attribute and returns the value" do
-      example_inst.write_attribute(:my_field, example_val).should == example_val
-      example_inst.read_attribute(:my_field).should == example_val
-      example_inst.write_attribute(:str_field, 'ok').should == 'ok'
-      example_inst.read_attribute(:str_field).should == 'ok'
-    end
-    it "raises an error if the field does not exist" do
-      ->{ example_inst.write_attribute(:fnord, 8) }.should raise_error(Gorillib::Record::UnknownFieldError, /unknown field: fnord/)
-    end
-  end
-
   context '#unset_attribute' do
     it "unsets the attribute" do
       example_inst.attribute_set?(:my_field).should be_true
@@ -143,24 +123,6 @@ describe Gorillib::Record, :record_spec => true do
     end
     it "raises an error if the field does not exist" do
       ->{ example_inst.unset_attribute(:fnord) }.should raise_error(Gorillib::Record::UnknownFieldError, /unknown field: fnord/)
-    end
-  end
-
-  context '#attribute_set?' do
-    it "is true if the attribute has been set" do
-      example_inst.attributes.should == {:my_field=>69, :str_field=>nil, :sym_field=>nil}
-      example_inst.attribute_set?(:my_field).should  be_true
-      example_inst.attribute_set?(:str_field).should be_false
-    end
-    it "is true if the attribute has a value (even nil or false)" do
-      example_inst.my_field = 69    ; example_inst.attribute_set?(:my_field).should be_true
-      example_inst.my_field = nil   ; example_inst.attribute_set?(:my_field).should be_true
-      example_inst.my_field = false ; example_inst.attribute_set?(:my_field).should be_true
-      example_inst.unset_attribute(:my_field)
-      example_inst.attribute_set?(:my_field).should be_false
-    end
-    it "raises an error if the field does not exist" do
-      ->{ example_inst.attribute_set?(:fnord) }.should raise_error(Gorillib::Record::UnknownFieldError, /unknown field: fnord/)
     end
   end
 
@@ -200,7 +162,6 @@ describe Gorillib::Record, :record_spec => true do
       example_inst.should_receive(:write_attribute).with(:str_field, 'yo')
       example_inst.receive! 'my_field'=>7, :str_field=>'yo'
     end
-    it "calls the factory method"
   end
 
   context '#== -- two records are equal if' do
@@ -253,6 +214,12 @@ describe Gorillib::Record, :record_spec => true do
     end
   end
 
+  context '.typename' do
+    it 'has a typename that matches its underscored class name' do
+      subject.typename.should == 'gorillib.test.complex_record'
+    end
+  end
+
   context '.receive' do
     it 'creates a new instance' do
       obj = example_inst
@@ -266,6 +233,24 @@ describe Gorillib::Record, :record_spec => true do
       subject.should_receive(:new).with().and_return(obj)
       obj.should_receive(:receive!).with(:my_field => 12)
       subject.receive(:my_field => 12).should equal(obj)
+    end
+
+    it 'uses the given type if the _type attribute is a factory' do
+      obj = complex_class.receive(:my_field => 12, :acme => 3, :_type => complex_subclass)
+      obj.should be_a(complex_subclass)
+    end
+
+    it 'complains if the given type is not right' do
+      mock_factory = mock ; mock_factory.stub(:receive! => {}, :receive => mock, :new => mock_factory)
+      mock_factory.should_receive(:<=).and_return(false)
+      complex_class.should_receive(:warn).with(/doesn't match type/)
+      complex_class.receive(:my_field => 12, :acme => 3, :_type => mock_factory)
+    end
+
+    it 'uses the given type if the _type attribute is a typename' do
+      complex_subclass.typename.should == 'gorillib.test.test_subclass'
+      obj = complex_class.receive(:my_field => 12, :acme => 3, :_type => 'gorillib.test.test_subclass')
+      obj.should be_a(complex_subclass)
     end
   end
 

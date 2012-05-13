@@ -130,7 +130,7 @@ module Gorillib
     # @return [Gorillib::Record] the object itself
     def receive!(hsh={})
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Record::Validate.hashlike!("attributes hash", hsh)
+      Gorillib::Record::Validate.hashlike!("attributes hash for #{self}", hsh)
       hsh = hsh.symbolize_keys
       self.class.fields.each do |attr, field|
         if    hsh.has_key?(attr)      then val = hsh[attr]
@@ -204,16 +204,21 @@ module Gorillib
 
     module ClassMethods
 
+      def typename
+        Gorillib::Inflector.underscore(self.name).gsub(%r{/}, '.')
+      end
+
       #
       # Receive external data, type-converting and creating contained records as necessary
       #
       # @return [Gorillib::Record] the new object
-      def receive(*args)
-        return nil if args.present? && args.first.nil?
-        raw = args.first
-        return raw if raw.is_a?(self)
-        obj = new
-        obj.receive!(*args)
+      def receive(attrs={}, &block)
+        return nil if attrs.nil?
+        return attrs if attrs.is_a?(self)
+        klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
+        warn "factory #{self} doesn't match type specified in #{attrs}" unless klass <= self
+        obj = klass.new
+        obj.receive!(attrs, &block)
         obj
       end
 

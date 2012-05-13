@@ -20,12 +20,10 @@ describe Gorillib::Builder, :record_spec => true do
     Gorillib::Test.cluster
   end
 
-  let(:ec_webnode  ){ example_cluster.facet(:webnode) }
-  let(:ec_webnode_a){ ec_webnode.server(:a) }
-  
-  it 'is awesome' do
-    p example_cluster
-  end
+  let(:ec_webnode  ){ fac = example_cluster.facet(:webnode); fac.cluster(example_cluster) ; fac }
+  let(:ec_webnode_a){ svr = ec_webnode.server(:a);           svr.facet(ec_webnode)        ; svr }
+
+  # it 'is awesome'
 
   context "collections get a {foo}_name accessor:" do
     it("facet.cluster_name"){ ec_webnode.cluster_name.should == :yellowhat }
@@ -35,5 +33,5 @@ describe Gorillib::Builder, :record_spec => true do
   context "collections get a `has_{foo}` tester:" do
     it("server.facet?"    ){ ec_webnode_a.facet?.should be_true }
     it("facet.has_server?"){ ec_webnode.should have_server(:a) }
-  end  
+  end
 end
