@@ -3,7 +3,7 @@
 require 'gorillib/metaprogramming/delegation'
 require 'pathname'
 
-module Wukong
+module Gorillib
 
   class Pathref < ::Pathname
     ROOT_PATHS = Hash.new unless defined?(ROOT_PATHS)
@@ -37,5 +37,7 @@ module Wukong
     end
   end
 
-  singleton_class.class_eval{ delegate :path_to, :register_path, :to => Pathref }
+  class << self
+    delegate :path_to, :register_path, :to => Pathref
+  end
 end
