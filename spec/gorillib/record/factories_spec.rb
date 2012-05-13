@@ -36,7 +36,7 @@ describe '', :record_spec => true do
         Gorillib::Factory(ff).should == ff
         Gorillib::Factory(Gorillib::Factory::SymbolFactory).should == Gorillib::Factory::SymbolFactory
       end
-      it 'looks up factories by handle' do
+      it 'looks up factories by typename' do
         Gorillib::Factory(:symbol   ).should == Gorillib::Factory::SymbolFactory
         Gorillib::Factory(:identical).should == Gorillib::Factory::IdenticalFactory
       end
@@ -110,6 +110,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_converts,           :foo => 'foo', 3 => '3', false => "false", [] => "[]"
     it_behaves_like :it_considers_blankish, nil
     it_behaves_like :it_is_registered_as, :string, String
+    its(:typename){ should == :string }
   end
 
   describe Gorillib::Factory::SymbolFactory do
@@ -118,6 +119,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_blankish, nil, ""
     it_behaves_like :it_is_a_mismatch_for,  3, false, []
     it_behaves_like :it_is_registered_as, :symbol, Symbol
+    its(:typename){ should == :symbol }
   end
 
   describe Gorillib::Factory::RegexpFactory do
@@ -126,6 +128,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_blankish, nil, ""
     it_behaves_like :it_is_a_mismatch_for,  :foo, 3, false, []
     it_behaves_like :it_is_registered_as, :regexp, Regexp
+    its(:typename){ should == :regexp }
   end
 
   describe Gorillib::Factory::IntegerFactory do
@@ -136,6 +139,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_blankish, nil, ""
     it_behaves_like :it_is_a_mismatch_for,  :foo, false, [], Complex(1,3)
     it_behaves_like :it_is_registered_as, :int, :integer, Integer
+    its(:typename){ should == :integer }
   end
 
   describe Gorillib::Factory::FloatFactory do
@@ -146,6 +150,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_blankish, nil, ""
     it_behaves_like :it_is_a_mismatch_for,  :foo, false, []
     it_behaves_like :it_is_registered_as, :float, Float
+    its(:typename){ should == :float }
   end
 
   describe Gorillib::Factory::ComplexFactory do
@@ -157,6 +162,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_blankish, nil, ""
     it_behaves_like :it_is_a_mismatch_for,  :foo, false, []
     it_behaves_like :it_is_registered_as, :complex, Complex
+    its(:typename){ should == :complex }
   end
 
   describe Gorillib::Factory::RationalFactory do
@@ -168,6 +174,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_blankish, nil, ""
     it_behaves_like :it_is_a_mismatch_for,  :foo, false, [], Complex(1.5,3)
     it_behaves_like :it_is_registered_as, :rational, Rational
+    its(:typename){ should == :rational }
   end
 
   describe Gorillib::Factory::BooleanFactory do
@@ -176,6 +183,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_converts,           "false" => false, :false => false
     it_behaves_like :it_converts,           "true" => true,   :true  => true, [] => true, :foo => true, [] => true, Complex(1.5,3) => true, Object.new => true
     it_behaves_like :it_is_registered_as, :boolean
+    its(:typename){ should == :boolean }
   end
 
   describe Gorillib::Factory::IdenticalFactory do
@@ -191,6 +199,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_native,  Module, Module.new, Class, Class.new, Object, String, BasicObject
     it_behaves_like :it_is_a_mismatch_for, true, false, 3, '', 'a string', :a_symbol, [], {}, ->(){ 'a proc' },             Complex(1,3), Object.new
     it_behaves_like :it_is_registered_as, :module, Module
+    its(:typename){ should == :module }
   end
 
   describe Gorillib::Factory::ClassFactory do
@@ -198,12 +207,14 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_native,  Module, Class, Class.new, Object, String, BasicObject
     it_behaves_like :it_is_a_mismatch_for, true, false, 3, '', 'a string', :a_symbol, [], {}, ->(){ 'a proc' }, Module.new, Complex(1,3), Object.new
     it_behaves_like :it_is_registered_as, :class, Class
+    its(:typename){ should == :class }
   end
 
   describe Gorillib::Factory::NilFactory do
     it_behaves_like :it_considers_native,  nil
     it_behaves_like :it_is_a_mismatch_for, true, false, 3, '', 'a string', :a_symbol, [], {}, ->(){ 'a proc' }, Module.new, Complex(1,3), Object.new
     it_behaves_like :it_is_registered_as, :nil, NilClass
+    its(:typename){ should == :nil_class }
   end
 
   describe Gorillib::Factory::TrueFactory do
@@ -223,6 +234,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_considers_native,  (1..2), ('a'..'z')
     it_behaves_like :it_is_a_mismatch_for, true,        3, '', 'a string', :a_symbol, [1,2], {}, ->(){ 'a proc' }, Module.new, Complex(1,3), Object.new
     it_behaves_like :it_is_registered_as, :range, Range
+    its(:typename){ should == :range }
   end
 
   # __________________________________________________________________________
@@ -273,6 +285,7 @@ describe '', :record_spec => true do
       factory.receive( { 3 => 4 } ).should == { 'converted!' => 4 }
     end
     it_behaves_like :it_is_registered_as, :hash, Hash
+    its(:typename){ should == :hash }
   end
 
   describe Gorillib::Factory::ArrayFactory do
@@ -289,6 +302,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_converts, { [] => [], {} => [], [1,2,3] => [1,2,3], {:a => :b} => [[:a, :b]], [:a] => [:a], [[]] => [[]], :non_native_ok => true }
     it_behaves_like :an_enumerable_factory
     it_behaves_like :it_is_registered_as, :array, Array
+    its(:typename){ should == :array }
   end
 
   describe Gorillib::Factory::SetFactory do
@@ -310,6 +324,7 @@ describe '', :record_spec => true do
     it_behaves_like :it_converts, { [] => Set.new, {} => Set.new, [1,2,3] => [1,2,3].to_set, {:a => :b} => Set.new({:a => :b}), [:a] => [:a].to_set, :non_native_ok => true }
     it_behaves_like :an_enumerable_factory
     it_behaves_like :it_is_registered_as, :set, Set
+    its(:typename){ should == :set }
   end
 
 end

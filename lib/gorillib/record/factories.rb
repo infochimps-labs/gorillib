@@ -13,6 +13,8 @@ module Gorillib
         when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
         when type.respond_to?(:receive)             then return type
         when factories.include?(type)               then return factories[type]
+        when type.is_a?(String)                     then
+          return Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/')))
         else raise "Don't know which factory makes a #{type}"
         end
       end
@@ -22,12 +24,11 @@ module Gorillib
       end
       private :factories
 
-      def register_factory(factory, *handles)
-        if handles.blank?
-          handles = [factory.handle, factory.product]
+      def register_factory(factory, *typenames)
+        if typenames.blank?
+          typenames = [factory.typename, factory.product]
         end
-        handles.each{|handle| factories[handle] = factory }
-        p factories if factory.to_s =~ /stage/i
+        typenames.each{|typename| factories[typename] = factory }
       end
     end
 
@@ -55,9 +56,10 @@ module Gorillib
         warn "Unknown options #{options.keys}" unless options.empty?
       end
 
-      def self.handle
+      def self.typename
         Gorillib::Inflector.underscore(product.name).to_sym
       end
+      def typename ; self.class.typename ; end
 
       def self.receive(*args, &block)
         self.new.receive(*args, &block)
@@ -248,6 +250,7 @@ module Gorillib
       def native?(obj)     obj.equal?(true) || obj.equal?(false) ; end
       def convert(obj)     (obj.to_s == "false") ? false : true ; end
       register_factory!(:boolean)
+      def self.typename() :boolean ; end
     end
 
     #
