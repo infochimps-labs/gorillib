@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require 'spec_helper'
 
 # libs under test
 require 'gorillib/builder'
@@ -56,6 +56,7 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
   let(:example_val  ){ mock('example val') }
 
   context 'examples:' do
+    subject{ car_class }
     it 'type-converts values' do
       obj = subject.receive(     :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2" )
       obj.attributes.should == { :name => :wildcat,  :make_model => 'Buick Wildcat', :year =>  1968,  :doors =>  2, :engine => nil }
@@ -95,29 +96,38 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
   end
 
   context ".field" do
-    subject{ car_class.new }
-    let(:sample_val){ 'fiat' }
-    let(:raw_val   ){ :fiat  }
-    it_behaves_like "a model field", :make_model
-    it("#read_attribute is nil if never set"){ subject.read_attribute(:make_model).should == nil }
 
-    it "calling the getset method #foo with no args calls read_attribute(:foo)" do
-      wildcat.write_attribute(:doors, example_val)
-      wildcat.should_receive(:read_attribute).with(:doors).at_least(:once).and_return(example_val)
-      wildcat.doors.should == example_val
+    context do
+      subject{ car_class.new }
+      let(:sample_val){ 'fiat' }
+      let(:raw_val   ){ :fiat  }
+      it_behaves_like "a model field", :make_model
+      it("#read_attribute is nil if never set"){ subject.read_attribute(:make_model).should == nil }
     end
-    it "calling the getset method #foo with an argument calls write_attribute(:foo)" do
-      wildcat.write_attribute(:doors, 'gone')
-      wildcat.should_receive(:write_attribute).with(:doors, example_val).and_return('returned')
-      result = wildcat.doors(example_val)
-      result.should == 'returned'
+
+    context 'calling the getset "#foo" method' do
+      subject{ wildcat }
+
+      it "with no args calls read_attribute(:foo)" do
+        subject.write_attribute(:doors, example_val)
+        subject.should_receive(:read_attribute).with(:doors).at_least(:once).and_return(example_val)
+        subject.doors.should == example_val
+      end
+      it "with an argument calls write_attribute(:foo)" do
+        subject.write_attribute(:doors, 'gone')
+        subject.should_receive(:write_attribute).with(:doors, example_val).and_return('returned')
+        result = subject.doors(example_val)
+        result.should == 'returned'
+      end
+      it "with multiple arguments is an error" do
+        expect{ subject.doors(1, 2) }.to raise_error(ArgumentError, "wrong number of arguments (2 for 0..1)")
+      end
     end
-    it "calling the getset method #foo with multiple arguments is an error" do
-      ->{ wildcat.doors(1, 2) }.should raise_error(ArgumentError, "wrong number of arguments (2 for 0..1)")
-    end
+
     it "does not create a writer method #foo=" do
-      wildcat.should     respond_to(:doors)
-      wildcat.should_not respond_to(:doors=)
+      subject{ car_class }
+      subject.should     be_method_defined(:doors)
+      subject.should_not be_method_defined(:doors=)
     end
   end
 

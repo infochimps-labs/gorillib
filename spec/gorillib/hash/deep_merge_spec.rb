@@ -1,4 +1,4 @@
-require File.expand_path('../../spec_helper', File.dirname(__FILE__))
+require 'spec_helper'
 require 'gorillib/hash/deep_merge'
 
 describe Hash, :hashlike_spec => true do

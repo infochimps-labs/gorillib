@@ -1,4 +1,4 @@
-require File.expand_path('../spec_helper', File.dirname(__FILE__))
+require 'spec_helper'
 #
 require 'gorillib/model'
 require 'gorillib/model/field'
@@ -16,6 +16,7 @@ describe Gorillib::Model, :model_spec => true do
   let(:anon_class){    Class.new{ include Gorillib::Model ; field :my_field, :whatever } }
   let(:example_inst){ subject.receive(:my_field => 69) }
   let(:example_val){ mock('example val') }
+
   let(:complex_class) do
     class Gorillib::Test::ComplexModel
       include Gorillib::Model
@@ -26,6 +27,7 @@ describe Gorillib::Model, :model_spec => true do
     end
   end
   let(:complex_subclass){ Gorillib::Test::TestSubclass = Class.new(complex_class){ field :zyzzyva, Integer; field :acme, Integer } }
+
   subject{ complex_class }
 
   context 'examples' do

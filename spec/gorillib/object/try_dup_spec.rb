@@ -1,4 +1,4 @@
-require File.expand_path('../../spec_helper', File.dirname(__FILE__))
+require 'spec_helper'
 require 'gorillib/object/try_dup'
 
 describe 'try_dup', :simple_spec => true do

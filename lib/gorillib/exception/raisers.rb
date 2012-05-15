@@ -23,8 +23,12 @@ ArgumentError.class_eval do
     return true if allowed_arity.include?(args.length)
     raise self.new("wrong number of arguments (#{args.length} for #{allowed_arity})")
   end
-end
 
+  def self.arity_at_least!(args, min_arity)
+    return true if min_arity <= args.length
+    raise self.new("wrong number of arguments (#{args.length} for #{min_arity}..#{min_arity})")
+  end
+end
 
 NoMethodError.class_eval do
   MESSAGE = "undefined method `%s' for %s:%s"
