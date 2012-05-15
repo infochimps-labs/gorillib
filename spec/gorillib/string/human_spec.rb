@@ -1,4 +1,4 @@
-require File.expand_path('../../spec_helper', File.dirname(__FILE__))
+require 'spec_helper'
 require File.expand_path('inflector_test_cases', File.dirname(__FILE__))
 require 'gorillib/string/human'
 

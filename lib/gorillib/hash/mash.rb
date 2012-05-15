@@ -16,7 +16,7 @@ class Hash
   #
   #   { :one => 1, :two => 2, :three => 3 }.only(:one)    #=> { :one => 1 }
   #
-  # @param [Array[String, Symbol]] *allowed The hash keys to include.
+  # @param allowed [Array[String, Symbol]] The hash keys to include.
   #
   # @return [Hash] A new hash with only the selected keys.
   #
@@ -33,7 +33,7 @@ class Hash
   #    { :one => 1, :two => 2, :three => 3 }.except(:one)
   #     #=> { :two => 2, :three => 3 }
   #
-  # @param [Array[String, Symbol]] *rejected The hash keys to exclude.
+  # @param rejected [Array[String, Symbol]] The hash keys to exclude.
   #
   # @return [Hash] A new hash without the selected keys.
   #
@@ -49,10 +49,10 @@ end
 # params[:key] instead of params['key'].
 class Mash < Hash
 
-  # @param constructor<Object>
+  # @param constructor [Object]
   #   The default value for the mash. Defaults to an empty hash.
   #
-  # @details [Alternatives]
+  # @overload [Alternatives]
   #   If constructor is a Hash, a new mash will be created based on the keys of
   #   the hash and no default value will be set.
   def initialize(constructor = {})
@@ -66,7 +66,7 @@ class Mash < Hash
 
   # @param key<Object> The default value for the mash. Defaults to nil.
   #
-  # @details [Alternatives]
+  # @overload [Alternatives]
   #   If key is a Symbol and it is a key in the mash, then the default value will
   #   be set to the value matching the key.
   def default(key = nil)
@@ -114,15 +114,15 @@ class Mash < Hash
   alias_method :has_key?, :key?
   alias_method :member?, :key?
 
-  # @param key<Object> The key to fetch. This will be run through convert_key.
-  # @param *extras<Array> Default value.
+  # @param <Object> key The key to fetch. This will be run through convert_key.
+  # @param <Array> extras Default value.
   #
   # @return [Object] The value at key or the default value.
   def fetch(key, *extras)
     super(convert_key(key), *extras)
   end
 
-  # @param *indices<Array>
+  # @param indices [Array]
   #   The keys to retrieve values for. These will be run through +convert_key+.
   #
   # @return [Array] The values at each of the provided keys
@@ -143,15 +143,15 @@ class Mash < Hash
     super(convert_key(key))
   end
 
-  # @param *rejected<Array[(String, Symbol)] The mash keys to exclude.
+  # @param [Array[(String, Symbol)]] rejected The mash keys to exclude.
   #
   # @return [Mash] A new mash without the selected keys.
   #
   # @example
   #   { :one => 1, :two => 2, :three => 3 }.except(:one)
   #     #=> { "two" => 2, "three" => 3 }
-  def except(*keys)
-    super(*keys.map {|k| convert_key(k)})
+  def except(*rejected)
+    super(*rejected.map {|k| convert_key(k)})
   end
 
   # Used to provide the same interface as Hash.
@@ -172,9 +172,9 @@ class Mash < Hash
   end
 
   protected
-  # @param key<Object> The key to convert.
+  # @param key [Object] The key to convert.
   #
-  # @param [Object]
+  # @return [Object]
   #   The converted key. If the key was a symbol, it will be converted to a
   #   string.
   #
@@ -183,7 +183,7 @@ class Mash < Hash
     key.kind_of?(Symbol) ? key.to_s : key
   end
 
-  # @param value<Object> The value to convert.
+  # @param value [Object] The value to convert.
   #
   # @return [Object]
   #   The converted value. A Hash or an Array of hashes, will be converted to

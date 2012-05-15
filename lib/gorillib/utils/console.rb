@@ -67,35 +67,21 @@ private
   end
 end
 
+module Test
+  module_function
 
-module ModA ; def from_mod_a() "ModA#from_mod_a on #{self}" ; end ; def override_me ; "ModA#override_me on #{self}" ; end ; end
-module ModB ; def from_mod_b() "ModB#from_mod_b on #{self}" ; end ; def some_method ; "ModB#some_method on #{self}" ; end ; end
-module ModC ; def from_mod_c() "ModC#from_mod_c on #{self}" ; end ; end
-class  Cls1
-  include ModA
-  def from_cls_1() "Cls1#from_cls_1 on #{self}" ; end
-end
-class  Cls2 < Cls1
-  extend  ModB
-  include ModC
-  def override_me ; "Cls2#override_me on #{self}" ; end
-  def from_cls_2  ; "Cls2#from_cls_2 on #{self}"  ; end
-end
-class Cls3
-  def override_me ; "Cls3#override_me on #{self}" ; end
-  def some_method ; "Cls3#some_method on #{self}" ; end
-end
-
-def create_class(name, *args, &block)
-  Object.class_eval do
-    remove_const(name) if self.const_defined?(name)
-    const_set(name, Class.new(*args, &block))
+  def create_class(name, *args, &block)
+    Object.class_eval do
+      remove_const(name) if self.const_defined?(name)
+      const_set(name, Class.new(*args, &block))
+    end
   end
-end
 
-def example_singleton(name, *args)
-  require 'singleton'
-  create_class(name, *args){ include ::Singleton }
+  def example_singleton(name, *args)
+    require 'singleton'
+    create_class(name, *args){ include ::Singleton }
+  end
+
 end
 
 class Module
@@ -103,18 +89,29 @@ class Module
   #
   # Lists the differences in methods between two modules/classes
   #
-  def compare_methods(that=Object, show_common=false)
+  # Breaks them down by providing module, and shows class and instance methods.
+  # @param other [Module] other class or module to compare with
+  # @param show_common [true,false] true to show methods they have in common; false by default
+  #
+  # @example Range has several extra instance methods; the Foo class and its instances have methods via the Happy module
+  #   module Happy ; def hello() 3 ; end ; end
+  #   class  Foo   ; include Enumerable ; include Happy ; extend Happy ; end
+  #   { "Foo#"   => { Happy => [:hello] },
+  #     "Foo."   => { Happy => [:hello] },
+  #     "Range#" => { Range => [:each, :step, :begin, :end, :last, :exclude_end?, :cover?]} }
+  #
+  def compare_methods(other=Object, show_common=false)
     result = Hash.new{|h,k| h[k] = Hash.new{|hh,hk| hh[hk] = [] } }
 
-    inst_ancestors_both  = ancestors                 & that.ancestors
-    klass_ancestors_both = singleton_class.ancestors & that.singleton_class.ancestors
+    inst_ancestors_both  = ancestors                 & other.ancestors
+    klass_ancestors_both = singleton_class.ancestors & other.singleton_class.ancestors
 
-    inst_meths  = (self.instance_methods | that.instance_methods)
-    klass_meths = (self.methods          | that.methods)
+    inst_meths  = (self.instance_methods | other.instance_methods)
+    klass_meths = (self.methods          | other.methods)
 
     [ [:both, inst_ancestors_both,                     klass_ancestors_both],
-      [self,  (self.ancestors - inst_ancestors_both), (self.singleton_class.ancestors - klass_ancestors_both)],
-      [that,  (that.ancestors - inst_ancestors_both), (that.singleton_class.ancestors - klass_ancestors_both)],
+      [self,   (self.ancestors  - inst_ancestors_both), (self.singleton_class.ancestors  - klass_ancestors_both)],
+      [other,  (other.ancestors - inst_ancestors_both), (other.singleton_class.ancestors - klass_ancestors_both)],
     ].each do |mod, inst_anc, klass_anc|
       inst_anc.reverse.each do |ancestor|
         result["#{mod}#"][ancestor] = inst_meths & ancestor.instance_methods
@@ -126,6 +123,8 @@ class Module
       end
     end
     unless show_common then result.delete("both#") ; result.delete("both.") ; end
+    result.each{|type,hsh|    hsh.reject!{|k,v| v.empty? } }
+    result.reject!{|type,hsh| hsh.empty? }
     result
   end
 

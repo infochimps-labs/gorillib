@@ -36,14 +36,16 @@ module Gorillib
       if attrs.is_a?(field.type)        # actual object: assign it into field
         val = attrs
         write_attribute(field.name, val)
-      elsif attribute_set?(field.name)  # existing item: retrieve it, updating as directed
+      else
         val = read_attribute(field.name)
-        val.receive!(*args, &block)
-      elsif attrs.blank?                # missing item (read): return nil
-        return nil
-      else                              # missing item (write): construct item and add to collection
-        val = field.type.receive(*args, &block)
-        write_attribute(field.name, val)
+        if val.present?
+          val.receive!(*args, &block) if args.present?
+        elsif attrs.blank?  # missing item (read): return nil
+          return nil
+        else                              # missing item (write): construct item and add to collection
+          val = field.type.receive(*args, &block)
+          write_attribute(field.name, val)
+        end
       end
       val
     end

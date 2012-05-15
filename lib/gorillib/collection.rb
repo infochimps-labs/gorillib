@@ -32,7 +32,7 @@ module Gorillib
     def to_hash ; clxn.dup  ; end
 
     # Merge the new items in-place; given items clobber existing items
-    # @param  [{Symbol => Object}, Array<Object>] a hash of key=>item pairs or a list of items
+    # @param  other [{Symbol => Object}, Array<Object>] a hash of key=>item pairs or a list of items
     # @return [Gorillib::Collection] the collection
     def merge!(other)
       clxn.merge!( convert_collection(other) )
@@ -57,7 +57,7 @@ module Gorillib
     end
 
     # Merge the new items into a new collection; given items clobber existing items
-    # @param  [{Symbol => Object}, Array<Object>] a hash of key=>item pairs or a list of items
+    # @param  other [{Symbol => Object}, Array<Object>] a hash of key=>item pairs or a list of items
     # @return [Gorillib::Collection] a new merged collection
     def merge(other)
       dup.merge!(other)

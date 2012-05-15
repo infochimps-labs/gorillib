@@ -4,7 +4,7 @@ module Gorillib
     Field.class_eval do
       field :default, :whatever
 
-      # @returns [true, false] true if the field has a default value/proc set
+      # @return [true, false] true if the field has a default value/proc set
       def has_default?
         attribute_set?(:default)
       end
@@ -52,9 +52,7 @@ module Gorillib
 
   protected
 
-    # Calculates a field default
-    #
-    # @protected
+    # the actual default value to assign to the attribute
     def attribute_default(field)
       return unless field.has_default?
       val = field.default

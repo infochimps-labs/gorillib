@@ -69,7 +69,7 @@ module Gorillib
       # By default, an object is native if it `is_a?(product)`
       #
       # @param   [Object]      obj the object to convert and receive
-      # @returns [true, false] true if the item does not need conversion
+      # @return [true, false] true if the item does not need conversion
       def native?(obj)
         obj.is_a?(product)
       end
@@ -78,7 +78,7 @@ module Gorillib
       # A `blankish` object should be converted to `nil`, not a value
       #
       # @param   [Object]      obj the object to convert and receive
-      # @returns [true, false] true if the item is equivalent to a nil value
+      # @return [true, false] true if the item is equivalent to a nil value
       def blankish?(obj)
         blankish_vals.include?(obj)
       end

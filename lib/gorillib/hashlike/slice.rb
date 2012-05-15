@@ -86,7 +86,7 @@ module Gorillib
       # @example Limit a set of parameters to everything but a few known toggles:
       #   { :one => 1, :two => 2, :three => 3 }.only(:one)    #=> { :one => 1 }
       #
-      # @param [Array[String, Symbol]] *allowed The hash keys to include.
+      # @param [Array[String, Symbol]] allowed The hash keys to include.
       #
       # @return [Hash] A new hash with only the selected keys.
       #

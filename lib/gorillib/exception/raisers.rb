@@ -7,24 +7,44 @@ Exception.class_eval do
 end
 
 ArgumentError.class_eval do
+  # Raise an error just like Ruby's native message if the array of arguments
+  # doesn't match the expected length or range of lengths.
   #
-  #
-  # @example `*args` distinguishes between no args and a nil arg, but we have to handle error ourselves
-  #   define_method(field_name) do |*args|
-  #     raise ArgumentError.wrong_number(*args.length, 1) unless *
+  # @example want `getset(:foo)` to be different from `getset(:foo, nil)`
+  #   def getset(key, *args)
+  #     ArgumentError.check_arity!(args, 0..1)
+  #     return self[key] if args.empty?
+  #     self[key] = args.first
   #   end
   #
-  def self.wrong_number(expected, got)
-    raise
+  # @overload check_arity!(args, n)
+  #   @param [Array]     args splat args as handed to the caller
+  #   @param [Integer]   val  expected length
+  # @overload check_arity!(args, x..y)
+  #   @param [Array]     args splat args as handed to the caller
+  #   @param [#include?] val  expected range/list/set of lengths
+  # @raise ArgumentError when there are
+  def self.check_arity!(args, val)
+    allowed_arity = val.is_a?(Integer) ? (val..val) : val
+    return true if allowed_arity.include?(args.length)
+    raise self.new("wrong number of arguments (#{args.length} for #{val})")
   end
 
-  def self.check_arity!(args, allowed_arity)
-    allowed_arity = (allowed_arity .. allowed_arity) if allowed_arity.is_a?(Fixnum)
-    return true if allowed_arity.include?(args.length)
-    raise self.new("wrong number of arguments (#{args.length} for #{allowed_arity})")
+  # Raise an error just like Ruby's native message if there are fewer arguments
+  # than expected
+  #
+  # @example want to use splat args, requiring at least one
+  #   def assemble_path(*pathsegs)
+  #     ArgumentError.arity_at_least!(pathsegs, 1)
+  #     # ...
+  #   end
+  #
+  # @param [Array]     args splat args as handed to the caller
+  # @param [Integer]   val  minimum expected length
+  def self.arity_at_least!(args, min_arity)
+    check_arity!(args, min_arity .. Float::INFINITY)
   end
 end
-
 
 NoMethodError.class_eval do
   MESSAGE = "undefined method `%s' for %s:%s"

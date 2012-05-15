@@ -1,4 +1,4 @@
-require 'gorillib/record'
+require 'gorillib/model'
 require 'gorillib/collection/has_collection'
 require 'hanuman/stage'
 

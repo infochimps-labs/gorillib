@@ -199,7 +199,7 @@ module Gorillib
       #     hsh.values_at(:c, :a, :c, :z, :a)
       #     # => [300, 100, 300, nil, 100]
       #
-      # @param  *allowed_keys [Object] the keys to retrieve.
+      # @param  allowed_keys [Object] the keys to retrieve.
       # @return [Array] the values, in order according to allowed_keys.
       #
       def values_at(*allowed_keys)
@@ -304,7 +304,7 @@ module Gorillib
     #     hsh.values_of(:c, :a, :c, :z, :a)
     #     # => [300, 100, 300, nil, 100]
     #
-    # @param  *allowed_keys [Object] the keys to retrieve.
+    # @param  allowed_keys [Object] the keys to retrieve.
     # @return [Array] the values, in order according to allowed_keys.
     #
     def values_of(*allowed_keys)
@@ -794,7 +794,9 @@ module Gorillib
     #     hsh.flatten(nil)
     #     # =>    [1, 2,  3, 4,      1,  2, 3,  4, 5, 6]
     #
-    # @param  level [Integer] the level of recursion to flatten, 0 by default.
+    # @overload flatten
+    # @overload flatten(level)
+    #   @param  level [Integer] the level of recursion to flatten, 0 by default.
     # @return [Array] the flattened key-value array.
     #
     def flatten(*args)
