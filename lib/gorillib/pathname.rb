@@ -16,9 +16,7 @@ module Gorillib::Pathname
       ArgumentError.arity_at_least!(pathsegs, 1)
       pathsegs = pathsegs.map{|ps| expand_pathseg(ps) }.flatten
       dir = pathsegs.shift
-      x = new(File.expand_path(File.join(*pathsegs), dir))
-      p [x, pathsegs]
-      x
+      new(File.expand_path(File.join(*pathsegs), dir))
     end
 
   protected
