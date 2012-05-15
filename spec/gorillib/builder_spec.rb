@@ -5,12 +5,12 @@ require 'gorillib/builder'
 require 'gorillib/builder/field'
 # testing helpers
 require 'gorillib/hash/compact'
-require 'record_test_helpers'
+require 'model_test_helpers'
 
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
-describe Gorillib::Builder, :record_spec => true, :builder_spec => true do
+describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:example_class) do
@@ -98,7 +98,7 @@ describe Gorillib::Builder, :record_spec => true, :builder_spec => true do
     subject{ car_class.new }
     let(:sample_val){ 'fiat' }
     let(:raw_val   ){ :fiat  }
-    it_behaves_like "a record field", :make_model
+    it_behaves_like "a model field", :make_model
     it("#read_attribute is nil if never set"){ subject.read_attribute(:make_model).should == nil }
 
     it "calling the getset method #foo with no args calls read_attribute(:foo)" do
@@ -125,7 +125,7 @@ describe Gorillib::Builder, :record_spec => true, :builder_spec => true do
     subject{ car_class.new }
     let(:sample_val){ example_engine }
     let(:raw_val   ){ example_engine.attributes }
-    it_behaves_like "a record field", :engine
+    it_behaves_like "a model field", :engine
     it("#read_attribute is nil if never set"){ subject.read_attribute(:engine).should == nil }
 
     it "calling the getset method #foo with no args calls read_attribute(:foo)" do
@@ -152,7 +152,7 @@ describe Gorillib::Builder, :record_spec => true, :builder_spec => true do
     subject{ garage }
     let(:sample_val){ wildcat }
     let(:raw_val   ){ wildcat.attributes }
-    it_behaves_like "a record field", :cars
+    it_behaves_like "a model field", :cars
     it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::Collection.new }
 
     it 'a collection holds named objects' do
@@ -249,7 +249,7 @@ end
 #       it "has behavior for collection member"
 #     end
 #     context "if exists" do
-#       it "retrieves a named record"
+#       it "retrieves a named model"
 #       it "accepts an attribute hash to update the member"
 #       it "has behavior for collection member"
 #     end

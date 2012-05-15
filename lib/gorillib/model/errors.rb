@@ -1,13 +1,13 @@
 module Gorillib
-  module Record
+  module Model
 
-    # All exceptions defined by Gorillib::Record include this module.
+    # All exceptions defined by Gorillib::Model include this module.
     module Error
     end
 
     # Exception raised if attempting to assign unknown fields
     class UnknownFieldError < ::NoMethodError
-      include Gorillib::Record::Error
+      include Gorillib::Model::Error
     end
 
   end

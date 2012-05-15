@@ -49,7 +49,7 @@ module Gorillib
 
     # Two collections are equal if they have the same class and their contents are equal
     #
-    # @param [Gorillib::Collection, Object] other The other record to compare
+    # @param [Gorillib::Collection, Object] other The other collection to compare
     # @return [true, false] True if attributes are equal and other is instance of the same Class
     def ==(other)
       return false unless other.instance_of?(self.class)

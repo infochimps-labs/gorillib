@@ -1,5 +1,5 @@
 module Gorillib
-  module Record
+  module Model
     module Validate
       module_function
 

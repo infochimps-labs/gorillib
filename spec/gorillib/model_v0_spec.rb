@@ -4,15 +4,15 @@ require 'gorillib/metaprogramming/concern'
 require 'gorillib/metaprogramming/remove_method'
 require "gorillib/object/try_dup"
 #
-require 'gorillib/record/named_schema'
-require 'gorillib/record'
-require 'gorillib/record/validate'
-require 'gorillib/record/errors'
-require 'gorillib/record/field'
+require 'gorillib/model/named_schema'
+require 'gorillib/model'
+require 'gorillib/model/validate'
+require 'gorillib/model/errors'
+require 'gorillib/model/field'
 #
-require 'record_test_helpers'
+require 'model_test_helpers'
 
-# describe Gorillib::Record, :record_spec => true do
+# describe Gorillib::Model, :model_spec => true do
 #   context '.field' do
 #   end
 #
@@ -31,14 +31,14 @@ require 'record_test_helpers'
 #     it 'raises an error if a field is redefined' do
 #       poppa_smurf.field :height, Integer
 #       poppa_smurf.send(:define_method, :boogie){ 'na na na' }
-#       ->{ smurfette.field   :height, Float }.should raise_error(::Gorillib::Record::DangerousFieldError, /A field named 'height'.*conflict/)
-#       ->{ smurfette.field   :boogie, Float }.should raise_error(::Gorillib::Record::DangerousFieldError, /A field named 'boogie'.*conflict/)
+#       ->{ smurfette.field   :height, Float }.should raise_error(::Gorillib::Model::DangerousFieldError, /A field named 'height'.*conflict/)
+#       ->{ smurfette.field   :boogie, Float }.should raise_error(::Gorillib::Model::DangerousFieldError, /A field named 'boogie'.*conflict/)
 #     end
 #   end
 #
 # end
 #
-# describe Meta::Schema::NamedSchema, :record_spec => true do
+# describe Meta::Schema::NamedSchema, :model_spec => true do
 #
 #   context '.meta_module' do
 #     it 'defines a new module named Meta::[KlassName]Type' do

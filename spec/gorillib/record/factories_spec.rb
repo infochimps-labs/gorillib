@@ -8,10 +8,10 @@ require 'gorillib/string/inflector'
 #
 require 'gorillib/collection'
 #
-require 'gorillib/record/factories'
+require 'gorillib/model/factories'
 
 
-describe '', :record_spec => true do
+describe '', :model_spec => true do
   let(:inst    ){ mock('any object') }
   let(:example_class){  Class.new }
   let(:example_module){ Module.new }

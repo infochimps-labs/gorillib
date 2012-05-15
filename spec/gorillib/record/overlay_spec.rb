@@ -1,4 +1,4 @@
-# describe 'Gorillib::Record::Overlay' do
+# describe 'Gorillib::Model::Overlay' do
 #
 #
 #   context '.layer' do

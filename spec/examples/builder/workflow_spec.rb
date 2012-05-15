@@ -2,9 +2,9 @@ require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 
 # related libs
 require 'gorillib/string/simple_inflector'
-require 'gorillib/record'
-require 'gorillib/record/field'
-require 'gorillib/record/defaults'
+require 'gorillib/model'
+require 'gorillib/model/field'
+require 'gorillib/model/defaults'
 # libs under test
 require 'gorillib/builder'
 require 'gorillib/builder/field'

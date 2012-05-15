@@ -1,12 +1,12 @@
 require 'gorillib/string/simple_inflector'
-require 'gorillib/record'
-require 'gorillib/record/field'
-require 'gorillib/record/defaults'
+require 'gorillib/model'
+require 'gorillib/model/field'
+require 'gorillib/model/defaults'
 
 module Gorillib
   module Builder
     extend  Gorillib::Concern
-    include Gorillib::Record
+    include Gorillib::Model
 
     def initialize(attrs={}, &block)
       receive!(attrs, &block)
@@ -151,7 +151,7 @@ module Gorillib
   end
 
   module Builder
-    class CollectionField < Gorillib::Record::Field
+    class CollectionField < Gorillib::Model::Field
       field :singular_name, Symbol, :default => ->{ Gorillib::Inflector.singularize(name.to_s).to_sym }
 
       self.visibilities = visibilities.merge(:writer => false, :tester => false,
@@ -166,7 +166,7 @@ module Gorillib
         :name
       end
 
-      def inscribe_methods(record)
+      def inscribe_methods(model)
         type           = self.type
         collection_key = self.collection_key
         self.default   = ->{ Gorillib::Collection.new(type, collection_key) }
@@ -175,28 +175,28 @@ module Gorillib
         #
         @visibilities[:writer] = false
         super
-        record.__send__(:define_collection_getset,  self)
-        record.__send__(:define_collection_tester,  self)
+        model.__send__(:define_collection_getset,  self)
+        model.__send__(:define_collection_tester,  self)
       end
     end
 
-    class GetsetField < Gorillib::Record::Field
+    class GetsetField < Gorillib::Model::Field
       self.visibilities = visibilities.merge(:writer => false, :tester => false)
 
-      def inscribe_methods(record)
+      def inscribe_methods(model)
         @visibilities[:writer] = false
         super
-        record.__send__(:define_attribute_getset,  self)
+        model.__send__(:define_attribute_getset,  self)
       end
     end
 
-    class MemberField < Gorillib::Record::Field
+    class MemberField < Gorillib::Model::Field
       self.visibilities = visibilities.merge(:writer => false, :tester => true)
 
-      def inscribe_methods(record)
+      def inscribe_methods(model)
         @visibilities[:writer] = false
         super
-        record.__send__(:define_member_getset,  self)
+        model.__send__(:define_member_getset,  self)
       end
     end
 

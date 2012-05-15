@@ -1,5 +1,5 @@
 module Gorillib
-  module Record
+  module Model
 
     Field.class_eval do
       field :default, :whatever

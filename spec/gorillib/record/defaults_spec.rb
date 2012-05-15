@@ -1,18 +1,18 @@
 require File.expand_path('../../spec_helper', File.dirname(__FILE__))
 
-require 'gorillib/record'
-require 'gorillib/record/field'
-require 'gorillib/record/defaults'
+require 'gorillib/model'
+require 'gorillib/model/field'
+require 'gorillib/model/defaults'
 
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
-describe Gorillib::Record, :record_spec => true do
+describe Gorillib::Model, :model_spec => true do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:car_class) do
     class Gorillib::Test::Car
-      include Gorillib::Record
+      include Gorillib::Model
       field    :name,          Symbol
       field    :make_model,    String
       field    :year,          Integer
@@ -34,8 +34,8 @@ describe Gorillib::Record, :record_spec => true do
   let(:style_field){ car_class.fields[:style] }
 
   describe 'Field#default' do
-    it 'is itself a field on Gorillib::Record::Field (boy that is confusing)' do
-      Gorillib::Record::Field.should have_field(:default)
+    it 'is itself a field on Gorillib::Model::Field (boy that is confusing)' do
+      Gorillib::Model::Field.should have_field(:default)
     end
     context '#has_default?' do
       it 'is true if the default is set' do
@@ -77,7 +77,7 @@ describe Gorillib::Record, :record_spec => true do
       ford_39.stub(:read_unset_attribute).and_return('bob')
       ford_39.attribute_default(year_field).should equal(expected)
     end
-    it "if the default is a proc with args, call it in current context with the record and field name" do
+    it "if the default is a proc with args, call it in current context with the model and field name" do
       this = self ; expected = mock
       year_field.default = ->(inst, field_name){ [self, inst, field_name, expected] }
       ford_39.attribute_default(year_field).should == [this, ford_39, :year, expected]

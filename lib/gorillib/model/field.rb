@@ -1,24 +1,24 @@
 module Gorillib
-  module Record
+  module Model
 
     # Represents a field for reflection
     #
     # @example Usage
-    #   Gorillib::Record::Field.new(:name => 'problems', type => Integer, :doc => 'Count of problems')
+    #   Gorillib::Model::Field.new(:name => 'problems', type => Integer, :doc => 'Count of problems')
     #
     #
     class Field
-      include Gorillib::Record
+      include Gorillib::Model
       remove_possible_method(:type)
 
-      # [Gorillib::Record] Record owning this field
-      attr_reader :record
+      # [Gorillib::Model] Model owning this field
+      attr_reader :model
 
       # [Hash] all options passed to the field not recognized by one of its own current fields
       attr_reader :extra_attributes
 
-      # Note: `Gorillib::Record::Field` is assembled in two pieces, so that it
-      # can behave as a record itself. Defining `name` here, along with some
+      # Note: `Gorillib::Model::Field` is assembled in two pieces, so that it
+      # can behave as a model itself. Defining `name` here, along with some
       # fudge in #initialize, provides enough functionality to bootstrap.
       # The fields are then defined properly at the end of the file.
 
@@ -31,16 +31,16 @@ module Gorillib
 
       # @param [#to_sym]                name    Field name
       # @param [#receive]               type    Factory for field values. To accept any object as-is, specify `Object` as the type.
-      # @param [Gorillib::Record]       record   Field's owner
+      # @param [Gorillib::Model]       model   Field's owner
       # @param [Hash{Symbol => Object}] options Extended attributes
       # @option options [String] doc Description of the field's purpose
       # @option options [true, false, :public, :protected, :private] :reader   Visibility for the reader (`#foo`) method; `false` means don't create one.
       # @option options [true, false, :public, :protected, :private] :writer   Visibility for the writer (`#foo=`) method; `false` means don't create one.
       # @option options [true, false, :public, :protected, :private] :receiver Visibility for the receiver (`#receive_foo`) method; `false` means don't create one.
       #
-      def initialize(name, type, record, options={})
+      def initialize(name, type, model, options={})
         Validate.identifier!(name)
-        @record            = record
+        @model            = model
         @name             = name.to_sym
         @type             = self.class.factory_for(type)
         default_visabilities = visibilities
@@ -71,14 +71,14 @@ module Gorillib
       end
 
       def ==(val)
-        super && (val.extra_attributes == self.extra_attributes) && (val.record == self.record)
+        super && (val.extra_attributes == self.extra_attributes) && (val.model == self.model)
       end
 
       def self.receive(hsh)
         name  = hsh.fetch(:name)
         type  = hsh.fetch(:type)
-        record = hsh.fetch(:record)
-        new(name, type, record, hsh)
+        model = hsh.fetch(:model)
+        new(name, type, model, hsh)
       end
 
       #
@@ -97,11 +97,11 @@ module Gorillib
       #
       #
       #
-      def inscribe_methods(record)
-        record.__send__(:define_attribute_reader,   self)
-        record.__send__(:define_attribute_writer,   self)
-        record.__send__(:define_attribute_tester,   self)
-        record.__send__(:define_attribute_receiver, self)
+      def inscribe_methods(model)
+        model.__send__(:define_attribute_reader,   self)
+        model.__send__(:define_attribute_writer,   self)
+        model.__send__(:define_attribute_tester,   self)
+        model.__send__(:define_attribute_receiver, self)
       end
 
     public

@@ -1,8 +1,8 @@
 require 'gorillib/utils/capture_output'
 require 'gorillib/utils/nuke_constants'
 
-shared_examples_for "a record field" do |field_name|
-  it('gives the record a field'){ subject.class.should have_field(field_name) }
+shared_examples_for "a model field" do |field_name|
+  it('gives the model a field'){ subject.class.should have_field(field_name) }
 
   context '#read_attribute' do
     it "if set, returns the value" do
@@ -15,7 +15,7 @@ shared_examples_for "a record field" do |field_name|
       subject.read_attribute(field_name).should == mock_val
     end
     it "raises an error if the field does not exist" do
-      ->{ subject.read_attribute(:fnord) }.should raise_error(Gorillib::Record::UnknownFieldError, /unknown field: fnord/)
+      ->{ subject.read_attribute(:fnord) }.should raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
     end
   end
 
@@ -28,7 +28,7 @@ shared_examples_for "a record field" do |field_name|
       subject.write_attribute(field_name, sample_val).should == sample_val
     end
     it "raises an error if the field does not exist" do
-      ->{ subject.write_attribute(:fnord, 8) }.should raise_error(Gorillib::Record::UnknownFieldError, /unknown field: fnord/)
+      ->{ subject.write_attribute(:fnord, 8) }.should raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
     end
   end
 
@@ -45,12 +45,12 @@ shared_examples_for "a record field" do |field_name|
       subject.attribute_set?(field_name).should be_false
     end
     it "raises an error if the field does not exist" do
-      ->{ subject.attribute_set?(:fnord) }.should raise_error(Gorillib::Record::UnknownFieldError, /unknown field: fnord/)
+      ->{ subject.attribute_set?(:fnord) }.should raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
     end
   end
 
   context "#receive_XX" do
-    it('returns the record itself') do
+    it('returns the model itself') do
       subject.send("receive_#{field_name}", raw_val).should == subject
     end
     it('type-converts the object') do
