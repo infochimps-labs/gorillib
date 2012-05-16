@@ -85,6 +85,9 @@ module Gorillib
       def collection(field_name, type, options={})
         field(field_name, type, {:field_type => ::Gorillib::Builder::CollectionField}.merge(options))
       end
+      def simple_field(field_name, type, options={})
+        field(field_name, type, {:field_type => ::Gorillib::Model::Field}.merge(options))
+      end
 
     protected
 
