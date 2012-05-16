@@ -74,21 +74,17 @@ module Gorillib
     end
 
     module ClassMethods
+      include Gorillib::Model::ClassMethods
 
-      # KLUDGE: no smell good, this
-      def regular_field(*args)
-        _field(*args)
-      end
       def field(field_name, type, options={})
-        _field(field_name, type, options.merge(:field_type => ::Gorillib::Builder::GetsetField))
+        super(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField}.merge(options))
       end
       def member(field_name, type, options={})
-        _field(field_name, type, options.merge(:field_type => ::Gorillib::Builder::MemberField))
+        field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField}.merge(options))
       end
       def collection(field_name, type, options={})
-        _field(field_name, type, options.merge(:field_type => ::Gorillib::Builder::CollectionField))
+        field(field_name, type, {:field_type => ::Gorillib::Builder::CollectionField}.merge(options))
       end
-      # /KLUDGE
 
     protected
 
@@ -134,8 +130,10 @@ module Gorillib
     end
 
     module ClassMethods
+      include Gorillib::Builder::ClassMethods
+
       def belongs_to(field_name, type, options={})
-        field = _field(field_name, type, options.merge(:field_type => ::Gorillib::Builder::MemberField))
+        field = field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField }.merge(options))
         define_meta_module_method "#{field.name}_name" do
           val = getset_member(field) or return nil
           val.name
@@ -153,6 +151,27 @@ module Gorillib
   end
 
   module Builder
+
+    class GetsetField < Gorillib::Model::Field
+      self.visibilities = visibilities.merge(:writer => false, :tester => false, :getset => true)
+      def inscribe_methods(model)
+        model.__send__(:define_attribute_getset,   self)
+        model.__send__(:define_attribute_writer,   self)
+        model.__send__(:define_attribute_tester,   self)
+        model.__send__(:define_attribute_receiver, self)
+      end
+    end
+
+    class MemberField < Gorillib::Model::Field
+      self.visibilities = visibilities.merge(:writer => false, :tester => true)
+      def inscribe_methods(model)
+        model.__send__(:define_member_getset,      self)
+        model.__send__(:define_attribute_writer,   self)
+        model.__send__(:define_attribute_tester,   self)
+        model.__send__(:define_attribute_receiver, self)
+      end
+    end
+
     class CollectionField < Gorillib::Model::Field
       field :singular_name, Symbol, :default => ->{ Gorillib::Inflector.singularize(name.to_s).to_sym }
 
@@ -172,33 +191,12 @@ module Gorillib
         type           = self.type
         collection_key = self.collection_key
         self.default   = ->{ Gorillib::Collection.new(type, collection_key) }
-        #
         raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
         #
         @visibilities[:writer] = false
         super
         model.__send__(:define_collection_getset,  self)
         model.__send__(:define_collection_tester,  self)
-      end
-    end
-
-    class GetsetField < Gorillib::Model::Field
-      self.visibilities = visibilities.merge(:writer => false, :tester => false)
-
-      def inscribe_methods(model)
-        @visibilities[:writer] = false
-        super
-        model.__send__(:define_attribute_getset,  self)
-      end
-    end
-
-    class MemberField < Gorillib::Model::Field
-      self.visibilities = visibilities.merge(:writer => false, :tester => true)
-
-      def inscribe_methods(model)
-        @visibilities[:writer] = false
-        super
-        model.__send__(:define_member_getset,  self)
       end
     end
 

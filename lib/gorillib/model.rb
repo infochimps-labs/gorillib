@@ -237,7 +237,7 @@ module Gorillib
       # @option options [Proc, Object] default Default value, or proc that instance can evaluate to find default value
       #
       # @return Gorillib::Model::Field
-      def _field(field_name, type, options={})
+      def field(field_name, type, options={})
         options = options.symbolize_keys
         field_type = options.delete(:field_type){ ::Gorillib::Model::Field }
         fld = field_type.new(field_name, type, self, options)
@@ -245,11 +245,6 @@ module Gorillib
         _reset_descendant_fields
         fld.send(:inscribe_methods, self)
         fld
-      end
-
-      # FIXME: kludge
-      def field(field_name, type, options={})
-        _field(field_name, type, options.merge(:field_type => ::Gorillib::Model::Field))
       end
 
       # @return [{Symbol => Gorillib::Model::Field}]

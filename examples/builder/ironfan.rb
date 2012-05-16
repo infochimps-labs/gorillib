@@ -7,7 +7,7 @@ module Gorillib::Test
 
   class IronfanBuilder
     include Gorillib::FancyBuilder
-    field 	    :name,        Symbol
+    field           :name,        Symbol
 
   end
   class ComputeBuilder < IronfanBuilder; end
