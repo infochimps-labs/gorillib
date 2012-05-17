@@ -73,23 +73,34 @@ describe Pathname do
     end
   end
 
-  context '.register_path' do
-    subject{ described_class }
+
+  context 'registering paths' do
+    subject { described_class }
     def expand_pathseg(*args) ; subject.send(:expand_pathseg, *args) ;  end
     
-    it 'stores a path so expand_pathseg can get it later' do
-      subject.register_path(:probe, ['skeletal', 'girth'])
-      expand_pathseg(:probe).should == ['skeletal', 'girth']
+    context '.register_path' do
+      it 'stores a path so expand_pathseg can get it later' do
+        subject.register_path(:probe, ['skeletal', 'girth'])
+        expand_pathseg(:probe).should == ['skeletal', 'girth']
+      end
+      it 'stores a list of path segments to re-expand' do
+        subject.register_path(:ace, 'tomato', 'corporation')
+        expand_pathseg(:ace).should == ['tomato', 'corporation']
+      end
+      it 'replaces the stored path if called again' do
+        subject.register_path(:glg_20, 'boyer')
+        subject.register_path(:glg_20, ['milbarge', 'fitz-hume'])
+        expand_pathseg(:glg_20).should == ['milbarge', 'fitz-hume']
+      end
     end
-    it 'stores a list of path segments to re-expand' do
-      subject.register_path(:ace, 'tomato', 'corporation')
-      expand_pathseg(:ace).should == ['tomato', 'corporation']
-    end
-    it 'replaces the stored path if called again' do
-      subject.register_path(:glg_20, 'boyer')
-      subject.register_path(:glg_20, ['milbarge', 'fitz-hume'])
-      expand_pathseg(:glg_20).should == ['milbarge', 'fitz-hume']
+    
+    context '.register_paths' do
+      let(:paths) { { :foo => ['foo'], :bar => [:foo, 'bar'] } }
+      
+      it 'registers multiple paths' do
+        subject.should_receive(:register_path).exactly(paths.size).times
+        subject.register_paths(paths)
+      end
     end
   end
-
 end
