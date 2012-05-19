@@ -1,5 +1,5 @@
 def Gorillib::Factory(*args)
-  ::Gorillib::Factory.factory_for(*args)
+  ::Gorillib::Factory.receive(*args)
 end
 
 module Gorillib
@@ -7,8 +7,7 @@ module Gorillib
   module Factory
     class FactoryMismatchError < ArgumentError ; end
 
-    class << self
-      def factory_for(type)
+    def self.receive(type)
         case
         when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
         when type.respond_to?(:receive)             then return type
@@ -19,17 +18,17 @@ module Gorillib
         end
       end
 
-      def factories
-        @factories ||= Gorillib::Collection.new.tap{|f| f.key_method = :name }
-      end
-      private :factories
+    private
+    def self.factories
+      @factories ||= Gorillib::Collection.new.tap{|f| f.key_method = :name }
+    end
+    public
 
-      def register_factory(factory, *typenames)
-        if typenames.blank?
-          typenames = [factory.typename, factory.product]
-        end
-        typenames.each{|typename| factories[typename] = factory }
+    def self.register_factory(factory, *typenames)
+      if typenames.blank?
+        typenames = [factory.typename, factory.product]
       end
+      typenames.each{|typename| factories[typename] = factory }
     end
 
     class BaseFactory
@@ -264,7 +263,7 @@ module Gorillib
       self.blankish_vals = Set.new([ nil ])
 
       def initialize(options={})
-        @items_factory = Gorillib::Factory.factory_for( options.delete(:items){ IdenticalFactory.new } )
+        @items_factory = Gorillib::Factory.receive( options.delete(:items){ IdenticalFactory.new } )
         super(options)
       end
 

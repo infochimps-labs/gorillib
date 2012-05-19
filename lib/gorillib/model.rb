@@ -132,14 +132,12 @@ module Gorillib
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
       Gorillib::Model::Validate.hashlike!("attributes hash for #{self}", hsh)
       hsh = hsh.symbolize_keys
-      self.class.fields.each do |attr, field|
-        if    hsh.has_key?(attr)      then val = hsh[attr]
-        elsif hsh.has_key?(attr.to_s) then val = hsh[attr.to_s]
-        else next ; end
-        self.public_send(:"receive_#{attr}", val)
+      self.class.fields.each do |field_name, field|
+        next unless hsh.has_key?(field_name)
+        self.public_send(:"receive_#{field_name}", hsh[field_name])
       end
       @extra_attributes ||= Hash.new
-      @extra_attributes.merge!( hsh.reject{|attr,val| self.class.has_field?(attr) } )
+      @extra_attributes.merge!( hsh.reject{|field_name,val| self.class.has_field?(field_name) } )
       self
     end
 

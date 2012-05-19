@@ -42,9 +42,9 @@ module Gorillib
     alias_method :receive!, :merge!
 
     def self.receive(items, *args)
-      clxn = new(*args)
-      clxn.receive!(items)
-      clxn
+      coll = new(*args)
+      coll.receive!(items)
+      coll
     end
 
     # Two collections are equal if they have the same class and their contents are equal

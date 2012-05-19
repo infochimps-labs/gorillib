@@ -52,14 +52,14 @@ module Gorillib
 
     def getset_collection_item(field, item_key, attrs={}, &block)
       clxn = collection_of(field.plural_name)
-      if attrs.is_a?(field.type)     # actual object: assign it into collection
+      if attrs.is_a?(field.item_type)     # actual object: assign it into collection
         val = attrs
         clxn[item_key] = val
       elsif clxn.include?(item_key)  # existing item: retrieve it, updating as directed
         val = clxn[item_key]
         val.receive!(attrs, &block)
       else                           # missing item: autovivify item and add to collection
-        val = field.type.receive({ key_method => item_key, :owner => self }.merge(attrs), &block)
+        val = field.item_type.receive({ key_method => item_key, :owner => self }.merge(attrs), &block)
         clxn[item_key] = val
       end
       val
@@ -82,8 +82,10 @@ module Gorillib
       def member(field_name, type, options={})
         field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField}.merge(options))
       end
-      def collection(field_name, type, options={})
-        field(field_name, type, {:field_type => ::Gorillib::Builder::CollectionField}.merge(options))
+      def collection(field_name, item_type, options={})
+        field(field_name, Gorillib::Collection, {
+            :item_type => item_type,
+            :field_type => ::Gorillib::Builder::CollectionField}.merge(options))
       end
       def simple_field(field_name, type, options={})
         field(field_name, type, {:field_type => ::Gorillib::Model::Field}.merge(options))
@@ -144,6 +146,11 @@ module Gorillib
         field
       end
 
+      def option(field_name, options={})
+        type = options.delete(:type){ Whatever }
+        field(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField }.merge(options))
+      end
+
       def collects(type, clxn_name)
         type_handle = type.handle
         define_meta_module_method type_handle do |item_name, attrs={}, options={}, &block|
@@ -177,6 +184,7 @@ module Gorillib
 
     class CollectionField < Gorillib::Model::Field
       field :singular_name, Symbol, :default => ->{ Gorillib::Inflector.singularize(name.to_s).to_sym }
+      field :item_type, Class, :default => Whatever
 
       self.visibilities = visibilities.merge(:writer => false, :tester => false,
         :collection_getset => :public, :collection_tester => true)
@@ -186,18 +194,14 @@ module Gorillib
         @singular_name ||= Gorillib::Inflector.singularize(name.to_s).to_sym
       end
 
-      def collection_key
-        :name
-      end
-
       def inscribe_methods(model)
-        type           = self.type
-        collection_key = self.collection_key
-        self.default   = ->{ Gorillib::Collection.new(type, collection_key) }
+        item_type      = self.item_type
+        self.default   = ->{ Gorillib::Collection.new(item_type) }
         raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
         #
         @visibilities[:writer] = false
         super
+        #
         model.__send__(:define_collection_getset,  self)
         model.__send__(:define_collection_tester,  self)
       end

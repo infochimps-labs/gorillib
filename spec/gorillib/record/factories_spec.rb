@@ -44,9 +44,9 @@ describe '', :model_spec => true do
         Gorillib::Factory(Symbol).should == Gorillib::Factory::SymbolFactory
         Gorillib::Factory(String).should == Gorillib::Factory::StringFactory
       end
-      it 'calls Gorillib::Factory.factory_for' do
+      it 'calls Gorillib::Factory.receive' do
         x = mock
-        Gorillib::Factory.should_receive(:factory_for).with(x)
+        Gorillib::Factory.should_receive(:receive).with(x)
         Gorillib::Factory(x)
       end
     end

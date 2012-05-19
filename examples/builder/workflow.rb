@@ -49,7 +49,6 @@ require 'hanuman/stage'
 #
 #     def tree(options={})
 #       options = {:indent => 0}.merge(options)
-#       p ['tree', self, options]
 #       indent_str = " " * options[:indent]
 #       str = ["#{indent_str}#{name}"]
 #       stages.to_a.each do |stage|
@@ -87,7 +86,6 @@ require 'hanuman/stage'
 #       utensil :oven
 #       utensil :wire_rack
 #
-#       p [self, self.owner]
 #       ingredient :flour,     :qty => '3 cups'
 #       ingredient :sugar,     :qty => '2 tbsp'
 #       ingredient :salt,      :qty => '1.5 tsp'

@@ -17,7 +17,7 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
     class Gorillib::Test::Engine
       include Gorillib::Builder
       field     :carburetor,   Symbol, :default => :stock
-      field     :volume,       Integer
+      field     :volume,       Integer, :doc => 'displacement volume, in in^3'
       field     :cylinders,    Integer
       self
     end
@@ -160,8 +160,8 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
   context 'collections' do
     subject{ garage }
-    let(:sample_val){ wildcat }
-    let(:raw_val   ){ wildcat.attributes }
+    let(:sample_val){ Gorillib::Collection.receive([wildcat], car_class, :name) }
+    let(:raw_val   ){ {wildcat.name => wildcat.attributes} }
     it_behaves_like "a model field", :cars
     it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::Collection.new }
 

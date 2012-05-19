@@ -1,6 +1,5 @@
 Exception.class_eval do
   def self.caller_parts
-    p caller[1]
     mg = %r{\A([^:]+):(\d+):in \`([^\']+)\'\z}.match(caller[1]) or return [caller[1], 1, 'unknown']
     [mg[1], mg[2].to_i, mg[3]]
   end

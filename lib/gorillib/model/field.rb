@@ -42,7 +42,7 @@ module Gorillib
         Validate.identifier!(name)
         @model            = model
         @name             = name.to_sym
-        @type             = self.class.factory_for(type)
+        @type             = self.factory_for(type)
         default_visabilities = visibilities
         @visibilities     = default_visabilities.merge( options.extract!(*default_visabilities.keys) )
         @doc              = options.delete(:name){ "#{name} field" }
@@ -59,6 +59,7 @@ module Gorillib
       def self.factory_for(type)
         Gorillib::Factory(type)
       end
+      def factory_for(type) ; self.class.factory_for(type) ; end
 
       # @return [String] Human-readable presentation of the field definition
       def inspect
