@@ -213,6 +213,7 @@ module Gorillib
       def receive(attrs={}, &block)
         return nil if attrs.nil?
         return attrs if attrs.is_a?(self)
+        Gorillib::Model::Validate.hashlike!("attributes for #{self}", attrs)
         klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
         warn "factory #{self} doesn't match type specified in #{attrs}" unless klass <= self
         obj = klass.new
@@ -306,9 +307,16 @@ module Gorillib
         field_name = field.name
         type       = field.type
         define_meta_module_method("receive_#{field_name}", field.visibility(:receiver)) do |val|
-          val = type.receive(val)
-          write_attribute(field_name, val)
-          self
+          begin
+            val = type.receive(val)
+            write_attribute(field_name, val)
+            self
+          rescue StandardError => err
+            err.backtrace.
+              detect{|l| l.include?(__FILE__) && l.include?("in define_attribute_receiver'") }.
+              gsub!(/define_attribute_receiver'/, "define_attribute_receiver for #{self.class}.#{field_name} type #{type} on #{val}'"[0..300]) rescue nil
+            raise
+          end
         end
       end
 

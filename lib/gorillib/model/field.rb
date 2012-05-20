@@ -56,10 +56,9 @@ module Gorillib
         name.to_s
       end
 
-      def self.factory_for(type)
+      def factory_for(type)
         Gorillib::Factory(type)
       end
-      def factory_for(type) ; self.class.factory_for(type) ; end
 
       # @return [String] Human-readable presentation of the field definition
       def inspect

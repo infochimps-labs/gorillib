@@ -69,8 +69,8 @@ module HashlikeHelper
   #   :cycle, :partition,
   # ]
   #
-  # p Enumerable.public_instance_methods.map(&:to_sym) - ENUMERABLE_METHODS
-  # p ENUMERABLE_METHODS - Enumerable.public_instance_methods.map(&:to_sym)
+  # Enumerable.public_instance_methods.map(&:to_sym) - ENUMERABLE_METHODS
+  # ENUMERABLE_METHODS - Enumerable.public_instance_methods.map(&:to_sym)
   # extra:   [:member?, :enum_slice, :reject, :select, :include?, :enum_cons, :enum_with_index]
   # missing: [:each_entry, :each_with_object, :collect_concat, :flat_map, :chunk, :slice_before]
 end

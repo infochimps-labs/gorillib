@@ -23,11 +23,10 @@ module Gorillib
     def getset(field, *args, &block)
       ArgumentError.check_arity!(args, 0..1)
       if args.empty?
-        val = read_attribute(field.name)
+        read_attribute(field.name)
       else
-        val = write_attribute(field.name, args.first)
+        write_attribute(field.name, args.first)
       end
-      val
     end
 
     def getset_member(field, *args, &block)
@@ -94,27 +93,58 @@ module Gorillib
     protected
 
       def define_attribute_getset(field)
-        define_meta_module_method(field.name, field.visibility(:reader)) do |*args, &block|
-          getset(field, *args, &block)
+        field_name = field.name; type = field.type
+        define_meta_module_method(field_name, field.visibility(:reader)) do |*args, &block|
+          begin
+            getset(field, *args, &block)
+          rescue StandardError => err
+            err.backtrace.
+              detect{|l| l.include?(__FILE__) && l.include?("in define_attribute_getset'") }.
+              gsub!(/define_attribute_getset'/, "define_attribute_getset for #{self.class}.#{field_name} type #{type} on #{args}'"[0..300]) rescue nil
+            raise
+          end
         end
       end
 
       def define_member_getset(field)
-        define_meta_module_method(field.name, field.visibility(:reader)) do |*args, &block|
-          getset_member(field, *args, &block)
+        field_name = field.name; type = field.type
+        define_meta_module_method(field_name, field.visibility(:reader)) do |*args, &block|
+          begin
+            getset_member(field, *args, &block)
+          rescue StandardError => err
+            err.backtrace.
+              detect{|l| l.include?(__FILE__) && l.include?("in define_member_getset'") }.
+              gsub!(/define_member_getset'/, "define_member_getset for #{self.class}.#{field_name} type #{type} on #{args}'"[0..300]) rescue nil
+            raise
+          end
         end
       end
 
       def define_collection_getset(field)
+        field_name = field.name; item_type = field.item_type
         define_meta_module_method(field.singular_name, field.visibility(:collection_getset)) do |*args, &block|
-          getset_collection_item(field, *args, &block)
+          begin
+            getset_collection_item(field, *args, &block)
+          rescue StandardError => err
+            err.backtrace.
+              detect{|l| l.include?(__FILE__) && l.include?("in define_collection_getset'") }.
+              gsub!(/define_collection_getset'/, "define_collection_getset for #{self.class}.#{field_name} c[#{item_type}] on #{args}'"[0..300]) rescue nil
+            raise
+          end
         end
       end
 
       def define_collection_tester(field)
         plural_name = field.plural_name
         define_meta_module_method("has_#{field.singular_name}?", field.visibility(:collection_tester)) do |item_key|
-          collection_of(plural_name).include?(item_key)
+          begin
+            collection_of(plural_name).include?(item_key)
+          rescue StandardError => err
+            err.backtrace.
+              detect{|l| l.include?(__FILE__) && l.include?("in define_collection_tester'") }.
+              gsub!(/define_collection_tester'/, "define_collection_tester for #{self.class}.#{field_name} type #{type}'") rescue nil
+            raise
+          end
         end
       end
 
