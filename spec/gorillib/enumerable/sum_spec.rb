@@ -3,7 +3,7 @@ require 'gorillib/enumerable/sum'
 
 Payment = Struct.new(:price)
 class SummablePayment < Payment
-  def +(p) self.class.new(price + p.price) end
+  def +(val) self.class.new(price + val.price) end
 end
 
 describe Enumerable, :simple_spec => true do
@@ -27,8 +27,8 @@ describe Enumerable, :simple_spec => true do
 
     it 'sums object with a synthetic "+" method' do
       payments = [ SummablePayment.new(5), SummablePayment.new(15) ]
-      payments.sum        .should == SummablePayment.new(20)
-      payments.sum{|p| p }.should == SummablePayment.new(20)
+      payments.sum            .should == SummablePayment.new(20)
+      payments.sum{|val| val }.should == SummablePayment.new(20)
     end
 
     it 'handles nil sums' do

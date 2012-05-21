@@ -1,8 +1,20 @@
 Exception.class_eval do
+  # @return [Array] __FILE__, __LINE__, description
   def self.caller_parts
-    mg = %r{\A([^:]+):(\d+):in \`([^\']+)\'\z}.match(caller[1]) or return [caller[1], 1, 'unknown']
+    caller_line = caller[1]
+    mg = %r{\A([^:]+):(\d+):in \`([^\']+)\'\z}.match(caller_line) or return [caller_line, 1, 'unknown']
     [mg[1], mg[2].to_i, mg[3]]
   end
+
+  #
+  # @note !! Be sure to rescue the call to this method; few things suck worse than debugging your rescue blocks/
+  def polish(extra_info)
+    filename, _, method_name = self.class.caller_parts
+    method_name.gsub!(/rescue in /, '')
+    most_recent_line = backtrace.detect{|line| line.include?(filename) && line.include?(method_name) }
+    most_recent_line.sub!(/'$/, " for #{extra_info}'"[0..300])
+  end
+
 end
 
 ArgumentError.class_eval do
