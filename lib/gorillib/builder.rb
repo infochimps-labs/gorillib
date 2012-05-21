@@ -32,17 +32,22 @@ module Gorillib
     def getset_member(field, *args, &block)
       ArgumentError.check_arity!(args, 0..1)
       attrs = args.first
-      if attrs.is_a?(field.type)        # actual object: assign it into field
+      if attrs.is_a?(field.type)
+        # actual object: assign it into field
         val = attrs
         write_attribute(field.name, val)
       else
         val = read_attribute(field.name)
         if val.present?
+          # existing item: update it with args and block
           val.receive!(*args, &block) if args.present?
-        elsif attrs.blank?  # missing item (read): return nil
+        elsif attrs.blank?
+          # missing item (read): return nil
           return nil
-        else                              # missing item (write): construct item and add to collection
-          val = field.type.receive(*args, &block)
+        else
+          # missing item (write): construct item and add to collection
+          options = args.extract_options!.merge(:owner => self)
+          val = field.type.receive(*args, options, &block)
           write_attribute(field.name, val)
         end
       end
@@ -50,22 +55,46 @@ module Gorillib
     end
 
     def getset_collection_item(field, item_key, attrs={}, &block)
-      clxn = collection_of(field.plural_name)
-      if attrs.is_a?(field.item_type)     # actual object: assign it into collection
+      plural_name = field.plural_name
+      if attrs.is_a?(field.item_type)
+        # actual object: assign it into collection
         val = attrs
-        clxn[item_key] = val
-      elsif clxn.include?(item_key)  # existing item: retrieve it, updating as directed
-        val = clxn[item_key]
+        set_collection_item(plural_name, item_key, val)
+      elsif has_collection_item?(plural_name, item_key)
+        # existing item: retrieve it, updating as directed
+        val = get_collection_item(plural_name, item_key)
         val.receive!(attrs, &block)
-      else                           # missing item: autovivify item and add to collection
+      else
+        # missing item: autovivify item and add to collection
         val = field.item_type.receive({ key_method => item_key, :owner => self }.merge(attrs), &block)
-        clxn[item_key] = val
+        set_collection_item(plural_name, item_key, val)
       end
       val
     end
 
+    def get_collection_item(plural_name, item_key)
+      collection_of(plural_name)[item_key]
+    end
+
+    def set_collection_item(plural_name, item_key, item)
+      collection_of(plural_name)[item_key] = item
+    end
+
+    def has_collection_item?(plural_name, item_key)
+      collection_of(plural_name).include?(item_key)
+    end
+
     def key_method
       :name
+    end
+
+    def to_key
+      self.read_attribute(key_method)
+    end
+
+    def inspect(detailed=true)
+      str = super
+      detailed ? str : ([str[0..-2], " #{to_key}>"].join)
     end
 
     def collection_of(plural_name)
@@ -97,12 +126,7 @@ module Gorillib
         define_meta_module_method(field_name, field.visibility(:reader)) do |*args, &block|
           begin
             getset(field, *args, &block)
-          rescue StandardError => err
-            err.backtrace.
-              detect{|l| l.include?(__FILE__) && l.include?("in define_attribute_getset'") }.
-              gsub!(/define_attribute_getset'/, "define_attribute_getset for #{self.class}.#{field_name} type #{type} on #{args}'"[0..300]) rescue nil
-            raise
-          end
+          rescue StandardError => err ; err.polish("#{self.class}.#{field_name} type #{type} on #{args}'") rescue nil ; raise ; end
         end
       end
 
@@ -111,12 +135,7 @@ module Gorillib
         define_meta_module_method(field_name, field.visibility(:reader)) do |*args, &block|
           begin
             getset_member(field, *args, &block)
-          rescue StandardError => err
-            err.backtrace.
-              detect{|l| l.include?(__FILE__) && l.include?("in define_member_getset'") }.
-              gsub!(/define_member_getset'/, "define_member_getset for #{self.class}.#{field_name} type #{type} on #{args}'"[0..300]) rescue nil
-            raise
-          end
+          rescue StandardError => err ; err.polish("#{self.class}.#{field_name} type #{type} on #{args}'") rescue nil ; raise ; end
         end
       end
 
@@ -125,12 +144,21 @@ module Gorillib
         define_meta_module_method(field.singular_name, field.visibility(:collection_getset)) do |*args, &block|
           begin
             getset_collection_item(field, *args, &block)
-          rescue StandardError => err
-            err.backtrace.
-              detect{|l| l.include?(__FILE__) && l.include?("in define_collection_getset'") }.
-              gsub!(/define_collection_getset'/, "define_collection_getset for #{self.class}.#{field_name} c[#{item_type}] on #{args}'"[0..300]) rescue nil
-            raise
-          end
+          rescue StandardError => err ; err.polish("#{self.class}.#{field_name} c[#{item_type}] on #{args}'") rescue nil ; raise ; end
+        end
+      end
+
+      def define_collection_receiver(field)
+        plural_name = field.name; item_type = field.item_type; field_type = field.type
+        define_meta_module_method("receive_#{plural_name}", true) do |coll, &block|
+          begin
+            if coll.is_a?(field_type)
+              write_attribute(plural_name, coll)
+            else
+              read_attribute(plural_name).receive!(coll, &block)
+            end
+            self
+          rescue StandardError => err ; err.polish("#{self.class} #{plural_name} c[#{item_type}] on #{args}'") rescue nil ; raise ; end
         end
       end
 
@@ -139,12 +167,7 @@ module Gorillib
         define_meta_module_method("has_#{field.singular_name}?", field.visibility(:collection_tester)) do |item_key|
           begin
             collection_of(plural_name).include?(item_key)
-          rescue StandardError => err
-            err.backtrace.
-              detect{|l| l.include?(__FILE__) && l.include?("in define_collection_tester'") }.
-              gsub!(/define_collection_tester'/, "define_collection_tester for #{self.class}.#{field_name} type #{type}'") rescue nil
-            raise
-          end
+          rescue StandardError => err ; err.polish("#{self.class}.#{plural_name} having #{item_key}?'") rescue nil ; raise ; end
         end
       end
 
@@ -154,11 +177,6 @@ module Gorillib
   module FancyBuilder
     extend  Gorillib::Concern
     include Gorillib::Builder
-
-    def inspect(detailed=true)
-      str = super
-      detailed ? str : ([str[0..-2], " #{read_attribute(key_method)}>"].join)
-    end
 
     included do |base|
       base.field :name,  Symbol
@@ -196,9 +214,9 @@ module Gorillib
       self.visibilities = visibilities.merge(:writer => false, :tester => false, :getset => true)
       def inscribe_methods(model)
         model.__send__(:define_attribute_getset,   self)
-        model.__send__(:define_attribute_writer,   self)
-        model.__send__(:define_attribute_tester,   self)
-        model.__send__(:define_attribute_receiver, self)
+        model.__send__(:define_attribute_writer,   self.name, self.type, visibility(:writer))
+        model.__send__(:define_attribute_tester,   self.name, self.type, visibility(:tester))
+        model.__send__(:define_attribute_receiver, self.name, self.type, visibility(:receiver))
       end
     end
 
@@ -206,9 +224,9 @@ module Gorillib
       self.visibilities = visibilities.merge(:writer => false, :tester => true)
       def inscribe_methods(model)
         model.__send__(:define_member_getset,      self)
-        model.__send__(:define_attribute_writer,   self)
-        model.__send__(:define_attribute_tester,   self)
-        model.__send__(:define_attribute_receiver, self)
+        model.__send__(:define_attribute_writer,   self.name, self.type, visibility(:writer))
+        model.__send__(:define_attribute_tester,   self.name, self.type, visibility(:tester))
+        model.__send__(:define_attribute_receiver, self.name, self.type, visibility(:receiver))
       end
     end
 
@@ -230,10 +248,12 @@ module Gorillib
         raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
         #
         @visibilities[:writer] = false
-        super
+        model.__send__(:define_attribute_reader,   self.name, self.type, visibility(:reader))
+        model.__send__(:define_attribute_tester,   self.name, self.type, visibility(:tester))
         #
-        model.__send__(:define_collection_getset,  self)
-        model.__send__(:define_collection_tester,  self)
+        model.__send__(:define_collection_receiver, self)
+        model.__send__(:define_collection_getset,   self)
+        model.__send__(:define_collection_tester,   self)
       end
     end
 

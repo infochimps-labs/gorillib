@@ -48,6 +48,53 @@ module Gorillib
       end
     end
 
+    #
+    # Accept the given attributes, converting each value to the appropriate
+    # type, constructing included models and collections, and other triggers as
+    # defined.
+    #
+    # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
+    # or some such. Use `#update_attributes` if your data is already type safe.
+    #
+    # @param [{Symbol => Object}] hsh The values to receive
+    # @return [Gorillib::Model] the object itself
+    def receive!(hsh={})
+      if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
+      Gorillib::Model::Validate.hashlike!("attributes hash for #{self.inspect}", hsh)
+      hsh = hsh.symbolize_keys
+      self.class.fields.each do |field_name, field|
+        next unless hsh.has_key?(field_name)
+        self.public_send(:"receive_#{field_name}", hsh[field_name])
+      end
+      handle_extra_attributes( hsh.reject{|field_name,val| self.class.has_field?(field_name) } )
+      self
+    end
+
+    def handle_extra_attributes(attrs)
+      @extra_attributes ||= Hash.new
+      @extra_attributes.merge!(attrs)
+    end
+
+    #
+    # Accept the given attributes, adopting each value directly.
+    #
+    # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
+    # or some such. Use `#update_attributes` if your data is already type safe.
+    #
+    # @param [{Symbol => Object}] hsh The values to update with
+    # @return [Gorillib::Model] the object itself
+    def update_attributes(hsh)
+      if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
+      Gorillib::Model::Validate.hashlike!("attributes hash", hsh)
+      self.class.fields.each do |attr, field|
+        if    hsh.has_key?(attr)      then val = hsh[attr]
+        elsif hsh.has_key?(attr.to_s) then val = hsh[attr.to_s]
+        else next ; end
+        write_attribute(attr, val)
+      end
+      self
+    end
+
     # Read a value from the model's attributes.
     #
     # @example Reading an attribute
@@ -118,49 +165,6 @@ module Gorillib
       instance_variable_defined?("@#{field_name}")
     end
 
-    #
-    # Accept the given attributes, converting each value to the appropriate
-    # type, constructing included models and collections, and other triggers as
-    # defined.
-    #
-    # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
-    # or some such. Use `#update_attributes` if your data is already type safe.
-    #
-    # @param [{Symbol => Object}] hsh The values to receive
-    # @return [Gorillib::Model] the object itself
-    def receive!(hsh={})
-      if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash for #{self}", hsh)
-      hsh = hsh.symbolize_keys
-      self.class.fields.each do |field_name, field|
-        next unless hsh.has_key?(field_name)
-        self.public_send(:"receive_#{field_name}", hsh[field_name])
-      end
-      @extra_attributes ||= Hash.new
-      @extra_attributes.merge!( hsh.reject{|field_name,val| self.class.has_field?(field_name) } )
-      self
-    end
-
-    #
-    # Accept the given attributes, adopting each value directly.
-    #
-    # Use `#receive!` to accept 'dirty' data -- from JSON, from a nested hash,
-    # or some such. Use `#update_attributes` if your data is already type safe.
-    #
-    # @param [{Symbol => Object}] hsh The values to update with
-    # @return [Gorillib::Model] the object itself
-    def update_attributes(hsh)
-      if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash", hsh)
-      self.class.fields.each do |attr, field|
-        if    hsh.has_key?(attr)      then val = hsh[attr]
-        elsif hsh.has_key?(attr.to_s) then val = hsh[attr.to_s]
-        else next ; end
-        write_attribute(attr, val)
-      end
-      self
-    end
-
     # Two models are equal if they have the same class and their attributes
     # are equal.
     #
@@ -197,7 +201,7 @@ module Gorillib
     # @raise [UnknownFieldError] if the field is missing
     def check_field(field_name)
       return true if self.class.has_field?(field_name)
-      raise UnknownFieldError, "unknown field: #{field_name}"
+      raise UnknownFieldError, "unknown field: #{field_name} for #{self}"
     end
 
     module ClassMethods
@@ -282,41 +286,36 @@ module Gorillib
         end
       end
 
-      def define_attribute_reader(field)
-        field_name = field.name
-        define_meta_module_method(field_name, field.visibility(:reader)) do
-          read_attribute(field_name)
+      # define the reader method `#foo` for a field named `:foo`
+      def define_attribute_reader(field_name, field_type, visibility)
+        define_meta_module_method(field_name, visibility) do
+          begin
+            read_attribute(field_name)
+          rescue StandardError => err ; err.polish("#{self.class}.#{field_name}") rescue nil ; raise ; end
         end
       end
 
-      def define_attribute_writer(field)
-        field_name = field.name
-        define_meta_module_method("#{field_name}=", field.visibility(:writer)) do |val|
+      # define the writer method `#foo=` for a field named `:foo`
+      def define_attribute_writer(field_name, field_type, visibility)
+        define_meta_module_method("#{field_name}=", visibility) do |val|
           write_attribute(field_name, val)
         end
       end
 
-      def define_attribute_tester(field)
-        field_name = field.name
-        define_meta_module_method("#{field_name}?", field.visibility(:tester)) do
+      # define the present method `#foo?` for a field named `:foo`
+      def define_attribute_tester(field_name, field_type, visibility)
+        define_meta_module_method("#{field_name}?", visibility) do
           attribute_set?(field_name)
         end
       end
 
-      def define_attribute_receiver(field)
-        field_name = field.name
-        type       = field.type
-        define_meta_module_method("receive_#{field_name}", field.visibility(:receiver)) do |val|
+      def define_attribute_receiver(field_name, field_type, visibility)
+        define_meta_module_method("receive_#{field_name}", visibility) do |val|
           begin
-            val = type.receive(val)
+            val = field_type.receive(val)
             write_attribute(field_name, val)
             self
-          rescue StandardError => err
-            err.backtrace.
-              detect{|l| l.include?(__FILE__) && l.include?("in define_attribute_receiver'") }.
-              gsub!(/define_attribute_receiver'/, "define_attribute_receiver for #{self.class}.#{field_name} type #{type} on #{val}'"[0..300]) rescue nil
-            raise
-          end
+          rescue StandardError => err ; err.polish("#{self.class}.#{field_name} type #{type} on #{val}") rescue nil ; raise ; end
         end
       end
 

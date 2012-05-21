@@ -3,7 +3,7 @@ module Gorillib
     module Validate
       module_function
 
-      VALID_NAME_RE = /\A[A-Za-z_][A-Za-z0-9_]+\z/
+      VALID_NAME_RE = /\A[A-Za-z_][A-Za-z0-9_]*\z/
       def identifier!(name)
         raise TypeError,     "can't convert #{name.class} into Symbol", caller unless name.respond_to? :to_sym
         raise ArgumentError, "Name must start with [A-Za-z_] and subsequently contain only [A-Za-z0-9_]", caller unless name =~ VALID_NAME_RE
@@ -11,7 +11,7 @@ module Gorillib
 
       def hashlike!(desc, val)
         return true if val.respond_to?(:[]) && val.respond_to?(:has_key?)
-        raise ArgumentError, "#{desc} should be something that behaves like a hash: {#{val.inspect}}", caller
+        raise ArgumentError, "#{desc} should be something that behaves like a hash: #{val.inspect}", caller
       end
 
       def included_in!(desc, val, colxn)

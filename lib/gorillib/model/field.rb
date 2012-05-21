@@ -98,10 +98,10 @@ module Gorillib
       #
       #
       def inscribe_methods(model)
-        model.__send__(:define_attribute_reader,   self)
-        model.__send__(:define_attribute_writer,   self)
-        model.__send__(:define_attribute_tester,   self)
-        model.__send__(:define_attribute_receiver, self)
+        model.__send__(:define_attribute_reader,   self.name, self.type, visibility(:reader))
+        model.__send__(:define_attribute_writer,   self.name, self.type, visibility(:writer))
+        model.__send__(:define_attribute_tester,   self.name, self.type, visibility(:tester))
+        model.__send__(:define_attribute_receiver, self.name, self.type, visibility(:receiver))
       end
 
     public

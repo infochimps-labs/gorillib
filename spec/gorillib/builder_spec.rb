@@ -14,15 +14,20 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:example_class) do
+    class Gorillib::Test::Car
+      include Gorillib::Builder
+    end
+
     class Gorillib::Test::Engine
       include Gorillib::Builder
-      field     :carburetor,   Symbol, :default => :stock
-      field     :volume,       Integer, :doc => 'displacement volume, in in^3'
-      field     :cylinders,    Integer
+      field    :name,         Symbol, :default => ->{ "#{owner? ? owner.name : ''} engine"}
+      field    :carburetor,   Symbol, :default => :stock
+      field    :volume,       Integer, :doc => 'displacement volume, in in^3'
+      field    :cylinders,    Integer
+      member   :owner,        Gorillib::Test::Car
       self
     end
     class Gorillib::Test::Car
-      include Gorillib::Builder
       field    :name,          Symbol
       field    :make_model,    String
       field    :year,          Integer
@@ -65,22 +70,21 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
       obj = subject.receive(
         :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2",
         :engine => { :carburetor => 'edelbrock', :volume => "455", :cylinders => '8' })
-      obj.attributes.except(:engine).should == {
-        :name => :wildcat,  :make_model => 'Buick Wildcat', :year =>  1968,  :doors =>  2 }
-      obj.engine.attributes.should == {
-        :carburetor => :edelbrock, :volume => 455, :cylinders => 8 }
+      obj.attributes.values_at(:name, :make_model, :year, :doors).should == [:wildcat, 'Buick Wildcat', 1968,  2 ]
+      obj.engine.attributes.values_at(:carburetor, :volume, :cylinders).should == [:edelbrock, 455, 8 ]
     end
     it 'lets you dive down' do
-      wildcat.engine.attributes.should == { :carburetor => :stock, :volume => 455, :cylinders => 8 }
+      wildcat.engine.attributes.values_at(:carburetor, :volume, :cylinders).should == [:stock, 455, 8 ]
       wildcat.engine(:cylinders => 6) do
         volume   383
       end
-      wildcat.engine.attributes.should == { :carburetor => :stock, :volume => 383, :cylinders => 6}
+      wildcat.engine.attributes.values_at(:carburetor, :volume, :cylinders).should == [:stock, 383, 6 ]
     end
     it 'lazily autovivifies members' do
       ford_39.read_attribute(:engine).should be_nil
       ford_39.engine(:cylinders => 6)
-      ford_39.engine.attributes.should == { :carburetor => :stock, :volume => nil, :cylinders => 6}
+      ford_39.read_attribute(:engine).should be_a(Gorillib::Test::Engine)
+      ford_39.engine.read_attribute(:cylinders).should == 6
     end
   end
 
@@ -161,7 +165,7 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
   context 'collections' do
     subject{ garage }
     let(:sample_val){ Gorillib::Collection.receive([wildcat], car_class, :name) }
-    let(:raw_val   ){ {wildcat.name => wildcat.attributes} }
+    let(:raw_val   ){ [ wildcat.attributes ] }
     it_behaves_like "a model field", :cars
     it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::Collection.new }
 
