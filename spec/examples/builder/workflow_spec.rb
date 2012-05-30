@@ -22,17 +22,6 @@ module Meta::WukongTest ; end
 #     WukongTest.workflow(:cherry_pie)
 #   end
 #
-#   it 'is awesome' do
-#
-#     example_workflow.stages.to_a.each do |stage|
-#       p stage
-#       p stage.stages
-#     end
-#
-#     puts
-#     puts example_workflow.tree
-#   end
-#
 #   # context "collections get a {foo}_name accessor:" do
 #   #   it("facet.cluster_name"){ ec_webnode.cluster_name.should == :yellowhat }
 #   #   it("server.facet_name" ){ ec_webnode_a.facet_name.should == :webnode   }
