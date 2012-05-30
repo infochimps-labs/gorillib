@@ -15,6 +15,10 @@ module Gorillib::Pathname
     def register_paths(pairs = {})
       pairs.each_pair{ |handle, pathsegs| register_path(handle, *pathsegs) }
     end
+
+    def unregister_path handle
+      ROOT_PATHS.delete handle
+    end
     
     # Expand a path with late-evaluated segments.
     # Calls expand_path -- '~' becomes $HOME, '..' is expanded, etc.
