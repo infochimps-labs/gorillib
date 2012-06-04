@@ -73,7 +73,6 @@ describe Pathname do
     end
   end
 
-
   context 'registering paths' do
     subject { described_class }
     def expand_pathseg(*args) ; subject.send(:expand_pathseg, *args) ;  end
@@ -102,5 +101,14 @@ describe Pathname do
         subject.register_paths(paths)
       end
     end
+
+    context '.unregister_path' do
+      it 'unregisters a path' do
+        subject.register_path(:foo, 'foo')
+        expand_pathseg(:foo).should == ['foo']
+        subject.unregister_path(:foo)
+        expect{ expand_pathseg(:foo)}.to raise_error(ArgumentError, /expand path reference.*foo/)
+      end
+    end    
   end
 end
