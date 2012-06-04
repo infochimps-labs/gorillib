@@ -178,6 +178,11 @@ module Gorillib
       register_factory!
     end
 
+    class GuidFactory      < StringFactory ; self.product = Guid      ; register_factory!(:guid)       ; end
+    class HostnameFactory  < StringFactory ; self.product = Hostname  ; register_factory!(:hostname)   ; end
+    class IpAddressFactory < StringFactory ; self.product = IpAddress ; register_factory!(:ip_address) ; end
+    class PathnameFactory  < StringFactory ; self.product = Pathname  ; register_factory!(:pathname)   ; end
+
     class BinaryFactory < StringFactory
       def convert(obj)
         super.force_encoding("BINARY")

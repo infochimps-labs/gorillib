@@ -11,6 +11,7 @@ require 'gorillib/metaprogramming/concern'
 require 'gorillib/metaprogramming/class_attribute'
 #
 require 'gorillib/collection'
+require 'gorillib/type/extended'
 require 'gorillib/model/factories'
 require 'gorillib/model/named_schema'
 require 'gorillib/model/validate'
