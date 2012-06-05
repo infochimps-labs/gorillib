@@ -237,7 +237,11 @@ module Gorillib
       self.product = Time
       def convert(obj)
         Time.parse(obj).utc
+      rescue ArgumentError => err
+        warn "Cannot parse time #{obj}: #{err}"
+        return nil
       end
+
       register_factory!
     end
 
