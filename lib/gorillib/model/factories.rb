@@ -8,15 +8,15 @@ module Gorillib
     class FactoryMismatchError < ArgumentError ; end
 
     def self.receive(type)
-        case
-        when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
-        when type.respond_to?(:receive)             then return type
-        when factories.include?(type)               then return factories[type]
-        when type.is_a?(String)                     then
-          return Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/')))
-        else raise "Don't know which factory makes a #{type}"
-        end
+      case
+      when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
+      when type.respond_to?(:receive)             then return type
+      when factories.include?(type)               then return factories[type]
+      when type.is_a?(String)                     then
+        return Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/')))
+      else raise "Don't know which factory makes a #{type}"
       end
+    end
 
     private
     def self.factories
@@ -178,10 +178,9 @@ module Gorillib
       register_factory!
     end
 
-    class GuidFactory      < StringFactory ; self.product = Guid      ; register_factory!(:guid)       ; end
-    class HostnameFactory  < StringFactory ; self.product = Hostname  ; register_factory!(:hostname)   ; end
-    class IpAddressFactory < StringFactory ; self.product = IpAddress ; register_factory!(:ip_address) ; end
-    class PathnameFactory  < StringFactory ; self.product = Pathname  ; register_factory!(:pathname)   ; end
+    class GuidFactory      < StringFactory ; self.product = ::Guid      ; register_factory! ; end
+    class HostnameFactory  < StringFactory ; self.product = ::Hostname  ; register_factory! ; end
+    class IpAddressFactory < StringFactory ; self.product = ::IpAddress ; register_factory! ; end
 
     class BinaryFactory < StringFactory
       def convert(obj)
@@ -189,6 +188,13 @@ module Gorillib
       end
       register_factory!(:binary)
     end
+
+    class PathnameFactory  < ConvertingFactory
+      self.product = ::Pathname
+      def convert(obj)      Pathname.new(obj)         end
+      register_factory!
+    end
+
 
     class SymbolFactory < ConvertingFactory
       self.product = Symbol

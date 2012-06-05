@@ -1,7 +1,7 @@
 require 'pathname'
 require 'gorillib/exception/raisers'
 
-module Gorillib::Pathname
+module Gorillib
   module Pathref
     ROOT_PATHS = Hash.new unless defined?(ROOT_PATHS)
 
@@ -19,7 +19,7 @@ module Gorillib::Pathname
     def unregister_path handle
       ROOT_PATHS.delete handle
     end
-    
+
     # Expand a path with late-evaluated segments.
     # Calls expand_path -- '~' becomes $HOME, '..' is expanded, etc.
     #
@@ -42,7 +42,7 @@ module Gorillib::Pathname
     #     Pathname.register_path(:environment, 'dev')
     #     Pathname.path_to(:conf_dir)                  # '/etc/happy_app/dev'
     #
-    # @param  [Array<[String,Symbol]>] pathsegs 
+    # @param  [Array<[String,Symbol]>] pathsegs
     #   any mixture of strings (literal sub-paths) and symbols (interpreted as references)
     # @return [Pathname] A single expanded Pathname
     #
@@ -63,7 +63,7 @@ module Gorillib::Pathname
     end
 
   protected
-    # Recursively expand a path handle 
+    # Recursively expand a path handle
     # @return [Array<String>] an array of path segments, suitable for .join
     def expand_pathseg(handle)
       return handle unless handle.is_a?(Symbol)
@@ -74,5 +74,5 @@ module Gorillib::Pathname
 end
 
 class Pathname
-  extend Gorillib::Pathname::Pathref
+  extend Gorillib::Pathref
 end
