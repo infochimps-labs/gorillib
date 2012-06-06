@@ -90,9 +90,10 @@ module Gorillib
       self.read_attribute(key_method)
     end
 
-    def inspect(detailed=true)
-      str = super
-      detailed ? str : ([str[0..-2], " #{to_key}>"].join)
+    def inspect_helper(detailed, attrs)
+      attrs.delete(:owner)
+      # detailed ? str : ([str[0..-2], " #{to_key}>"].join)
+      str = super(detailed, attrs)
     end
 
     def collection_of(plural_name)

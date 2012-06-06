@@ -27,7 +27,22 @@ module Gorillib
     # @return [{Symbol => Object}] The Hash of all attributes
     def attributes
       self.class.field_names.inject(Hash.new) do |hsh, fn|
-        hsh[fn] = read_attribute(fn) ; hsh
+        hsh[fn] = read_attribute(fn)
+        hsh
+      end
+    end
+
+    # Returns a Hash of all attributes *that have been set*
+    #
+    # @example Get attributes (smurfette is unarmed)
+    #   smurfette.attributes         # => { :name => "Smurfette", :weapon => nil }
+    #   smurfette.compact_attributes # => { :name => "Smurfette" }
+    #
+    # @return [{Symbol => Object}] The Hash of all *set* attributes
+    def compact_attributes
+      self.class.field_names.inject(Hash.new) do |hsh, fn|
+        hsh[fn] = read_attribute(fn) if attribute_set?(fn)
+        hsh
       end
     end
 
@@ -162,21 +177,25 @@ module Gorillib
       attributes == other.attributes
     end
 
+    # override inspect_helper (not this) in your descendant class
     # @return [String] Human-readable presentation of the attributes
-    def inspect(show_attrs=true)
-      str = "#<" << self.class.name.to_s
-      if show_attrs && (attr_names = self.class.field_names).present?
-        str << " " << attr_names.map{|attr| "#{attr}=#{inspect_attr(attr)}" }.join(", ")
-      end
-      str << ">"
-      str
+    def inspect(detailed=true)
+      inspect_helper(detailed, compact_attributes)
     end
 
-    def inspect_attr(attr)
-      return '~' if not attribute_set?(attr)
-      val = read_attribute(attr)
-      val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::Collection) ? val.inspect(false) : val.inspect
+    # assembles just the given attributes into the inspect string.
+    # @return [String] Human-readable presentation of the attributes
+    def inspect_helper(detailed, attrs)
+      str = "#<" << self.class.name.to_s
+      if detailed && attrs.present?
+        str << " "
+        str << attrs.map do |attr, val|
+          "#{attr}=#{val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::Collection) ? val.inspect(false) : val.inspect}"
+        end.join(", ")
+      end
+      str << ">"
     end
+    private :inspect_helper
 
   protected
 

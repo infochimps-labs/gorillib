@@ -1,13 +1,17 @@
 module Gorillib
   module Model
 
-    def to_json(options={})
-      p [options, self]
+    def to_wire(options={})
       attributes.inject({}) do |acc, (key,attr)|
-        acc[key] = MultiJson.dump(attr, options)
+        acc[key] = attr.respond_to?(:to_wire) ? attr.to_wire(options) : attr
         acc
       end
     end
+
+    def to_json(options={})
+      MultiJson.dump(to_wire(options), options)
+    end
+    alias_method(:as_json, :to_wire)
 
     module ClassMethods
       def from_tuple(*vals)

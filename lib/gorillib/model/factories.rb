@@ -134,19 +134,6 @@ module Gorillib
       end
     end
 
-    class IdenticalFactory < BaseFactory
-      self.redefinable_methods = []
-      self.blankish_vals       = []
-      def native?(obj)   true  ; end
-      def blankish?(obj) false ; end
-      def receive(obj)
-        obj
-      end
-      register_factory!(:identical, :whatever)
-    end
-    ::Whatever = IdenticalFactory unless defined?(Whatever)
-
-    # __________________________________________________________________________
     #
     # A NonConvertingFactory accepts objects that are *already* native, and
     # throws a mismatch error for anything else.
@@ -169,9 +156,22 @@ module Gorillib
       end
     end
 
+    class IdenticalFactory < BaseFactory
+      self.redefinable_methods = []
+      self.blankish_vals       = []
+      def native?(obj)   true  ; end
+      def blankish?(obj) false ; end
+      def receive(obj)
+        obj
+      end
+      register_factory!(:identical, :whatever)
+    end
+    ::Whatever = IdenticalFactory unless defined?(Whatever)
+
+    # __________________________________________________________________________
     #
-    #
-    #
+    #  Concrete Factories
+    # __________________________________________________________________________
 
     class StringFactory < ConvertingFactory
       self.product = String
@@ -253,6 +253,8 @@ module Gorillib
     class ModuleFactory < NonConvertingFactory ; self.product = Module     ; register_factory! ; end
     class TrueFactory   < NonConvertingFactory ; self.product = TrueClass  ; register_factory!(:true, TrueClass) ; end
     class FalseFactory  < NonConvertingFactory ; self.product = FalseClass ; register_factory!(:false, FalseClass) ; end
+
+    class ExceptionFactory < NonConvertingFactory ; self.product = Exception ; register_factory!(:exception, Exception) ; end
 
     class NilFactory    < NonConvertingFactory
       self.product       = NilClass
