@@ -3,62 +3,14 @@ require 'spec_helper'
 # libs under test
 require 'gorillib/builder'
 require 'gorillib/builder/field'
+
 # testing helpers
 require 'gorillib/hash/compact'
 require 'model_test_helpers'
 
-module Gorillib::Test       ; end
-module Meta::Gorillib::Test ; end
-
 describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
-  after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
-
-  let(:example_class) do
-    class Gorillib::Test::Car
-      include Gorillib::Builder
-    end
-
-    class Gorillib::Test::Engine
-      include Gorillib::Builder
-      field    :name,         Symbol, :default => ->{ "#{owner? ? owner.name : ''} engine"}
-      field    :carburetor,   Symbol, :default => :stock
-      field    :volume,       Integer, :doc => 'displacement volume, in in^3'
-      field    :cylinders,    Integer
-      member   :owner,        Gorillib::Test::Car
-      self
-    end
-    class Gorillib::Test::Car
-      field    :name,          Symbol
-      field    :make_model,    String
-      field    :year,          Integer
-      field    :doors,         Integer
-      member   :engine,        Gorillib::Test::Engine
-      self
-    end
-    class Gorillib::Test::Garage
-      include Gorillib::Builder
-      collection :cars,       Gorillib::Test::Car
-      self
-    end
-    Gorillib::Test::Car
-  end
-  let(:car_class){    example_class ; Gorillib::Test::Car    }
-  let(:garage_class){ example_class ; Gorillib::Test::Garage }
-  let(:wildcat) do
-    car_class.receive( :name => :wildcat,
-      :make_model => 'Buick Wildcat', :year => 1968, :doors => 2,
-      :engine => { :volume => 455, :cylinders => 8 } )
-  end
-  let(:ford_39) do
-    car_class.receive( :name => :ford_39,
-      :make_model => 'Ford Tudor Sedan', :year => 1939, :doors => 2, )
-  end
-  let(:garage) do
-    garage_class.new
-  end
-  let(:example_engine){ Gorillib::Test::Engine.new( :name => 'Geo Metro 1.0L', :volume => 61, :cylinders => 3 )}
-  subject{ car_class }
   let(:example_val  ){ mock('example val') }
+  subject{ car_class }
 
   context 'examples:' do
     subject{ car_class }
@@ -229,43 +181,7 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
         wildcat.doors.should == 9
         wildcat.make_model.should == 'WILDCAT'
       end
+
     end
   end
-
 end
-
-
-
-# describe "[builder gettersettter pattern]" do
-#
-#   it "supplies a gettersettter method #foo, and no method #foo="
-#   it_behaves_like "... a gettersetter method"
-#
-#   shared_examples_for "a simple gettersettter method" do
-#     it "with no arg, reads the current value"
-#     it "with an argument, writes the new value"
-#     it "with a nil arg, `write_attribute`s the value to nil"
-#     it "returns the updated value"
-#   end
-#
-#   shared_examples_for "a named collection gettersettter method" do
-#     it "example: utensil(:spork, :tines => 3){ color :black } creates or updates a utensil named :spork with 3 tines, color black."
-#     shared_examples_for 'collection member' do
-#       it "executes a supplied block with no arity (`utensil(:spork){     ... }`) in the context of the collection member"
-#       it "executes a supplied block with arity 1  (`utensil(:spork){ |u| ... }`) in the current context, passing the member as the block param"
-#       it "does not execute a block if no block is supplied"
-#       it "returns the collection member"
-#     end
-#     context "if absent" do
-#       it "creates a new member"
-#       it "with the given name"
-#       it "accepts an attribute hash on behalf of the new member"
-#       it "has behavior for collection member"
-#     end
-#     context "if exists" do
-#       it "retrieves a named model"
-#       it "accepts an attribute hash to update the member"
-#       it "has behavior for collection member"
-#     end
-#   end
-# end
