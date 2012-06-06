@@ -1,3 +1,6 @@
+require 'pathname'
+require 'gorillib/type/extended'
+
 def Gorillib::Factory(*args)
   ::Gorillib::Factory.receive(*args)
 end
@@ -141,7 +144,7 @@ module Gorillib
       end
       register_factory!(:identical, :whatever)
     end
-    ::Whatever = IdenticalFactory
+    ::Whatever = IdenticalFactory unless defined?(Whatever)
 
     # __________________________________________________________________________
     #
@@ -194,7 +197,6 @@ module Gorillib
       def convert(obj)      Pathname.new(obj)         end
       register_factory!
     end
-
 
     class SymbolFactory < ConvertingFactory
       self.product = Symbol

@@ -1,7 +1,5 @@
 require 'gorillib/string/simple_inflector'
 require 'gorillib/model'
-require 'gorillib/model/field'
-require 'gorillib/model/defaults'
 
 module Gorillib
   module Builder

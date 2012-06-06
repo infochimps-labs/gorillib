@@ -4,7 +4,6 @@ class Module
   # writing specs for metaprogramming methods
   #
   def nuke_constants
-
     constants.each{|const| remove_const(const) }
   end
 end

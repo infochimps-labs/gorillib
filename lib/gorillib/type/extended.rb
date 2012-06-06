@@ -1,4 +1,5 @@
-require 'gorillib/metaprogramming/delegation'
+require 'pathname'
+require 'time'
 
 class ::Long      < ::Integer ; end
 class ::Double    < ::Float   ; end
@@ -8,6 +9,10 @@ class ::Guid      < ::String  ; end
 class ::IpAddress < ::String  ; end
 class ::Hostname  < ::String  ; end
 
+class ::Url       < ::String  ; end
+
+# require 'gorillib/metaprogramming/delegation'
+#
 # class ::Boolean < ::Object
 #   attr_accessor :val
 #   def initialize(val=nil)
