@@ -1,16 +1,9 @@
 require 'spec_helper'
-#
-require 'gorillib/model'
-require 'gorillib/model/field'
-require 'gorillib/model/defaults'
-#
 require 'model_test_helpers'
 
-module Gorillib::Test       ; end
-module Meta::Gorillib::Test ; end
+require 'gorillib/model'
 
 describe Gorillib::Model, :model_spec => true do
-  after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:simple_model){ class Gorillib::Test::TestClass ; include Gorillib::Model ; field :my_field, Whatever ; self ; end }
   let(:anon_class){    Class.new{ include Gorillib::Model ; field :my_field, :whatever } }

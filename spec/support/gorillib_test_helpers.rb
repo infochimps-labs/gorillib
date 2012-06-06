@@ -64,7 +64,3 @@ shared_examples_for "a model field" do |field_name|
     end
   end
 end
-
-module Gorillib::TestHelpers
-
-end
