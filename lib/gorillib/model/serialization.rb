@@ -2,7 +2,7 @@ module Gorillib
   module Model
 
     def to_wire(options={})
-      attributes.inject({}) do |acc, (key,attr)|
+      attributes.merge(:_type => self.class.typename).inject({}) do |acc, (key,attr)|
         acc[key] = attr.respond_to?(:to_wire) ? attr.to_wire(options) : attr
         acc
       end
