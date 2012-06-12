@@ -17,7 +17,7 @@ module Gorillib
       when factories.include?(type)               then return factories[type]
       when type.is_a?(String)                     then
         return Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/')))
-      else raise "Don't know which factory makes a #{type}"
+      else raise ArgumentError, "Don't know which factory makes a #{type}"
       end
     end
 
@@ -243,7 +243,6 @@ module Gorillib
         warn "Cannot parse time #{obj}: #{err}"
         return nil
       end
-
       register_factory!
     end
 
