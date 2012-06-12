@@ -12,3 +12,5 @@ require 'gorillib/string/constantize'
 require 'gorillib/hash/mash'
 require 'gorillib/metaprogramming/delegation'
 require 'gorillib/metaprogramming/concern'
+
+require 'gorillib/logger/log'
