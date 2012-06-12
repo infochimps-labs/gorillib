@@ -238,7 +238,12 @@ module Gorillib
     class TimeFactory < ConvertingFactory
       self.product = Time
       def convert(obj)
-        Time.parse(obj).utc
+        case obj
+        when String
+          Time.parse(obj).utc
+        when Numeric
+          Time.at(obj).utc
+        end
       rescue ArgumentError => err
         warn "Cannot parse time #{obj}: #{err}"
         return nil
