@@ -19,7 +19,6 @@ describe Array do
       it ('returns a sample of the given size as close to evenly ' \
           'distributed over the array as possible') do
         sample = (1..100).to_a.sorted_sample(26)
-        puts "!!! #{sample}"
         deltas = sample[0..-2].zip(sample[1..-1]).map{|a,b| b-a}
         deltas.max.should <= 4
         deltas.min.should >= 3
