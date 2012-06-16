@@ -36,6 +36,9 @@ class ItsATrap < BasicObject
   alias_method :pretty_inspect, :inspect
   def methods() @obj.methods ; end
 
+  # @returns the proxied object
+  def __obj__ ; @obj ; end
+
   # These are defined on BasicObject, delegate them along with the rest
   #   BasicObject.instance_methods
   #   => [:==, :equal?, :!, :!=, :instance_eval, :instance_exec, :__send__, :__id__]
@@ -58,7 +61,7 @@ private
   end
 
   def __describe_and_send__(meth, *args, &block)
-    pref         = "%-3d %-14s %-15s" % [@call_count, __id__, self.to_s[0..14]]
+    pref         = "%-3d %-14s %-15s" % [@call_count, @obj.__id__, self.to_s[0..14]]
     @call_count += 1
     $stderr.puts   "%s %-15s <-  %-30s %s -- %s" % [pref, meth.to_s[0..14], args.map(&:inspect).join(','), block, ::Kernel.caller.first]
     ret = @obj.__send__(meth, *args, &block)
