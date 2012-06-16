@@ -5,6 +5,8 @@ require 'pathname'
 
 require 'gorillib/base'
 
+require 'gorillib/logger/log'
+
 require 'gorillib/pathname'
 require 'gorillib/string/simple_inflector'
 require 'gorillib/string/inflections'
