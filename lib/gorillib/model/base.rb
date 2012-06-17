@@ -103,7 +103,6 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [Object] The value of the attribute, or nil if it is unset
     def read_attribute(field_name)
-      check_field(field_name)
       if instance_variable_defined?("@#{field_name}")
         instance_variable_get("@#{field_name}")
       else
@@ -122,7 +121,6 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [Object] the attribute's value
     def write_attribute(field_name, val)
-      check_field(field_name)
       instance_variable_set("@#{field_name}", val)
     end
 
@@ -140,7 +138,6 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [Object] the former value if it was set, nil if it was unset
     def unset_attribute(field_name)
-      check_field(field_name)
       if instance_variable_defined?("@#{field_name}")
         val = instance_variable_get("@#{field_name}")
         remove_instance_variable("@#{field_name}")
@@ -159,7 +156,6 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [true, false]
     def attribute_set?(field_name)
-      check_field(field_name)
       instance_variable_defined?("@#{field_name}")
     end
 
@@ -198,13 +194,6 @@ module Gorillib
     private :inspect_helper
 
   protected
-
-    # @return [true] if the field exists
-    # @raise [UnknownFieldError] if the field is missing
-    def check_field(field_name)
-      return true if self.class.has_field?(field_name)
-      raise UnknownFieldError, "unknown field: #{field_name} for #{self}"
-    end
 
     module ClassMethods
 
@@ -306,8 +295,9 @@ module Gorillib
 
       # define the present method `#foo?` for a field named `:foo`
       def define_attribute_tester(field_name, field_type, visibility)
+        field = fields[field_name]
         define_meta_module_method("#{field_name}?", visibility) do
-          attribute_set?(field_name)
+          attribute_set?(field_name) || field.has_default?
         end
       end
 

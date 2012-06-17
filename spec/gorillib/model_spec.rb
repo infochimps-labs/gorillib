@@ -116,9 +116,6 @@ describe Gorillib::Model, :model_spec => true do
       example_inst.unset_attribute(:my_field ).should == 69
       example_inst.unset_attribute(:str_field).should == nil
     end
-    it "raises an error if the field does not exist" do
-      ->{ example_inst.unset_attribute(:fnord) }.should raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
-    end
   end
 
   context '#update_attributes' do
