@@ -9,15 +9,21 @@ module Gorillib
 
     def register_path(handle, *pathsegs)
       ArgumentError.arity_at_least!(pathsegs, 1)
-      ROOT_PATHS[handle] = pathsegs
+      ROOT_PATHS[handle.to_sym] = pathsegs
     end
 
-    def register_paths(pairs = {})
-      pairs.each_pair{ |handle, pathsegs| register_path(handle, *pathsegs) }
+    def register_paths(handle_paths = {})
+      handle_paths.each_pair{|handle, pathsegs| register_path(handle, *pathsegs) }
     end
 
-    def unregister_path handle
-      ROOT_PATHS.delete handle
+    def register_default_paths(handle_paths = {})
+      handle_paths.each_pair do |handle, pathsegs|
+        register_path(handle, *pathsegs) unless ROOT_PATHS.has_key?(handle.to_sym)
+      end
+    end
+
+    def unregister_path(handle)
+      ROOT_PATHS.delete handle.to_sym
     end
 
     # Expand a path with late-evaluated segments.
@@ -59,8 +65,13 @@ module Gorillib
     def relative_path_to(*pathsegs)
       ArgumentError.arity_at_least!(pathsegs, 1)
       pathsegs = pathsegs.map{|ps| expand_pathseg(ps) }.flatten
-      new(File.join(*pathsegs)).cleanpath(true)
+      self.new(File.join(*pathsegs)).cleanpath(true)
     end
+    def relpath_to(*args) relative_path_to(*args) ; end
+
+    # def make_pathname(*args)
+    #   Pathname.new(*args)
+    # end
 
   protected
     # Recursively expand a path handle
@@ -75,4 +86,8 @@ end
 
 class Pathname
   extend Gorillib::Pathref
+  class << self ; alias_method :new_pathname, :new ; end
+
+  # FIXME: find out if this is dangerous
+  alias_method :to_str, :to_path
 end

@@ -1,3 +1,10 @@
+
+class Array
+  def to_tsv
+    join("\t")
+  end
+end
+
 module Gorillib
   module Model
 
@@ -12,6 +19,10 @@ module Gorillib
       MultiJson.dump(to_wire(options), options)
     end
     alias_method(:as_json, :to_wire)
+
+    def to_tsv
+      attributes.values.join("\t")
+    end
 
     module ClassMethods
       def from_tuple(*vals)
