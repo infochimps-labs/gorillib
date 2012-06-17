@@ -36,7 +36,7 @@ module Gorillib
       class_attribute :product
 
       def initialize(options={})
-        @product       = options.delete(:product)       if options.has_key?(:product)
+        @product       = options.delete(:product){ self.class.product }
         if options[:blankish]
           define_singleton_method(:blankish, options.delete(:blankish))
         end
@@ -45,7 +45,7 @@ module Gorillib
       end
 
       def self.typename
-        Gorillib::Inflector.underscore(product.name).to_sym
+        @typename ||= Gorillib::Inflector.underscore(product.name).to_sym
       end
       def typename ; self.class.typename ; end
 
@@ -55,7 +55,7 @@ module Gorillib
       # @param   [Object]      obj the object to convert and receive
       # @return [true, false] true if the item does not need conversion
       def native?(obj)
-        obj.is_a?(product)
+        obj.is_a?(@product)
       end
       def self.native?(obj) self.new.native?(obj) ; end
 
@@ -279,7 +279,7 @@ module Gorillib
       def native?(obj)      false    ; end
 
       def empty_product
-        product.new
+        @product.new
       end
 
       def convert(obj)

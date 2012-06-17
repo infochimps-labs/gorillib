@@ -9,9 +9,9 @@ module Gorillib
         raise ArgumentError, "Name must start with [A-Za-z_] and subsequently contain only [A-Za-z0-9_]", caller unless name =~ VALID_NAME_RE
       end
 
-      def hashlike!(desc, val)
+      def hashlike!(val)
         return true if val.respond_to?(:[]) && val.respond_to?(:has_key?)
-        raise ArgumentError, "#{desc} should be something that behaves like a hash: #{val.inspect}", caller
+        raise ArgumentError, "#{block_given? ? yield : 'value'} should be something that behaves like a hash: #{val.inspect}", caller
       end
 
       def included_in!(desc, val, colxn)

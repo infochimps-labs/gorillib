@@ -32,6 +32,10 @@ module Gorillib
       end
     end
 
+    def attribute_values
+      self.class.field_names.map{|fn| read_attribute(fn) }
+    end
+
     # Returns a Hash of all attributes *that have been set*
     #
     # @example Get attributes (smurfette is unarmed)
@@ -57,14 +61,19 @@ module Gorillib
     # @param [{Symbol => Object}] hsh The values to receive
     # @return [Gorillib::Model] the object itself
     def receive!(hsh={})
-      if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash for #{self.inspect}", hsh)
-      hsh = hsh.symbolize_keys
-      self.class.fields.each do |field_name, field|
-        next unless hsh.has_key?(field_name)
-        self.public_send(:"receive_#{field_name}", hsh[field_name])
+      if hsh.respond_to?(:attributes)
+        hsh = hsh.attributes
+      else
+        Gorillib::Model::Validate.hashlike!(hsh){ "attributes hash for #{self.inspect}" }
+        hsh = hsh.dup
       end
-      handle_extra_attributes( hsh.reject{|field_name,val| self.class.has_field?(field_name) } )
+      self.class.field_names.each do |field_name|
+        if    hsh.has_key?(field_name)      then val = hsh.delete(field_name)
+        elsif hsh.has_key?(field_name.to_s) then val = hsh.delete(field_name.to_s)
+        else next ; end
+        self.send("receive_#{field_name}", val)
+      end
+      handle_extra_attributes(hsh)
       self
     end
 
@@ -83,12 +92,12 @@ module Gorillib
     # @return [Gorillib::Model] the object itself
     def update_attributes(hsh)
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash", hsh)
-      self.class.fields.each do |attr, field|
-        if    hsh.has_key?(attr)      then val = hsh[attr]
-        elsif hsh.has_key?(attr.to_s) then val = hsh[attr.to_s]
+      Gorillib::Model::Validate.hashlike!(hsh){ "attributes hash for #{self.inspect}" }
+      self.class.field_names.each do |field_name|
+        if    hsh.has_key?(field_name)      then val = hsh[field_name]
+        elsif hsh.has_key?(field_name.to_s) then val = hsh[field_name.to_s]
         else next ; end
-        write_attribute(attr, val)
+        write_attribute(field_name, val)
       end
       self
     end
@@ -103,8 +112,9 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [Object] The value of the attribute, or nil if it is unset
     def read_attribute(field_name)
-      if instance_variable_defined?("@#{field_name}")
-        instance_variable_get("@#{field_name}")
+      attr_name = "@#{field_name}"
+      if instance_variable_defined?(attr_name)
+        instance_variable_get(attr_name)
       else
         read_unset_attribute(field_name)
       end
@@ -208,7 +218,7 @@ module Gorillib
       def receive(attrs={}, &block)
         return nil if attrs.nil?
         return attrs if attrs.is_a?(self)
-        Gorillib::Model::Validate.hashlike!("attributes for #{self}", attrs)
+        Gorillib::Model::Validate.hashlike!(attrs){ "attributes for #{self.inspect}" }
         klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
         warn "factory #{self} doesn't match type specified in #{attrs}" unless klass <= self
         obj = klass.new
@@ -254,7 +264,7 @@ module Gorillib
 
       # @return [Array<Symbol>] The attribute names
       def field_names
-        fields.keys
+        @_field_names ||= fields.keys
       end
 
       # @return Class name and its attributes
@@ -273,7 +283,8 @@ module Gorillib
       # are added after the child class is defined.
       def _reset_descendant_fields
         ObjectSpace.each_object(::Class) do |klass|
-          klass.__send__(:remove_instance_variable, '@_fields') if klass <= self && klass.instance_variable_defined?('@_fields')
+          klass.__send__(:remove_instance_variable, '@_fields')      if (klass <= self) && klass.instance_variable_defined?('@_fields')
+          klass.__send__(:remove_instance_variable, '@_field_names') if (klass <= self) && klass.instance_variable_defined?('@_field_names')
         end
       end
 
