@@ -12,25 +12,22 @@ module Gorillib
 
     def self.receive(type)
       case
-      when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
-      when type.respond_to?(:receive)             then return type
       when factories.include?(type)               then return factories[type]
+      when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
+      when type.respond_to?(:receive)             then return factories[type] = type
       when type.is_a?(String)                     then
-        return Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/')))
+        return( factories[type] = Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/'))) )
       else raise ArgumentError, "Don't know which factory makes a #{type}"
       end
     end
 
     private
     def self.factories
-      @factories ||= Gorillib::Collection.new.tap{|f| f.key_method = :name }
+      @factories ||= Hash.new
     end
     public
 
-    def self.register_factory(factory, *typenames)
-      if typenames.blank?
-        typenames = [factory.typename, factory.product]
-      end
+    def self.register_factory(factory, typenames)
       typenames.each{|typename| factories[typename] = factory }
     end
 
@@ -38,23 +35,12 @@ module Gorillib
       # [Class] The type of objects produced by this factory
       class_attribute :product
 
-      # [Array<Symbol>] methods that can be redefined by passing a block to an
-      # instance No not add to your superclass' value in-place; instead, use
-      # `self.redefinable_methods += [...]`.
-      # @see #redefine
-      class_attribute :redefinable_methods, :instance_writer => false
-      self.redefinable_methods = Set.new([:blankish?, :convert])
-
-      # [Array<Object>] objects considered to be equivalent to `nil`
-      class_attribute :blankish_vals
-      self.blankish_vals = Set.new([ nil, "" ]) # note: [] {} and false are NOT blankish by default
-
       def initialize(options={})
         @product       = options.delete(:product)       if options.has_key?(:product)
-        @blankish_vals = options.delete(:blankish_vals) if options.has_key?(:blankish_vals)
-        options.extract!(*redefinable_methods).each do |meth, value_or_block|
-          redefine(meth, value_or_block)
+        if options[:blankish]
+          define_singleton_method(:blankish, options.delete(:blankish))
         end
+        redefine(:convert, options.delete(:convert)) if options.has_key?(:convert)
         warn "Unknown options #{options.keys}" unless options.empty?
       end
 
@@ -62,10 +48,6 @@ module Gorillib
         Gorillib::Inflector.underscore(product.name).to_sym
       end
       def typename ; self.class.typename ; end
-
-      def self.receive(*args, &block)
-        self.new.receive(*args, &block)
-      end
 
       # A `native` object does not need any transformation; it is accepted directly.
       # By default, an object is native if it `is_a?(product)`
@@ -82,12 +64,15 @@ module Gorillib
       # @param   [Object]      obj the object to convert and receive
       # @return [true, false] true if the item is equivalent to a nil value
       def blankish?(obj)
-        blankish_vals.include?(obj)
+        obj.nil? || (obj == "")
       end
-      def self.blankish?(obj) self.new.blankish?(obj) ; end
+      def self.blankish?(obj)
+        obj.nil? || (obj == "")
+      end
+
+    protected
 
       def redefine(meth, *args, &block)
-        raise ArgumentError, "Cannot redefine #{meth} -- only #{redefinable_methods.inspect} are redefinable" unless redefinable_methods.include?(meth)
         if args.present?
           val = args.first
           case
@@ -100,8 +85,6 @@ module Gorillib
         self
       end
 
-    protected
-
       # Raises a FactoryMismatchError.
       def mismatched!(obj, message=nil, *args)
         message ||= "item cannot be converted to #{product}"
@@ -109,8 +92,9 @@ module Gorillib
         raise FactoryMismatchError, message, *args
       end
 
-      def self.register_factory!(*args)
-        Gorillib::Factory.register_factory(self, *args)
+      def self.register_factory!(*typenames)
+        typenames = [typename, product] if typenames.empty?
+        Gorillib::Factory.register_factory(self.new, typenames)
       end
     end
 
@@ -139,14 +123,13 @@ module Gorillib
     # throws a mismatch error for anything else.
     #
     # @example
-    #   ff = Gorillib::Factory::NonConvertingFactory.new(:product => String, :blankish_vals => [nil])
+    #   ff = Gorillib::Factory::NonConvertingFactory.new(:product => String, :blankish => ->(obj){ obj.nil? })
     #   ff.receive(nil)    #=> nil
     #   ff.receive("bob")  #=> "bob"
     #   ff.receive(:bob)   #=> Gorillib::Factory::FactoryMismatchError: must be an instance of String, got 3
     #
     class NonConvertingFactory < BaseFactory
-      self.blankish_vals = [nil]
-
+      def blankish?(obj) obj.nil? ; end
       def receive(obj)
         return nil  if blankish?(obj)
         return obj  if native?(obj)
@@ -156,17 +139,20 @@ module Gorillib
       end
     end
 
-    class IdenticalFactory < BaseFactory
-      self.redefinable_methods = []
-      self.blankish_vals       = []
+    class ::Whatever < BaseFactory
+      def initialize(options={})
+        options.slice!(:convert, :blankish)
+        super(options)
+      end
       def native?(obj)   true  ; end
       def blankish?(obj) false ; end
-      def receive(obj)
+      def receive(obj)   obj   ; end
+      def self.receive(obj)
         obj
       end
-      register_factory!(:identical, :whatever)
+      Gorillib::Factory.register_factory(self, [self, :identical, :whatever])
     end
-    ::Whatever = IdenticalFactory unless defined?(Whatever)
+    IdenticalFactory = ::Whatever unless defined?(IdenticalFactory)
 
     # __________________________________________________________________________
     #
@@ -175,7 +161,7 @@ module Gorillib
 
     class StringFactory < ConvertingFactory
       self.product = String
-      self.blankish_vals -= [""]
+      def blankish?(obj)    obj.nil? ; end
       def native?(obj)      obj.respond_to?(:to_str)  end
       def convert(obj)      obj.to_s                  end
       register_factory!
@@ -262,13 +248,13 @@ module Gorillib
 
     class NilFactory    < NonConvertingFactory
       self.product       = NilClass
-      self.blankish_vals = []
+      def blankish?(obj) false ; end
       register_factory!(:nil, NilClass)
     end
 
     class BooleanFactory < ConvertingFactory
       self.product       = [TrueClass, FalseClass]
-      self.blankish_vals = [nil]
+      def blankish?(obj)    obj.nil? ; end
       def native?(obj)     obj.equal?(true) || obj.equal?(false) ; end
       def convert(obj)     (obj.to_s == "false") ? false : true ; end
       register_factory!(:boolean)
@@ -282,17 +268,15 @@ module Gorillib
     class EnumerableFactory < ConvertingFactory
       # [#receive] factory for converting items
       attr_reader :items_factory
-      self.redefinable_methods += [:empty_product]
-      self.blankish_vals = Set.new([ nil ])
 
       def initialize(options={})
-        @items_factory = Gorillib::Factory.receive( options.delete(:items){ IdenticalFactory.new } )
+        @items_factory = Gorillib::Factory.receive( options.delete(:items){ Gorillib::Factory(:identical) } )
+        redefine(:empty_product, options.delete(:empty_product)) if options.has_key?(:empty_product)
         super(options)
       end
 
-      def native?(obj)
-        false
-      end
+      def blankish?(obj)    obj.nil? ; end
+      def native?(obj)      false    ; end
 
       def empty_product
         product.new
@@ -323,7 +307,7 @@ module Gorillib
       self.product = Hash
 
       def initialize(options={})
-        @keys_factory = Gorillib::Factory( options.delete(:keys){ Whatever.new } )
+        @keys_factory = Gorillib::Factory( options.delete(:keys){ Gorillib::Factory(:identical) } )
         super(options)
       end
 
@@ -339,7 +323,7 @@ module Gorillib
 
     class RangeFactory < NonConvertingFactory
       self.product       = Range
-      self.blankish_vals = [ nil, [] ]
+      def blankish?(obj)    obj.nil? || obj == [] ; end
       register_factory!
     end
 
@@ -347,7 +331,6 @@ module Gorillib
 
     class ApplyProcFactory < ConvertingFactory
       attr_reader :callable
-      self.blankish_vals = Set.new([nil])
 
       def initialize(callable=nil, options={}, &block)
         if block_given?
@@ -357,9 +340,8 @@ module Gorillib
         @callable = callable
         super(options)
       end
-      def native?(val)
-        false
-      end
+      def blankish?(obj)    obj.nil? ; end
+      def native?(val)      false    ; end
       def convert(obj)
         callable.call(obj)
       end

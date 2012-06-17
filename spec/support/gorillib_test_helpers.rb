@@ -14,8 +14,8 @@ shared_examples_for "a model field" do |field_name|
       subject.should_receive(:read_unset_attribute).with(field_name).and_return(mock_val)
       subject.read_attribute(field_name).should == mock_val
     end
-    it "raises an error if the field does not exist" do
-      ->{ subject.read_attribute(:fnord) }.should raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
+    it "does **not** raise an error if the field does not exist (require 'model/lint' if you want it to)" do
+      ->{ subject.read_attribute(:fnord) }.should_not raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
     end
   end
 
@@ -27,8 +27,8 @@ shared_examples_for "a model field" do |field_name|
     it('returns the new value') do
       subject.write_attribute(field_name, sample_val).should == sample_val
     end
-    it "raises an error if the field does not exist" do
-      ->{ subject.write_attribute(:fnord, 8) }.should raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
+    it "does **not** raise an error if the field does not exist (require 'model/lint' if you want it to)" do
+      ->{ subject.write_attribute(:fnord, 8) }.should_not raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
     end
   end
 
@@ -44,8 +44,8 @@ shared_examples_for "a model field" do |field_name|
     it('is false if never written') do
       subject.attribute_set?(field_name).should be_false
     end
-    it "raises an error if the field does not exist" do
-      ->{ subject.attribute_set?(:fnord) }.should raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
+    it "does **not** raise an error if the field does not exist (require 'model/lint' if you want it to)" do
+      ->{ subject.attribute_set?(:fnord) }.should_not raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
     end
   end
 
