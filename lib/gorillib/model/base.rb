@@ -259,7 +259,12 @@ module Gorillib
 
       # @return [true, false] true if the field is defined on this class
       def has_field?(field_name)
-        fields.has_key?(field_name.to_sym)
+
+        #
+        # fields.has_key?(field_name.to_sym)
+        #
+
+        fields.has_key?(field_name)
       end
 
       # @return [Array<Symbol>] The attribute names
