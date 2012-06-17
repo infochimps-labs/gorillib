@@ -21,7 +21,7 @@ module Gorillib
     alias_method(:as_json, :to_wire)
 
     def to_tsv
-      attributes.values.join("\t")
+      attribute_values.map(&:to_s).join("\t")
     end
 
     module ClassMethods
