@@ -1,8 +1,6 @@
 require 'spec_helper'
 require 'model_test_helpers'
 
-require 'json'
-
 require 'multi_json'
 #
 require 'gorillib/model'

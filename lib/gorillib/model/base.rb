@@ -208,7 +208,7 @@ module Gorillib
     module ClassMethods
 
       def typename
-        Gorillib::Inflector.underscore(self.name).gsub(%r{/}, '.')
+        Gorillib::Inflector.underscore(self.name||'anon').gsub(%r{/}, '.')
       end
 
       #

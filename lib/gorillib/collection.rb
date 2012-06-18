@@ -95,10 +95,11 @@ module Gorillib
       str << " }"
     end
     # @return [Array] serializable array representation of the collection
-    def to_wire(options)
+    def to_wire(options={})
       to_a.map{|el| el.respond_to?(:to_wire) ? el.to_wire(options) : el }
     end
-    alias_method(:as_json, :to_wire)
+    def as_json(*args) to_wire(*args) ; end
+
     # @return [String] JSON serialization of the collection's array representation
     def to_json(*args)
       p [self, options]
