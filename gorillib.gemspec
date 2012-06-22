@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "gorillib"
-  s.version = "0.1.10"
+  s.version = "0.1.11"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
@@ -148,7 +148,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://infochimps.com/labs"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.11"
+  s.rubygems_version = "1.8.15"
   s.summary = "include only what you need. No dependencies, no creep"
   s.test_files = ["spec/array/average_spec.rb", "spec/array/compact_blank_spec.rb", "spec/array/extract_options_spec.rb", "spec/array/sorted_median_spec.rb", "spec/array/sorted_percentile_spec.rb", "spec/array/sorted_sample_spec.rb", "spec/datetime/flat_spec.rb", "spec/datetime/parse_spec.rb", "spec/dsl_object_spec.rb", "spec/enumerable/sum_spec.rb", "spec/hash/compact_spec.rb", "spec/hash/deep_compact_spec.rb", "spec/hash/deep_merge_spec.rb", "spec/hash/indifferent_access_spec.rb", "spec/hash/keys_spec.rb", "spec/hash/reverse_merge_spec.rb", "spec/hash/slice_spec.rb", "spec/hash/zip_spec.rb", "spec/hashlike/behave_same_as_hash_spec.rb", "spec/hashlike/deep_hash_spec.rb", "spec/hashlike/hashlike_behavior_spec.rb", "spec/hashlike/hashlike_via_accessors_spec.rb", "spec/hashlike_spec.rb", "spec/logger/log_spec.rb", "spec/metaprogramming/aliasing_spec.rb", "spec/metaprogramming/cattr_accessor_spec.rb", "spec/metaprogramming/class_attribute_spec.rb", "spec/metaprogramming/delegation_spec.rb", "spec/metaprogramming/mattr_accessor_spec.rb", "spec/metaprogramming/singleton_class_spec.rb", "spec/numeric/clamp_spec.rb", "spec/object/blank_spec.rb", "spec/object/try_dup_spec.rb", "spec/object/try_spec.rb", "spec/receiver/acts_as_hash_spec.rb", "spec/receiver_spec.rb", "spec/spec_helper.rb", "spec/string/constantize_spec.rb", "spec/string/human_spec.rb", "spec/string/inflections_spec.rb", "spec/string/inflector_test_cases.rb", "spec/string/truncate_spec.rb", "spec/struct/acts_as_hash_fuzz_spec.rb", "spec/struct/acts_as_hash_spec.rb", "spec/support/hashlike_fuzzing_helper.rb", "spec/support/hashlike_helper.rb", "spec/support/hashlike_struct_helper.rb", "spec/support/hashlike_via_delegation.rb", "spec/support/kcode_test_helper.rb", "spec/support/matchers/be_array_eql.rb", "spec/support/matchers/be_hash_eql.rb", "spec/support/matchers/enumerate_method.rb", "spec/support/matchers/evaluate_to_true.rb"]
 
