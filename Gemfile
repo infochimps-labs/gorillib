@@ -14,7 +14,9 @@ end
 group :support do
   gem 'jeweler',     ">= 1.6"
   gem 'pry'
-  #
+end
+
+group :docs do
   gem 'yard',        ">= 0.7"
   gem 'redcarpet',   ">= 2.1"
 end

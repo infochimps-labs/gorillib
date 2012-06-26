@@ -7,6 +7,7 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
+require 'rake'
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
@@ -37,12 +38,13 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
-# RSpec::Core::RakeTask.new(:rcov) do |spec|
-#   Bundler.setup(:default, :development, :test)
-#   spec.pattern = 'spec/**/*_spec.rb'
-#   spec.rcov = true
-#   spec.rcov_opts = %w[ --exclude .rvm --no-comments --text-summary]
-# end
+# if rcov shits the bed with ruby 1.9, see
+#   https://github.com/relevance/rcov/issues/31
+RSpec::Core::RakeTask.new(:rcov) do |spec|
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.rcov = true
+  spec.rcov_opts = %w[ --exclude .rvm --no-comments --text-summary]
+end
 
 require 'yard'
 YARD::Rake::YardocTask.new do
