@@ -1,4 +1,3 @@
-
 module Gorillib
 
   # Provides a set of class methods for defining a field schema and instance
@@ -19,6 +18,10 @@ module Gorillib
   module Model
     extend Gorillib::Concern
 
+    def initialize(attrs={})
+      receive!(attrs)
+    end
+
     # Returns a Hash of all attributes
     #
     # @example Get attributes
@@ -32,6 +35,7 @@ module Gorillib
       end
     end
 
+    # @return [Array[Object]] all the attributes, in field order, with `nil` where unset
     def attribute_values
       self.class.field_names.map{|fn| read_attribute(fn) }
     end
@@ -218,12 +222,12 @@ module Gorillib
       def receive(attrs={}, &block)
         return nil if attrs.nil?
         return attrs if attrs.is_a?(self)
+        #
         Gorillib::Model::Validate.hashlike!(attrs){ "attributes for #{self.inspect}" }
         klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
         warn "factory #{self} doesn't match type specified in #{attrs}" unless klass <= self
-        obj = klass.new
-        obj.receive!(attrs, &block)
-        obj
+        #
+        klass.new(attrs, &block)
       end
 
       # Defines a new field
