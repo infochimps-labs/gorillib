@@ -4,6 +4,8 @@ module Meta ; module Gorillib ; module Test ; end ; end ; end
 shared_context 'model', :model_spec => true do
   after(:each){ Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
+  let(:mock_val){ mock('mock value') }
+
   let(:smurf_klass) do
     class Gorillib::Test::Smurf
       include Gorillib::Model

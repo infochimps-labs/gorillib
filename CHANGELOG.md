@@ -4,7 +4,15 @@
 ### 2012-06 - Version 1.0.1-pre: First wave of refactors
 
 
-* `Collection` no longer has factory functionality. 
+Broke up collection as follows:
+
+* a generic collection has receive!, values, to_a, each and each_value; length, size, empty?, blank?. Objects are stored uniquely and in the order added. 
+* A `Gorillib::Collection` lets you store and retrieve things by label: it adds [], []=, include?, fetch, delete, each_pair and to_hash. 
+* A `Gorillib::ModelCollection` knows how to get the key from an object (by default it calls #to_key), and it accepts a factory for new objects. It allows <<, will accept an array, and has find_or_create and update_or_create.
+
+what this means for you:
+* `Collection` no longer has factory functionality -- that is now in `ModelCollection`. 
+* The signature of `ModelCollection#initialize` is `initialize(key_meth, factory)` -- the reverse of what was.
 
 
 ### 2012-04 - Version 1.0.0-pre: DSL Magic

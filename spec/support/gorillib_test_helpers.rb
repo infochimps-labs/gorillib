@@ -10,7 +10,6 @@ shared_examples_for "a model field" do |field_name|
       subject.read_attribute(field_name).should == sample_val
     end
     it "if unset, calls #read_unset_attribute" do
-      mock_val = mock
       subject.should_receive(:read_unset_attribute).with(field_name).and_return(mock_val)
       subject.read_attribute(field_name).should == mock_val
     end

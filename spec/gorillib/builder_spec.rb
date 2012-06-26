@@ -117,7 +117,7 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
   context 'collections' do
     subject{ garage }
-    let(:sample_val){ Gorillib::ModelCollection.receive([wildcat], car_class, :name) }
+    let(:sample_val){ Gorillib::ModelCollection.receive([wildcat], :name, car_class) }
     let(:raw_val   ){ [ wildcat.attributes ] }
     it_behaves_like "a model field", :cars
     it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::ModelCollection.new }
@@ -141,13 +141,13 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
       # examine the whole collection
       garage.cars.keys.should == [:cadzilla, :wildcat, :ford_39]
-      garage.cars.should == Gorillib::ModelCollection.receive([cadzilla, wildcat, ford_39], car_class, :name)
+      garage.cars.should == Gorillib::ModelCollection.receive([cadzilla, wildcat, ford_39], :name, car_class)
     end
 
     it 'lazily autovivifies collection items' do
       garage.cars.should be_empty
       garage.car(:chimera).should be_a(car_class)
-      garage.cars.should == Gorillib::ModelCollection.receive([{:name => :chimera}], car_class, :name)
+      garage.cars.should == Gorillib::ModelCollection.receive([{:name => :chimera}], :name, car_class)
     end
 
     context 'collection getset method' do

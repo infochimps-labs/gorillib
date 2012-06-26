@@ -244,7 +244,7 @@ module Gorillib
 
       def inscribe_methods(model)
         item_type      = self.item_type
-        self.default   = ->{ Gorillib::ModelCollection.new(item_type) }
+        self.default   = ->{ Gorillib::ModelCollection.new(nil, item_type) }
         raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
         #
         @visibilities[:writer] = false
