@@ -1,6 +1,13 @@
 ## Version 1.0
 
-### 2012-04 - Version 1.0.0: DSL Magic
+
+### 2012-06 - Version 1.0.1-pre: First wave of refactors
+
+
+* `Collection` no longer has factory functionality. 
+
+
+### 2012-04 - Version 1.0.0-pre: DSL Magic
 
 #### New functionality
 

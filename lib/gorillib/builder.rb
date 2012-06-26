@@ -1,5 +1,6 @@
 require 'gorillib/string/simple_inflector'
 require 'gorillib/model'
+require 'gorillib/collection/model_collection'
 
 module Gorillib
   module Builder
@@ -110,7 +111,7 @@ module Gorillib
         field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField}.merge(options))
       end
       def collection(field_name, item_type, options={})
-        field(field_name, Gorillib::Collection, {
+        field(field_name, Gorillib::ModelCollection, {
             :item_type => item_type,
             :field_type => ::Gorillib::Builder::CollectionField}.merge(options))
       end
@@ -243,7 +244,7 @@ module Gorillib
 
       def inscribe_methods(model)
         item_type      = self.item_type
-        self.default   = ->{ Gorillib::Collection.new(item_type) }
+        self.default   = ->{ Gorillib::ModelCollection.new(item_type) }
         raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
         #
         @visibilities[:writer] = false

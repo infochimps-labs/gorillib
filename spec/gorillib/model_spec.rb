@@ -213,18 +213,14 @@ describe Gorillib::Model, :model_spec => true do
   end
 
   context '.receive' do
-    it 'creates a new instance' do
+    it 'calls new (which later calls receive!)' do
       obj = example_inst
-      subject.should_receive(:new).with().and_return(obj)
-      result = subject.receive(:my_field => 12)
-      result.should equal(obj)
-      result.my_field.should == 12
-    end
-    it 'calls receive! to set the attributes, and returns the object' do
-      obj = example_inst
-      subject.should_receive(:new).with().and_return(obj)
-      obj.should_receive(:receive!).with(:my_field => 12)
+      subject.should_receive(:new).with(:my_field => 12).and_return(obj)
       subject.receive(:my_field => 12).should equal(obj)
+    end
+    it 'sets the attributes as given' do
+      obj = subject.receive(:my_field => 12)
+      obj.my_field.should == 12
     end
 
     it 'uses the given type if the _type attribute is a factory' do

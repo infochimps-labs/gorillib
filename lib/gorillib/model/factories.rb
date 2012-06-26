@@ -21,6 +21,19 @@ module Gorillib
       end
     end
 
+    # Manufactures objects from their raw attributes hash
+    #
+    # A hash with a value for `:_type` is dispatched to the corresponding factory
+    # Everything else is returned directly
+    def self.make(obj)
+      if obj.respond_to?(:has_key?) && (obj.has_key?(:_type) || obj.has_key?('_type'))
+        factory = Gorillib::Factory(attrs[:_type])
+        factory.receive(obj)
+      else
+        obj
+      end
+    end
+
     private
     def self.factories
       @factories ||= Hash.new

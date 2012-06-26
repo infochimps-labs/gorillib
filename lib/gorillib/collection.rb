@@ -8,43 +8,35 @@ module Gorillib
     # The default `key_method` invoked on a new item to generate its collection key
     DEFAULT_KEY_METHOD = :to_key
 
-    # [Class, #receive] Factory for generating a new collection item.
-    class_attribute :factory, :instance_writer => false
-    singleton_class.class_eval{ protected :factory= }
-
     # [{Symbol => Object}] The actual store of items, but not for you to mess with
     attr_reader :clxn
     protected   :clxn
 
-    delegate :[], :[]=, :delete, :fetch,                  :to => :clxn
-    delegate :keys, :values, :each_pair, :each_value,     :to => :clxn
-    delegate :has_key?, :include?, :length, :size, :empty?, :blank?, :to => :clxn
-
-    def initialize(factory=nil, key_method=DEFAULT_KEY_METHOD)
+    def initialize(key_method=DEFAULT_KEY_METHOD)
+      @clxn        = Hash.new
       @key_method  = key_method
-      @factory     = factory unless factory.nil?
-      @clxn        = {}
     end
-
-    # @return [Array] an array holding the items
-    def to_a    ; values    ; end
-    # @return [{Symbol => Object}] a hash of key=>item pairs
-    def to_hash ; clxn.dup  ; end
-
-    # Merge the new items in-place; given items clobber existing items
-    # @param  other [{Symbol => Object}, Array<Object>] a hash of key=>item pairs or a list of items
-    # @return [Gorillib::Collection] the collection
-    def merge!(other)
-      clxn.merge!( convert_collection(other) )
-      self
-    end
-    alias_method :concat,   :merge!
-    alias_method :receive!, :merge!
 
     def self.receive(items, *args)
       coll = new(*args)
       coll.receive!(items)
       coll
+    end
+
+    # common to all collections, delegable to all
+    delegate :[], :[]=, :fetch,                       :to => :clxn
+    delegate :length, :size, :empty?, :blank?,        :to => :clxn
+    # common to all collections, delegable to hash
+    delegate :values, :delete,                        :to => :clxn
+    # novel to a labelled collection
+    delegate :keys, :each_pair, :each_value,          :to => :clxn
+    delegate :include?,                               :to => :clxn
+
+    # Adds an item in-place
+    # @return [Gorillib::Collection] the collection
+    def <<(val)
+      receive! [val]
+      self
     end
 
     # Two collections are equal if they have the same class and their contents are equal
@@ -56,29 +48,40 @@ module Gorillib
       clxn == other.send(:clxn)
     end
 
-    # Merge the new items into a new collection; given items clobber existing items
+    #
+    # Hash-backed collection
+    #
+
+    # @return [Array] an array holding the items
+    def to_a    ; values    ; end
+    # @return [{Symbol => Object}] a hash of key=>item pairs
+    def to_hash ; clxn.dup  ; end
+
+    # iterate over each value in the collection
+    def each(&block); each_value(&block) ; end
+
+    # Add the new items in-place; given items clobber existing items
     # @param  other [{Symbol => Object}, Array<Object>] a hash of key=>item pairs or a list of items
-    # @return [Gorillib::Collection] a new merged collection
-    def merge(other)
-      dup.merge!(other)
-    end
-
-    def create(*args)
-      item = factory.receive(*args)
-      self << item
-      item
-    end
-
-    def find_or_create(key)
-      fetch(key){ create(key_method => key) }
-    end
-
-    # Adds an item in-place
     # @return [Gorillib::Collection] the collection
-    def <<(val)
-      merge! [val]
+    def receive!(other)
+      clxn.merge!( convert_collection(other) )
       self
     end
+
+  protected
+
+    # - if the given collection responds_to `to_hash`, it is received into the internal collection; each hash key *must* match the id of its value or results are undefined.
+    # - otherwise, it receives a hash generates from the id/value pairs of each object in the given collection.
+    def convert_collection(cc)
+      return cc.to_hash if cc.respond_to?(:to_hash)
+      cc.inject({}) do |acc, val|
+        key      = val.public_send(key_method)
+        acc[key] = val
+        acc
+      end
+    end
+
+  public
 
     # @return [String] string describing the collection's array representation
     def to_s           ; to_a.to_s           ; end
@@ -102,29 +105,8 @@ module Gorillib
 
     # @return [String] JSON serialization of the collection's array representation
     def to_json(*args)
-      p [self, options]
       to_wire(*args).to_json(*args)
     end
 
-  protected
-
-    def convert_value(val)
-      return val unless factory
-      return nil if val.nil?
-      factory.receive(val)
-    end
-
-    # - if the given collection responds_to `to_hash`, it is merged into the internal collection; each hash key *must* match the id of its value or results are undefined.
-    # - otherwise, it merges a hash generates from the id/value pairs of each object in the given collection.
-    def convert_collection(cc)
-      return cc.to_hash if cc.respond_to?(:to_hash)
-      cc.inject({}) do |acc, val|
-        val      = convert_value(val)
-        key      = val.public_send(key_method).to_sym
-        acc[key] = val
-        acc
-      end
-    end
   end
-
 end
