@@ -9,6 +9,8 @@ group :development do
   gem 'jeweler',   "~> 1.6"
   gem 'rspec',     "~> 2.5"
   gem 'yard',      "~> 0.6"
+  gem 'cucumber',  "~> 1"
+  gem 'aruba',     "~> 0.4"
 end
 
 group :docs do

@@ -44,8 +44,6 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov_opts = %w[ --exclude .rvm --no-comments --text-summary]
 end
 
-task :default => :spec
-
 require 'yard'
 YARD::Rake::YardocTask.new do
   Bundler.setup(:default, :development, :docs)
@@ -54,3 +52,5 @@ end
 
 # App-specific tasks
 Dir[File.dirname(__FILE__)+'/lib/tasks/**/*.rake'].sort.each{|f| load f }
+
+task :default => [:spec]
