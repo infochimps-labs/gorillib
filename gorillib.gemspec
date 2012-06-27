@@ -33,10 +33,14 @@ Gem::Specification.new do |s|
     "gorillib.gemspec",
     "lib/alt/kernel/call_stack.rb",
     "lib/gorillib.rb",
+    "lib/gorillib/array/average.rb",
     "lib/gorillib/array/compact_blank.rb",
     "lib/gorillib/array/deep_compact.rb",
     "lib/gorillib/array/extract_options.rb",
     "lib/gorillib/array/random.rb",
+    "lib/gorillib/array/sorted_median.rb",
+    "lib/gorillib/array/sorted_percentile.rb",
+    "lib/gorillib/array/sorted_sample.rb",
     "lib/gorillib/array/wrap.rb",
     "lib/gorillib/base.rb",
     "lib/gorillib/builder.rb",
@@ -120,6 +124,10 @@ Gem::Specification.new do |s|
     "notes/model-overlay.md",
     "notes/model.md",
     "notes/structured-data-classes.md",
+    "spec/array/average_spec.rb",
+    "spec/array/sorted_median_spec.rb",
+    "spec/array/sorted_percentile_spec.rb",
+    "spec/array/sorted_sample_spec.rb",
     "spec/examples/builder/ironfan_spec.rb",
     "spec/extlib/hash_spec.rb",
     "spec/extlib/mash_spec.rb",
@@ -184,7 +192,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.11"
   s.summary = "include only what you need. No dependencies, no creep"
-  s.test_files = ["spec/examples/builder/ironfan_spec.rb", "spec/extlib/hash_spec.rb", "spec/extlib/mash_spec.rb", "spec/gorillib/array/compact_blank_spec.rb", "spec/gorillib/array/extract_options_spec.rb", "spec/gorillib/builder_spec.rb", "spec/gorillib/collection_spec.rb", "spec/gorillib/datetime/parse_spec.rb", "spec/gorillib/datetime/to_flat_spec.rb", "spec/gorillib/enumerable/sum_spec.rb", "spec/gorillib/exception/raisers_spec.rb", "spec/gorillib/hash/compact_spec.rb", "spec/gorillib/hash/deep_compact_spec.rb", "spec/gorillib/hash/deep_merge_spec.rb", "spec/gorillib/hash/keys_spec.rb", "spec/gorillib/hash/reverse_merge_spec.rb", "spec/gorillib/hash/slice_spec.rb", "spec/gorillib/hash/zip_spec.rb", "spec/gorillib/hashlike/behave_same_as_hash_spec.rb", "spec/gorillib/hashlike/deep_hash_spec.rb", "spec/gorillib/hashlike/hashlike_behavior_spec.rb", "spec/gorillib/hashlike/hashlike_via_accessors_spec.rb", "spec/gorillib/hashlike_spec.rb", "spec/gorillib/logger/log_spec.rb", "spec/gorillib/metaprogramming/aliasing_spec.rb", "spec/gorillib/metaprogramming/class_attribute_spec.rb", "spec/gorillib/metaprogramming/delegation_spec.rb", "spec/gorillib/metaprogramming/singleton_class_spec.rb", "spec/gorillib/model/lint_spec.rb", "spec/gorillib/model/record/defaults_spec.rb", "spec/gorillib/model/record/factories_spec.rb", "spec/gorillib/model/record/overlay_spec.rb", "spec/gorillib/model/serialization_spec.rb", "spec/gorillib/model_spec.rb", "spec/gorillib/numeric/clamp_spec.rb", "spec/gorillib/object/blank_spec.rb", "spec/gorillib/object/try_dup_spec.rb", "spec/gorillib/object/try_spec.rb", "spec/gorillib/pathname_spec.rb", "spec/gorillib/string/constantize_spec.rb", "spec/gorillib/string/human_spec.rb", "spec/gorillib/string/inflections_spec.rb", "spec/gorillib/string/inflector_test_cases.rb", "spec/gorillib/string/truncate_spec.rb", "spec/gorillib/type/extended_spec.rb", "spec/gorillib/utils/capture_output_spec.rb", "spec/spec_helper.rb", "spec/support/gorillib_test_helpers.rb", "spec/support/hashlike_fuzzing_helper.rb", "spec/support/hashlike_helper.rb", "spec/support/hashlike_struct_helper.rb", "spec/support/hashlike_via_delegation.rb", "spec/support/kcode_test_helper.rb", "spec/support/matchers/be_array_eql.rb", "spec/support/matchers/be_hash_eql.rb", "spec/support/matchers/enumerate_method.rb", "spec/support/matchers/evaluate_to_true.rb", "spec/support/model_test_helpers.rb"]
+  s.test_files = ["spec/array/average_spec.rb", "spec/array/sorted_median_spec.rb", "spec/array/sorted_percentile_spec.rb", "spec/array/sorted_sample_spec.rb", "spec/examples/builder/ironfan_spec.rb", "spec/extlib/hash_spec.rb", "spec/extlib/mash_spec.rb", "spec/gorillib/array/compact_blank_spec.rb", "spec/gorillib/array/extract_options_spec.rb", "spec/gorillib/builder_spec.rb", "spec/gorillib/collection_spec.rb", "spec/gorillib/datetime/parse_spec.rb", "spec/gorillib/datetime/to_flat_spec.rb", "spec/gorillib/enumerable/sum_spec.rb", "spec/gorillib/exception/raisers_spec.rb", "spec/gorillib/hash/compact_spec.rb", "spec/gorillib/hash/deep_compact_spec.rb", "spec/gorillib/hash/deep_merge_spec.rb", "spec/gorillib/hash/keys_spec.rb", "spec/gorillib/hash/reverse_merge_spec.rb", "spec/gorillib/hash/slice_spec.rb", "spec/gorillib/hash/zip_spec.rb", "spec/gorillib/hashlike/behave_same_as_hash_spec.rb", "spec/gorillib/hashlike/deep_hash_spec.rb", "spec/gorillib/hashlike/hashlike_behavior_spec.rb", "spec/gorillib/hashlike/hashlike_via_accessors_spec.rb", "spec/gorillib/hashlike_spec.rb", "spec/gorillib/logger/log_spec.rb", "spec/gorillib/metaprogramming/aliasing_spec.rb", "spec/gorillib/metaprogramming/class_attribute_spec.rb", "spec/gorillib/metaprogramming/delegation_spec.rb", "spec/gorillib/metaprogramming/singleton_class_spec.rb", "spec/gorillib/model/lint_spec.rb", "spec/gorillib/model/record/defaults_spec.rb", "spec/gorillib/model/record/factories_spec.rb", "spec/gorillib/model/record/overlay_spec.rb", "spec/gorillib/model/serialization_spec.rb", "spec/gorillib/model_spec.rb", "spec/gorillib/numeric/clamp_spec.rb", "spec/gorillib/object/blank_spec.rb", "spec/gorillib/object/try_dup_spec.rb", "spec/gorillib/object/try_spec.rb", "spec/gorillib/pathname_spec.rb", "spec/gorillib/string/constantize_spec.rb", "spec/gorillib/string/human_spec.rb", "spec/gorillib/string/inflections_spec.rb", "spec/gorillib/string/inflector_test_cases.rb", "spec/gorillib/string/truncate_spec.rb", "spec/gorillib/type/extended_spec.rb", "spec/gorillib/utils/capture_output_spec.rb", "spec/spec_helper.rb", "spec/support/gorillib_test_helpers.rb", "spec/support/hashlike_fuzzing_helper.rb", "spec/support/hashlike_helper.rb", "spec/support/hashlike_struct_helper.rb", "spec/support/hashlike_via_delegation.rb", "spec/support/kcode_test_helper.rb", "spec/support/matchers/be_array_eql.rb", "spec/support/matchers/be_hash_eql.rb", "spec/support/matchers/enumerate_method.rb", "spec/support/matchers/evaluate_to_true.rb", "spec/support/model_test_helpers.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
