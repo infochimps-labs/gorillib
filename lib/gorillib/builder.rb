@@ -72,7 +72,10 @@ module Gorillib
     end
 
     def set_collection_item(plural_name, item_key, item)
-      collection_of(plural_name)[item_key] = item
+      collection = collection_of(plural_name)
+      collection[item_key] = item
+      write_attribute(plural_name, collection)
+      collection[item_key]
     end
 
     def has_collection_item?(plural_name, item_key)
