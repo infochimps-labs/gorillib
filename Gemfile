@@ -1,13 +1,13 @@
 source "http://rubygems.org"
 
 gem   'multi_json',  ">= 1.1"
-gem   'oj',          ">= 1.2"
-gem   'json',                    :platform => :jruby
 
 # Only gems that you want listed as development dependencies in the gemspec
 group :development do
   gem 'bundler',     "~> 1.1"
   gem 'rake'
+  gem 'oj',          ">= 1.2"
+  gem 'json',                  :platform => :jruby
 end
 
 # Gems you would use if hacking on this gem (rather than with it)
@@ -29,7 +29,6 @@ group :test do
   gem 'guard',       ">= 1.0"
   gem 'guard-rspec', ">= 0.6"
   gem 'guard-yard'
-  gem 'guard-process'
   #
   if RUBY_PLATFORM.include?('darwin')
     gem 'rb-fsevent', ">= 0.9"

@@ -6,34 +6,13 @@ shared_context 'model', :model_spec => true do
 
   let(:mock_val){ mock('mock value') }
 
-  let(:smurf_klass) do
-    class Gorillib::Test::Smurf
-      include Gorillib::Model
-
-      field :smurfiness, Integer
-      field :weapon,     Symbol
-    end
-    Gorillib::Test::Smurf
-  end
-
-  let(:smurfette_klass) do
-    class Gorillib::Test::Smurfette < smurf_klass
-      field :blondness, Boolean
-    end
-    Gorillib::Test::Smurfette
-  end
-
-  let(:poppa_smurf  ){ smurf_klass.receive(:name => 'Poppa Smurf',   :smurfiness => 9, :weapon => 'staff') }
-  let(:smurfette    ){ smurf_klass.receive(:name => 'Smurfette',     :smurfiness => 11, :weapon => 'charm') }
-  let(:generic_smurf){ smurf_klass.receive(:name => 'Generic Smurf', :smurfiness => 2, :weapon => 'fists') }
-
   let(:engine_class) do
     class Gorillib::Test::Engine
       include Gorillib::Builder
-      field    :name,         Symbol, :default => ->{ "#{owner? ? owner.name : ''} engine"}
-      field    :carburetor,   Symbol, :default => :stock
-      field    :volume,       Integer, :doc => 'displacement volume, in in^3'
-      field    :cylinders,    Integer
+      magic    :name,         Symbol, :default => ->{ "#{owner? ? owner.name : ''} engine"}
+      magic    :carburetor,   Symbol, :default => :stock
+      magic    :volume,       Integer, :doc => 'displacement volume, in in^3'
+      magic    :cylinders,    Integer
       member   :owner,        Whatever
       self
     end
@@ -44,10 +23,10 @@ shared_context 'model', :model_spec => true do
     engine_class
     class Gorillib::Test::Car
       include Gorillib::Builder
-      field    :name,          Symbol
-      field    :make_model,    String
-      field    :year,          Integer
-      field    :doors,         Integer
+      magic    :name,          Symbol
+      magic    :make_model,    String
+      magic    :year,          Integer
+      magic    :doors,         Integer
       member   :engine,        Gorillib::Test::Engine
       self
     end

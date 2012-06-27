@@ -13,8 +13,8 @@ module Gorillib
     def self.receive(type)
       case
       when factories.include?(type)               then return factories[type]
+      when type.respond_to?(:receive)             then return type
       when type.is_a?(Proc) || type.is_a?(Method) then return Gorillib::Factory::ApplyProcFactory.new(type)
-      when type.respond_to?(:receive)             then return factories[type] = type
       when type.is_a?(String)                     then
         return( factories[type] = Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/'))) )
       else raise ArgumentError, "Don't know which factory makes a #{type}"

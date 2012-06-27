@@ -7,10 +7,6 @@ module Gorillib
     extend  Gorillib::Concern
     include Gorillib::Model
 
-    def initialize(attrs={}, &block)
-      receive!(attrs, &block)
-    end
-
     def receive!(*args, &block)
       super(*args)
       if block_given?
@@ -104,8 +100,8 @@ module Gorillib
     module ClassMethods
       include Gorillib::Model::ClassMethods
 
-      def field(field_name, type, options={})
-        super(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField}.merge(options))
+      def magic(field_name, type, options={})
+        field(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField}.merge(options))
       end
       def member(field_name, type, options={})
         field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField}.merge(options))
@@ -114,9 +110,6 @@ module Gorillib
         field(field_name, Gorillib::ModelCollection, {
             :item_type => item_type,
             :field_type => ::Gorillib::Builder::CollectionField}.merge(options))
-      end
-      def simple_field(field_name, type, options={})
-        field(field_name, type, {:field_type => ::Gorillib::Model::Field}.merge(options))
       end
 
     protected
@@ -179,14 +172,14 @@ module Gorillib
     include Gorillib::Builder
 
     included do |base|
-      base.field :name,  Symbol
+      base.magic :name,  Symbol
     end
 
     module ClassMethods
       include Gorillib::Builder::ClassMethods
 
       def belongs_to(field_name, type, options={})
-        field = field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField }.merge(options))
+        field = member(field_name, type)
         define_meta_module_method "#{field.name}_name" do
           val = getset_member(field) or return nil
           val.name
@@ -196,7 +189,7 @@ module Gorillib
 
       def option(field_name, options={})
         type = options.delete(:type){ Whatever }
-        field(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField }.merge(options))
+        magic(field_name, type)
       end
 
       def collects(type, clxn_name)

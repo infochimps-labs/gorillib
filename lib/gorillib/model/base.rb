@@ -18,8 +18,14 @@ module Gorillib
   module Model
     extend Gorillib::Concern
 
-    def initialize(attrs={})
-      receive!(attrs)
+    def initialize(*args, &block)
+      attrs = args.extract_options!
+      if args.present?
+        fns = self.class.field_names
+        ArgumentError.check_arity!(args, 0..fns.length)
+        attrs = attrs.merge(Hash[ fns[0..(args.length-1)].zip(args) ])
+      end
+      receive!(attrs, &block)
     end
 
     # Returns a Hash of all attributes
@@ -198,9 +204,8 @@ module Gorillib
     def inspect_helper(detailed, attrs)
       str = "#<" << self.class.name.to_s
       if detailed && attrs.present?
-        str << " "
-        str << attrs.map do |attr, val|
-          "#{attr}=#{val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::Collection) ? val.inspect(false) : val.inspect}"
+        str << " " << attrs.map do |attr, val|
+          "#{attr}=#{val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::GenericCollection) ? val.inspect(false) : val.inspect}"
         end.join(", ")
       end
       str << ">"
@@ -211,8 +216,11 @@ module Gorillib
 
     module ClassMethods
 
+      #
+      # A readable handle for this field
+      #
       def typename
-        Gorillib::Inflector.underscore(self.name||'anon').gsub(%r{/}, '.')
+        @typename ||= Gorillib::Inflector.underscore(self.name||'anon').gsub(%r{/}, '.')
       end
 
       #
@@ -225,7 +233,7 @@ module Gorillib
         #
         Gorillib::Model::Validate.hashlike!(attrs){ "attributes for #{self.inspect}" }
         klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
-        warn "factory #{self} doesn't match type specified in #{attrs}" unless klass <= self
+        warn "factory #{klass} is not a type of #{self} as specified in #{attrs}" unless klass <= self
         #
         klass.new(attrs, &block)
       end
@@ -263,11 +271,6 @@ module Gorillib
 
       # @return [true, false] true if the field is defined on this class
       def has_field?(field_name)
-
-        #
-        # fields.has_key?(field_name.to_sym)
-        #
-
         fields.has_key?(field_name)
       end
 
