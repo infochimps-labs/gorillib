@@ -12,27 +12,39 @@ shared_examples_for 'a model' do
       obj = smurf_class.new :smurfiness => 3, :weapon => :smurfchucks
       obj.compact_attributes.should == { :smurfiness => 3, :weapon => :smurfchucks }
     end
-    it "takes all preceding args as positional, clobbering values set in attrs" do
-      obj = smurf_class.new 7,   :smurfing_stars
-      obj.compact_attributes.should == { :smurfiness => 7, :weapon => :smurfing_stars }
-      obj = smurf_class.new 7,   :smurfing_stars, :smurfiness => 3, :weapon => :smurfchucks
-      obj.compact_attributes.should == { :smurfiness => 7, :weapon => :smurfing_stars }
-    end
-    it "does nothing special with a nil positional arg -- it clobbers anything there setting the attribute to nil" do
-      obj = smurf_class.new nil, :smurfiness => 3
-      obj.compact_attributes.should == { :smurfiness => nil }
-    end
-    it "raises an error if too many positional args are given" do
-      ->{ smurf_class.new 7, :smurfing_stars, :azrael }.should raise_error(ArgumentError, /wrong number of arguments.*3.*0\.\.2/)
-    end
-    it "always takes the last hash arg as the attrs -- even if it is in the positional slot of a hash field" do
-      smurf_class.field :hashie, Hash
-      obj = smurf_class.new({:smurfiness => 3, :weapon => :smurfchucks})
-      obj.compact_attributes.should == { :smurfiness => 3, :weapon => :smurfchucks }
-      obj = smurf_class.new(3, :smurfchucks, { :weapon => :bastard_smurf })
-      obj.compact_attributes.should == { :smurfiness => 3, :weapon => :smurfchucks }
-      obj = smurf_class.new(3, :smurfchucks, {:this => :that}, { :weapon => :bastard_smurf })
-      obj.compact_attributes.should == { :smurfiness => 3, :weapon => :smurfchucks, :hashie => {:this => :that} }
+
+    context 'positional args' do
+      before do
+        smurf_class.fields[:smurfiness].position = 0
+        smurf_class.fields[:weapon    ].position = 1
+      end
+      it "takes all preceding args as positional, clobbering values set in attrs" do
+        obj = smurf_class.new 7,   :smurfing_stars
+        obj.compact_attributes.should == { :smurfiness => 7, :weapon => :smurfing_stars }
+        obj = smurf_class.new 7,   :smurfing_stars, :smurfiness => 3, :weapon => :smurfchucks
+        obj.compact_attributes.should == { :smurfiness => 7, :weapon => :smurfing_stars }
+      end
+      it "does nothing special with a nil positional arg -- it clobbers anything there setting the attribute to nil" do
+        obj = smurf_class.new nil, :smurfiness => 3
+        obj.compact_attributes.should == { :smurfiness => nil }
+      end
+      it "raises an error if too many positional args are given" do
+        ->{ smurf_class.new 7, :smurfing_stars, :azrael }.should raise_error(ArgumentError, /wrong number of arguments.*3.*0\.\.2/)
+      end
+      it "always takes the last hash arg as the attrs -- even if it is in the positional slot of a hash field" do
+        smurf_class.field :hashie, Hash, :position => 2
+        obj = smurf_class.new({:smurfiness => 3, :weapon => :smurfiken})
+        obj.compact_attributes.should == { :smurfiness => 3, :weapon => :smurfiken }
+        obj = smurf_class.new(3, :smurfiken, { :weapon => :bastard_smurf })
+        obj.compact_attributes.should == { :smurfiness => 3, :weapon => :smurfiken }
+        obj = smurf_class.new(3, :smurfiken, {:this => :that}, { :weapon => :bastard_smurf })
+        obj.compact_attributes.should == { :smurfiness => 3, :weapon => :smurfiken, :hashie => {:this => :that} }
+      end
+      it "skips fields that are not positional args" do
+        smurf_class.fields[:weapon].unset_attribute(:position)
+        smurf_class.field :color, String, :position => 1
+        smurf_class.new(99, 'cerulean').compact_attributes.should == { :smurfiness => 99, :color => 'cerulean' }
+      end
     end
   end
 

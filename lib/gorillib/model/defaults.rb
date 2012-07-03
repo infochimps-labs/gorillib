@@ -17,7 +17,7 @@ module Gorillib
     # @param [String, Symbol, #to_s] field_name Name of the attribute to unset.
     # @return [nil] Ze goggles! Zey do nussing!
     def read_unset_attribute(field_name)
-      field = self.class.fields[field_name]
+      field = self.class.fields[field_name] or return nil
       return unless field.has_default?
       write_attribute(field.name, attribute_default(field))
     end

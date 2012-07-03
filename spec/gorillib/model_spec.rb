@@ -3,7 +3,7 @@ require 'model_test_helpers'
 
 require 'gorillib/model'
 
-describe Gorillib::Model, :model_spec => true do
+describe Gorillib::Model, :only, :model_spec do
   let(:smurf_class) do
     class Gorillib::Test::Smurf
       include Gorillib::Model
@@ -170,6 +170,9 @@ describe Gorillib::Model, :model_spec => true do
       example_inst.should_receive(:write_attribute).with(:my_field,  7)
       example_inst.should_receive(:write_attribute).with(:str_field, 'yo')
       example_inst.receive! 'my_field'=>7, :str_field=>'yo'
+    end
+    it "returns nil with no block given" do
+      example_inst.receive!('my_field'=>7, :str_field=>'yo').should be_nil
     end
   end
 

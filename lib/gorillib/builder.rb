@@ -7,12 +7,12 @@ module Gorillib
     extend  Gorillib::Concern
     include Gorillib::Model
 
+    # @return [Object, nil] the return value of the block, or nil if no block given
     def receive!(*args, &block)
       super(*args)
       if block_given?
         (block.arity == 1) ? block.call(self) : self.instance_eval(&block)
       end
-      self
     end
 
     def getset(field, *args, &block)

@@ -1,5 +1,19 @@
 ## Version 1.0
 
+**positional args**:
+
+* You must explicitly declare the field to be positional in its definition: 
+
+      class Smurf
+        include Gorillib::Model
+        field :smurfiness, Integer, :position => 0
+        field :weapon, String, :position => 1
+      end
+    
+    Positions must be non-conflicting and in minimal order: if a subclass would bomb out if it declared `field :foo, Whatever, :position => 1` (or any position besides `2`).
+
+* Builder's `receive!` method returns the *block*'s return value, not `self`.
+
 
 ### 2012-06 - Version 1.0.1-pre: First wave of refactors
 

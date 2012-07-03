@@ -122,6 +122,8 @@ module Gorillib
       # Field's description
       field :doc, String
 
+      field :position, Integer, :tester => true, :doc => "Indicates this is a positional initialization arg -- you can pass it as a plain value in the given slot to #initialize"
+
       # remove the attr_reader method (needed for scaffolding), leaving the meta_module method to remain
       remove_possible_method(:name)
 

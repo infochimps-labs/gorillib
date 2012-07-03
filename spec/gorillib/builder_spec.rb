@@ -67,6 +67,14 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
       wildcat.receive!({}){|c| expect_7 = 7 ; expect_obj = c }
       expect_7.should    == 7 ; expect_obj.should  == wildcat
     end
+    it 'with a block, returns its return value' do
+      val = mock_val
+      wildcat.receive!{      val }.should == val
+      wildcat.receive!{|obj| val }.should == val
+    end
+    it 'with no block, returns nil' do
+      wildcat.receive!.should be_nil
+    end
   end
 
   context ".magic" do

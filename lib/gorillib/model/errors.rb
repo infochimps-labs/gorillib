@@ -10,5 +10,9 @@ module Gorillib
       include Gorillib::Model::Error
     end
 
+    class ConflictingPositionError < ::ArgumentError
+      include Gorillib::Model::Error
+    end
+
   end
 end

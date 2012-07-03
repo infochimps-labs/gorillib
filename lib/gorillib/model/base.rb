@@ -19,19 +19,14 @@ module Gorillib
     extend Gorillib::Concern
 
     def initialize(*args, &block)
-      attrs = args.extract_options!
-      if args.present?
-        fns = self.class.field_names
-        ArgumentError.check_arity!(args, 0..fns.length)
-        attrs = attrs.merge(Hash[ fns[0..(args.length-1)].zip(args) ])
-      end
+      attrs = self.class.attrs_hash_from_args(args)
       receive!(attrs, &block)
     end
 
     # Returns a Hash of all attributes
     #
     # @example Get attributes
-    #   person.attributes # => { :name => "Ben Poweski" }
+    #   person.attributes # => { :name => "Emmet Brown", :title => "Dr" }
     #
     # @return [{Symbol => Object}] The Hash of all attributes
     def attributes
@@ -69,7 +64,7 @@ module Gorillib
     # or some such. Use `#update_attributes` if your data is already type safe.
     #
     # @param [{Symbol => Object}] hsh The values to receive
-    # @return [Gorillib::Model] the object itself
+    # @return [nil] nothing
     def receive!(hsh={})
       if hsh.respond_to?(:attributes)
         hsh = hsh.attributes
@@ -84,7 +79,7 @@ module Gorillib
         self.send("receive_#{field_name}", val)
       end
       handle_extra_attributes(hsh)
-      self
+      nil
     end
 
     def handle_extra_attributes(attrs)
@@ -279,6 +274,40 @@ module Gorillib
         @_field_names ||= fields.keys
       end
 
+      def positionals
+        @_positionals ||= assemble_positionals
+      end
+
+      def assemble_positionals
+        positionals = fields.values.keep_if{|fld| fld.position? }.sort_by!{|fld| fld.position }
+        return [] if positionals.empty?
+        if (positionals.map(&:position) != (0..positionals.length-1).to_a) then raise ConflictingPositionError, "field positions #{positionals.map(&:position).join(",")} for #{positionals.map(&:name).join(",")} aren't in strict minimal order"  ; end
+        positionals.map!(&:name)
+      end
+
+      # turn model constructor args (`*positional_args, {attrs}`) into a combined
+      # attrs hash. positional_args are mapped to the set of attribute names in
+      # order -- by default, the class' field names.
+      #
+      # Notes:
+      #
+      # * Positional args always clobber elements of the attribute hash.
+      # * Nil positional args are treated as present-and-nil (this might change).
+      # * Raises an error if positional args
+      #
+      # @param [Array[Symbol]] attr_names list of attributes, in order, to map.
+      #
+      # @return [Hash] a combined, reconciled hash of attributes to set
+      def attrs_hash_from_args(args)
+        attrs = args.extract_options!
+        if args.present?
+          ArgumentError.check_arity!(args, 0..positionals.length)
+          positionals_to_map = positionals[0..(args.length-1)]
+          attrs = attrs.merge(Hash[positionals_to_map.zip(args)])
+        end
+        attrs
+      end
+
       # @return Class name and its attributes
       #
       # @example Inspect the model's definition.
@@ -297,6 +326,7 @@ module Gorillib
         ObjectSpace.each_object(::Class) do |klass|
           klass.__send__(:remove_instance_variable, '@_fields')      if (klass <= self) && klass.instance_variable_defined?('@_fields')
           klass.__send__(:remove_instance_variable, '@_field_names') if (klass <= self) && klass.instance_variable_defined?('@_field_names')
+          klass.__send__(:remove_instance_variable, '@_positionals') if (klass <= self) && klass.instance_variable_defined?('@_positionals')
         end
       end
 
