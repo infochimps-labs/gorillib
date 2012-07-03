@@ -63,6 +63,7 @@ module Gorillib
   end
 
   class Collection < Gorillib::GenericCollection
+    include Gorillib::Model
     def initialize
       @clxn   = Hash.new
     end
