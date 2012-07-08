@@ -69,7 +69,7 @@ module Gorillib
       if hsh.respond_to?(:attributes)
         hsh = hsh.attributes
       else
-        Gorillib::Model::Validate.hashlike!(hsh){ "attributes hash for #{self.inspect}" }
+        Gorillib::Model::Validate.hashlike!(hsh){ "attributes for #{self.inspect}" }
         hsh = hsh.dup
       end
       self.class.field_names.each do |field_name|
@@ -97,7 +97,7 @@ module Gorillib
     # @return [Gorillib::Model] the object itself
     def update_attributes(hsh)
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!(hsh){ "attributes hash for #{self.inspect}" }
+      Gorillib::Model::Validate.hashlike!(hsh){ "attributes for #{self.inspect}" }
       self.class.field_names.each do |field_name|
         if    hsh.has_key?(field_name)      then val = hsh[field_name]
         elsif hsh.has_key?(field_name.to_s) then val = hsh[field_name.to_s]
@@ -200,7 +200,7 @@ module Gorillib
       str = "#<" << self.class.name.to_s
       if detailed && attrs.present?
         str << " " << attrs.map do |attr, val|
-          "#{attr}=#{val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::GenericCollection) ? val.inspect(false) : val.inspect}"
+          "#{attr}=#{val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::Collection) ? val.inspect(false) : val.inspect}"
         end.join(", ")
       end
       str << ">"
@@ -224,13 +224,22 @@ module Gorillib
       # @return [Gorillib::Model] the new object
       def receive(attrs={}, &block)
         return nil if attrs.nil?
-        return attrs if attrs.is_a?(self)
+        return attrs if native?(attrs)
         #
         Gorillib::Model::Validate.hashlike!(attrs){ "attributes for #{self.inspect}" }
         klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
         warn "factory #{klass} is not a type of #{self} as specified in #{attrs}" unless klass <= self
         #
         klass.new(attrs, &block)
+      end
+
+      # A `native` object does not need any transformation; it is accepted directly.
+      # By default, an object is native if it `is_a?` this class
+      #
+      # @param  obj [Object] the object that will be received
+      # @return [true, false] true if the item does not need conversion
+      def native?(obj)
+        obj.is_a?(self)
       end
 
       # Defines a new field
