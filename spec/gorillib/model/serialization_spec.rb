@@ -7,7 +7,7 @@ require 'gorillib/model'
 require 'gorillib/builder'
 require 'gorillib/model/serialization'
 
-describe Gorillib::Model, :model_spec => true do
+describe Gorillib::Model, :model_spec, :builder_spec do
   subject do
     garage.cars << wildcat
     garage.cars << ford_39

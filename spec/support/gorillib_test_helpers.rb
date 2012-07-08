@@ -56,7 +56,7 @@ shared_examples_for 'a model' do
       smurf_class.receive(nil).should == nil
     end
     it "returns the object if given a single object of the model class" do
-      smurf_class.receive(poppa_smurf).should equal(poppa_smurf)
+      smurf_class.receive(papa_smurf).should equal(papa_smurf)
     end
     it "raises an error if the attributes are not hashlike" do
       ->{ smurf_class.receive('DURRRR') }.should raise_error(ArgumentError, /attributes .* like a hash: "DURRRR"/)

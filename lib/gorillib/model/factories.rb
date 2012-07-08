@@ -65,7 +65,7 @@ module Gorillib
       # A `native` object does not need any transformation; it is accepted directly.
       # By default, an object is native if it `is_a?(product)`
       #
-      # @param   [Object]      obj the object to convert and receive
+      # @param  obj [Object] the object that will be received
       # @return [true, false] true if the item does not need conversion
       def native?(obj)
         obj.is_a?(@product)

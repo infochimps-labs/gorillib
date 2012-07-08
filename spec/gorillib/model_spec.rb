@@ -3,18 +3,7 @@ require 'model_test_helpers'
 
 require 'gorillib/model'
 
-describe Gorillib::Model, :only, :model_spec do
-  let(:smurf_class) do
-    class Gorillib::Test::Smurf
-      include Gorillib::Model
-      field :smurfiness, Integer
-      field :weapon,     Symbol
-    end
-    Gorillib::Test::Smurf
-  end
-  let(:poppa_smurf  ){ smurf_class.receive(:name => 'Poppa Smurf',   :smurfiness => 9,  :weapon => 'staff') }
-  let(:smurfette    ){ smurf_class.receive(:name => 'Smurfette',     :smurfiness => 11, :weapon => 'charm') }
-
+describe Gorillib::Model, :model_spec do
   let(:simple_model) do
     class Gorillib::Test::SimpleModel
       include Gorillib::Model
@@ -53,8 +42,8 @@ describe Gorillib::Model, :only, :model_spec do
       obj.attributes.should == { :my_field => 'accepted as-is', :str_field => 'bob', :sym_field=>:converted_to_sym }
     end
     it 'handles nested structures' do
-      deep_obj = nested_model.receive(:str_field => 'deep, man', :smurf => poppa_smurf.attributes)
-      deep_obj.attributes.should == { :str_field => 'deep, man', :smurf => poppa_smurf, :sym_field=>nil, :my_field => nil, }
+      deep_obj = nested_model.receive(:str_field => 'deep, man', :smurf => papa_smurf.attributes)
+      deep_obj.attributes.should == { :str_field => 'deep, man', :smurf => papa_smurf, :sym_field=>nil, :my_field => nil, }
     end
   end
 
