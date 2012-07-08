@@ -11,8 +11,8 @@ Exception.class_eval do
   def polish(extra_info)
     filename, _, method_name = self.class.caller_parts
     method_name.gsub!(/rescue in /, '')
-    most_recent_line = backtrace.detect{|line| line.include?(filename) && line.include?(method_name) }
-    most_recent_line.sub!(/'$/, " for #{extra_info}'"[0..300])
+    most_recent_line = backtrace.detect{|line| line.include?(filename) && line.include?(method_name) && line[-1] == "'" }
+    most_recent_line.sub!(/'$/, "' for [#{extra_info.to_s[0..300]}]")
   end
 
 end
