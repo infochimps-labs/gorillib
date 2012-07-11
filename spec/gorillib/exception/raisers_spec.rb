@@ -9,6 +9,7 @@ describe 'raisers' do
   def should_return_true
     yield.should be_true
   end
+  # different rubies have different error messages ARRGH.
   def capture_error
     message = 'should have raised, did not'
     begin
@@ -41,6 +42,11 @@ describe 'raisers' do
       it 'matches the message a native arity error would' do
         should_raise_my_error(capture_error{ [].fill()   }){ described_class.check_arity!([],  1..3) }
         should_raise_my_error(capture_error{ [].to_s(1)  }){ described_class.check_arity!([1], 0) }
+      end
+      it 'appends result of block (if given) to message' do
+        str = "esiar no delave ylno"
+        ->{ described_class.check_arity!([],  1..3){ str.reverse! } }.should raise_error(/only evaled on raise/)
+        str.should == "only evaled on raise"
       end
     end
 
