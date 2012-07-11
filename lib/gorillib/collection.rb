@@ -183,14 +183,14 @@ module Gorillib
     # @return [String] string describing the collection's array representation
     def to_s           ; to_a.to_s           ; end
     # @return [String] string describing the collection's array representation
-    def inspect(detailed=true)
-      if detailed
-        key_width = [keys.map{|key| key.to_s.length }.max.to_i, 45].min
-        guts = clxn.map{|key, val| "%-#{key_width}s %s" % ["#{key}:", val.inspect] }.join(",\n   ")
-      else
-        guts =  keys.join(", ")
-      end
-      ["c{ ", guts, " }"].join
+    def inspect
+      key_width = [keys.map{|key| key.to_s.length + 1 }.max.to_i, 45].min
+      guts = clxn.map{|key, val| "%-#{key_width}s %s" % ["#{key}:", val.inspect] }.join(",\n   ")
+      ['c{ ', guts, ' }'].join
+    end
+
+    def inspect_compact
+      ['c{ ', keys.join(", "), ' }'].join
     end
 
   end

@@ -82,6 +82,7 @@ module Gorillib
     def receive_item(label, *args, &block)
       item  = item_type.receive(*args, &block)
       super(label, item)
+    rescue StandardError => err ; err.polish("#{item_type} #{label} as #{args.inspect} to #{self}") rescue nil ; raise
     end
 
     def update_or_add(label, attrs, &block)
@@ -93,6 +94,7 @@ module Gorillib
         attrs = attrs.merge(key_method => label) if key_method
         receive_item(label, attrs, &block)
       end
+    rescue StandardError => err ; err.polish("#{item_type} #{label} as #{attrs} to #{self}") rescue nil ; raise
     end
 
     # @return [Array] serializable array representation of the collection
@@ -104,6 +106,10 @@ module Gorillib
     # @return [String] JSON serialization of the collection's array representation
     def to_json(*args) to_wire(*args).to_json(*args) ; end
   end
+
+  #
+  # Deprecated!
+  #
 
   class ModelCollectionOld < Gorillib::ModelCollection
     # The default `key_method` invoked on a new item to generate its collection key
