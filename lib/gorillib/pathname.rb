@@ -53,7 +53,7 @@ module Gorillib
     # @return [Pathname] A single expanded Pathname
     #
     def path_to(*pathsegs)
-      relative_path_to(*pathsegs).expand_path
+      relpath_to(*pathsegs).expand_path
     end
 
     # Expand a path with late-evaluated segments
@@ -62,16 +62,12 @@ module Gorillib
     # Calls cleanpath (removing `//` double slashes and useless `..`s), but does
     # not reference the filesystem or make paths absolute
     #
-    def relative_path_to(*pathsegs)
+    def relpath_to(*pathsegs)
       ArgumentError.arity_at_least!(pathsegs, 1)
       pathsegs = pathsegs.map{|ps| expand_pathseg(ps) }.flatten
       self.new(File.join(*pathsegs)).cleanpath(true)
     end
-    def relpath_to(*args) relative_path_to(*args) ; end
-
-    # def make_pathname(*args)
-    #   Pathname.new(*args)
-    # end
+    alias_method :relative_path_to, :relpath_to
 
   protected
     # Recursively expand a path handle
@@ -87,6 +83,19 @@ end
 class Pathname
   extend Gorillib::Pathref
   class << self ; alias_method :new_pathname, :new ; end
+
+  def self.receive(obj)
+    return obj if obj.nil?
+    obj.is_a?(self) ? obj : new(obj)
+  end
+
+  # @return the basename without extension (using self.extname as the extension)
+  def corename
+    basename(self.extname)
+  end
+
+  # @return [String] compact string rendering
+  def inspect_compact() to_s.dump ; end
 
   # FIXME: find out if this is dangerous
   alias_method :to_str, :to_path

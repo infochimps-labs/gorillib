@@ -58,17 +58,17 @@ describe Pathname do
     end
   end
 
-  context '.relative_path_to' do
+  context '.relpath_to' do
     subject{ described_class }
 
     it 'collapses "//" double slashes and useless ".." dots, but does not use the filesystem' do
-      subject.relative_path_to('/', '../..', :access, '//have', 'a//pepsi').should == Pathname.new('/would/you/like/to/have/a/pepsi')
+      subject.relpath_to('/', '../..', :access, '//have', 'a//pepsi').should == Pathname.new('/would/you/like/to/have/a/pepsi')
     end
 
     it 'does not expand relative paths' do
       FileUtils.cd '/' do
         subject.register_path(:hello,  'doctor')
-        subject.relative_path_to(:hello, :hello, :hello).should == Pathname.new('doctor/doctor/doctor')
+        subject.relpath_to(:hello, :hello, :hello).should == Pathname.new('doctor/doctor/doctor')
       end
     end
   end
@@ -76,7 +76,7 @@ describe Pathname do
   context 'registering paths' do
     subject { described_class }
     def expand_pathseg(*args) ; subject.send(:expand_pathseg, *args) ;  end
-    
+
     context '.register_path' do
       it 'stores a path so expand_pathseg can get it later' do
         subject.register_path(:probe, ['skeletal', 'girth'])
@@ -92,10 +92,10 @@ describe Pathname do
         expand_pathseg(:glg_20).should == ['milbarge', 'fitz-hume']
       end
     end
-    
+
     context '.register_paths' do
       let(:paths) { { :foo => ['foo'], :bar => [:foo, 'bar'] } }
-      
+
       it 'registers multiple paths' do
         subject.should_receive(:register_path).exactly(paths.size).times
         subject.register_paths(paths)
@@ -109,6 +109,6 @@ describe Pathname do
         subject.unregister_path(:foo)
         expect{ expand_pathseg(:foo)}.to raise_error(ArgumentError, /expand path reference.*foo/)
       end
-    end    
+    end
   end
 end
