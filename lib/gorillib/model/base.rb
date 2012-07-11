@@ -69,7 +69,7 @@ module Gorillib
       if hsh.respond_to?(:attributes)
         hsh = hsh.attributes
       else
-        Gorillib::Model::Validate.hashlike!(hsh){ "attributes hash for #{self.inspect}" }
+        Gorillib::Model::Validate.hashlike!(hsh){ "attributes for #{self.inspect}" }
         hsh = hsh.dup
       end
       self.class.field_names.each do |field_name|
@@ -97,7 +97,7 @@ module Gorillib
     # @return [Gorillib::Model] the object itself
     def update_attributes(hsh)
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!(hsh){ "attributes hash for #{self.inspect}" }
+      Gorillib::Model::Validate.hashlike!(hsh){ "attributes for #{self.inspect}" }
       self.class.field_names.each do |field_name|
         if    hsh.has_key?(field_name)      then val = hsh[field_name]
         elsif hsh.has_key?(field_name.to_s) then val = hsh[field_name.to_s]
@@ -190,20 +190,23 @@ module Gorillib
 
     # override inspect_helper (not this) in your descendant class
     # @return [String] Human-readable presentation of the attributes
-    def inspect(detailed=true)
-      inspect_helper(detailed, compact_attributes)
+    def inspect
+      str = '#<' << self.class.name.to_s
+      attrs = inspect_helper
+      if attrs.present?
+        str << '(' << attrs.map{|attr, val| "#{attr}=#{val.respond_to?(:inspect_compact) ? val.inspect_compact : val.inspect}" }.join(", ") << ')'
+      end
+      str << '>'
+    end
+
+    def inspect_compact
+      str = "#<#{self.class.name.to_s}>"
     end
 
     # assembles just the given attributes into the inspect string.
     # @return [String] Human-readable presentation of the attributes
-    def inspect_helper(detailed, attrs)
-      str = "#<" << self.class.name.to_s
-      if detailed && attrs.present?
-        str << " " << attrs.map do |attr, val|
-          "#{attr}=#{val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::GenericCollection) ? val.inspect(false) : val.inspect}"
-        end.join(", ")
-      end
-      str << ">"
+    def inspect_helper
+      compact_attributes
     end
     private :inspect_helper
 
@@ -224,13 +227,22 @@ module Gorillib
       # @return [Gorillib::Model] the new object
       def receive(attrs={}, &block)
         return nil if attrs.nil?
-        return attrs if attrs.is_a?(self)
+        return attrs if native?(attrs)
         #
         Gorillib::Model::Validate.hashlike!(attrs){ "attributes for #{self.inspect}" }
         klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
         warn "factory #{klass} is not a type of #{self} as specified in #{attrs}" unless klass <= self
         #
         klass.new(attrs, &block)
+      end
+
+      # A `native` object does not need any transformation; it is accepted directly.
+      # By default, an object is native if it `is_a?` this class
+      #
+      # @param  obj [Object] the object that will be received
+      # @return [true, false] true if the item does not need conversion
+      def native?(obj)
+        obj.is_a?(self)
       end
 
       # Defines a new field
@@ -301,7 +313,7 @@ module Gorillib
       def attrs_hash_from_args(args)
         attrs = args.extract_options!
         if args.present?
-          ArgumentError.check_arity!(args, 0..positionals.length)
+          ArgumentError.check_arity!(args, 0..positionals.length){ "extracting args #{args} for #{self}" }
           positionals_to_map = positionals[0..(args.length-1)]
           attrs = attrs.merge(Hash[positionals_to_map.zip(args)])
         end
@@ -313,8 +325,10 @@ module Gorillib
       # @example Inspect the model's definition.
       #   Person.inspect #=> Person[first_name, last_name]
       def inspect
-        "#{self.name || 'anon'}[#{ field_names.join(", ") }]"
+        "#{self.name || 'anon'}[#{ field_names.join(",") }]"
       end
+      def inspect_compact() self.name || inspect ; end
+
 
     protected
 

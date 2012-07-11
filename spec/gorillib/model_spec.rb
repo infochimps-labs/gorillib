@@ -221,6 +221,15 @@ describe Gorillib::Model, :model_spec do
     end
   end
 
+  context '.inspect' do
+    it('is pretty'){ smurf_class.inspect.should == 'Gorillib::Test::Smurf[smurfiness,weapon]' }
+    it('is pretty even if class is anonymous'){ Class.new(smurf_class).inspect.should == 'anon[smurfiness,weapon]' }
+  end
+  context '.inspect_compact' do
+    it('is just the class name'){ smurf_class.inspect_compact.should == "Gorillib::Test::Smurf" }
+    it('is detailed if class is anonymous'){ Class.new(smurf_class).inspect_compact.should == "anon[smurfiness,weapon]" }
+  end
+
   describe Gorillib::Model::NamedSchema do
     context ".meta_module" do
       let(:basic_field_names){ [ :my_field, :my_field=, :receive_my_field, :receive_str_field, :receive_sym_field, :str_field, :str_field=, :sym_field, :sym_field= ]}
