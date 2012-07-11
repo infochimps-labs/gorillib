@@ -86,7 +86,7 @@ module Gorillib
     end
 
     def to_key
-      self.read_attribute(key_method)
+      self.send(key_method)
     end
 
     def to_inspectable
