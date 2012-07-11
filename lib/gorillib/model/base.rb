@@ -188,11 +188,11 @@ module Gorillib
       attributes == other.attributes
     end
 
-    # override inspect_helper (not this) in your descendant class
+    # override to_inspectable (not this) in your descendant class
     # @return [String] Human-readable presentation of the attributes
     def inspect
       str = '#<' << self.class.name.to_s
-      attrs = inspect_helper
+      attrs = to_inspectable
       if attrs.present?
         str << '(' << attrs.map{|attr, val| "#{attr}=#{val.respond_to?(:inspect_compact) ? val.inspect_compact : val.inspect}" }.join(", ") << ')'
       end
@@ -205,10 +205,10 @@ module Gorillib
 
     # assembles just the given attributes into the inspect string.
     # @return [String] Human-readable presentation of the attributes
-    def inspect_helper
+    def to_inspectable
       compact_attributes
     end
-    private :inspect_helper
+    private :to_inspectable
 
   protected
 
