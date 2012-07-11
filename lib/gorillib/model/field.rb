@@ -65,6 +65,9 @@ module Gorillib
         args = [name.inspect, type.to_s]
         "field(#{args.join(", ")})"
       end
+      def inspect_compact
+        "field(#{name})"
+      end
 
       def to_hash
         attributes.merge!(@visibility).merge!(@extra_attributes)
