@@ -1,56 +1,5 @@
 module Gorillib
 
-
-  #
-  # facet(:foo)                        -- update_or_add facet
-  # facet(:foo, :blah => 'val')        -- update_or_add facet
-  # facet(:foo, :blah => 'val'){ ... } -- update_or_add facet
-  #
-  # facet(:foo, existing_facet)        -- error
-  #
-
-  class Collection
-    #
-    #
-    #     class ClusterCollection < ModelCollection
-    #       self.item_type = Cluster
-    #     end
-    #     class Organization
-    #       field :clusters, ClusterCollection, default: ->{ ClusterCollection.new(common_attrs: { organization: self }) }
-    #     end
-    #
-    module CommonAttrs
-      extend Gorillib::Concern
-
-      included do
-        # [Class, #receive] Attributes to mix in to each added item
-        class_attribute :common_attrs, :instance_writer => false
-        singleton_class.send(:protected, :common_attrs=)
-        self.common_attrs = Hash.new
-      end
-
-      def initialize(options={})
-        super
-        @common_attrs = self.class.common_attrs.merge(options[:common_attrs]) if options.include?(:common_attrs)
-      end
-
-      #
-      # * a factory-native object: item is updated with common_attrs, then added
-      # * raw materials for the object: item is constructed (from the merged attrs and common_attrs), then added
-      #
-      def receive_item(label, *args, &block)
-        attrs = args.extract_options!.merge(common_attrs)
-        super(label, *args, attrs, &block)
-      end
-
-      def update_or_add(label, *args, &block)
-        attrs = args.extract_options!.merge(common_attrs)
-        super(label, *args, attrs, &block)
-      end
-
-    end
-  end
-
   #
   # A collection of Models
   #
@@ -107,56 +56,46 @@ module Gorillib
     def to_json(*args) to_wire(*args).to_json(*args) ; end
   end
 
-  #
-  # Deprecated!
-  #
+  class Collection
+    #
+    #
+    #     class ClusterCollection < ModelCollection
+    #       self.item_type = Cluster
+    #     end
+    #     class Organization
+    #       field :clusters, ClusterCollection, default: ->{ ClusterCollection.new(common_attrs: { organization: self }) }
+    #     end
+    #
+    module CommonAttrs
+      extend Gorillib::Concern
 
-  class ModelCollectionOld < Gorillib::ModelCollection
-    # The default `key_method` invoked on a new item to generate its collection key
-    DEFAULT_KEY_METHOD = :to_key
-
-    def initialize(key_meth=nil, item_type=nil)
-      @item_type   = Gorillib::Factory(item_type) if item_type
-      @clxn        = Hash.new
-      @key_method  = key_meth || DEFAULT_KEY_METHOD
-    end
-
-    def create(*args, &block)
-      item = item_type.receive(*args)
-      self << item
-      item
-    end
-
-    def update_or_create(key, *args, &block)
-      if include?(key)
-        obj = fetch(key)
-        obj.receive!(*args, &block)
-        obj
-      else
-        attrs = args.extract_options!.merge(key_method => key)
-        create(*args, attrs, &block)
+      included do
+        # [Class, #receive] Attributes to mix in to each added item
+        class_attribute :common_attrs, :instance_writer => false
+        singleton_class.send(:protected, :common_attrs=)
+        self.common_attrs = Hash.new
       end
-    end
 
-  protected
-
-    def convert_value(val)
-      return val unless item_type
-      return nil if val.nil?
-      item_type.receive(val)
-    end
-
-    # - if the given collection responds_to `to_hash`, it is received into the internal collection; each hash key *must* match the id of its value or results are undefined.
-    # - otherwise, it receives a hash generates from the id/value pairs of each object in the given collection.
-    def convert_collection(cc)
-      return cc.to_hash if cc.respond_to?(:to_hash)
-      cc.inject({}) do |acc, val|
-        val      = convert_value(val)
-        key      = val.public_send(key_method)
-        acc[key] = val
-        acc
+      def initialize(options={})
+        super
+        @common_attrs = self.class.common_attrs.merge(options[:common_attrs]) if options.include?(:common_attrs)
       end
-    end
 
+      #
+      # * a factory-native object: item is updated with common_attrs, then added
+      # * raw materials for the object: item is constructed (from the merged attrs and common_attrs), then added
+      #
+      def receive_item(label, *args, &block)
+        attrs = args.extract_options!.merge(common_attrs)
+        super(label, *args, attrs, &block)
+      end
+
+      def update_or_add(label, *args, &block)
+        attrs = args.extract_options!.merge(common_attrs)
+        super(label, *args, attrs, &block)
+      end
+
+    end
   end
+
 end
