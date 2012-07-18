@@ -222,12 +222,12 @@ describe Gorillib::Model, :model_spec do
   end
 
   context '.inspect' do
-    it('is pretty'){ smurf_class.inspect.should == 'Gorillib::Test::Smurf[smurfiness,weapon]' }
-    it('is pretty even if class is anonymous'){ Class.new(smurf_class).inspect.should == 'anon[smurfiness,weapon]' }
+    it('is pretty'){ smurf_class.inspect.should == 'Gorillib::Test::Smurf[name,smurfiness,weapon]' }
+    it('is pretty even if class is anonymous'){ Class.new(smurf_class).inspect.should == 'anon[name,smurfiness,weapon]' }
   end
   context '.inspect_compact' do
     it('is just the class name'){ smurf_class.inspect_compact.should == "Gorillib::Test::Smurf" }
-    it('is detailed if class is anonymous'){ Class.new(smurf_class).inspect_compact.should == "anon[smurfiness,weapon]" }
+    it('is detailed if class is anonymous'){ Class.new(smurf_class).inspect_compact.should == "anon[name,smurfiness,weapon]" }
   end
 
   describe Gorillib::Model::NamedSchema do
