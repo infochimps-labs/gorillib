@@ -95,7 +95,7 @@ class Pathname
   end
 
   # @return [String] compact string rendering
-  def inspect_compact() to_s.dump ; end
+  def inspect_compact() to_path.dump ; end
 
   # FIXME: find out if this is dangerous
   alias_method :to_str, :to_path
