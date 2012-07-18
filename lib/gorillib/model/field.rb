@@ -28,7 +28,6 @@ module Gorillib
       class_attribute :visibilities, :instance_writer => false
       self.visibilities = { :reader => :public, :writer => :public, :receiver => :public, :tester => false }
 
-
       # @param [#to_sym]                name    Field name
       # @param [#receive]               type    Factory for field values. To accept any object as-is, specify `Object` as the type.
       # @param [Gorillib::Model]       model   Field's owner
@@ -62,7 +61,7 @@ module Gorillib
 
       # @return [String] Human-readable presentation of the field definition
       def inspect
-        args = [name.inspect, type.to_s]
+        args = [name.inspect, type.to_s, attributes.reject{|k,v| k =~ /^(name|type)$/}.inspect[1..-2] ]
         "field(#{args.join(", ")})"
       end
       def inspect_compact

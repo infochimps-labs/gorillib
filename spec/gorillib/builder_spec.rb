@@ -11,17 +11,6 @@ require 'model_test_helpers'
 
 describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
-  let(:smurf_class) do
-    class Gorillib::Test::Smurf
-      include Gorillib::Builder
-      magic :smurfiness, Integer
-      magic :weapon,     Symbol
-    end
-    Gorillib::Test::Smurf
-  end
-  let(:poppa_smurf  ){ smurf_class.receive(:name => 'Poppa Smurf',   :smurfiness => 9,  :weapon => 'staff') }
-  let(:smurfette    ){ smurf_class.receive(:name => 'Smurfette',     :smurfiness => 11, :weapon => 'charm') }
-
   #
   # IT BEHAVES LIKE A MODEL
   # (maybe you wouldn't notice if it was just one little line)
@@ -141,10 +130,10 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
   context 'collections' do
     subject{ garage }
-    let(:sample_val){ Gorillib::ModelCollection.receive([wildcat], :name, car_class) }
+    let(:sample_val){ Gorillib::ModelCollection.receive([wildcat], key_method: :name, item_type: car_class) }
     let(:raw_val   ){ [ wildcat.attributes ] }
     it_behaves_like "a model field", :cars
-    it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::ModelCollection.new }
+    it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::ModelCollection.new(key_method: :to_key) }
 
     it 'a collection holds named objects' do
       garage.cars.should be_empty
@@ -165,13 +154,13 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
       # examine the whole collection
       garage.cars.keys.should == [:cadzilla, :wildcat, :ford_39]
-      garage.cars.should == Gorillib::ModelCollection.receive([cadzilla, wildcat, ford_39], :name, car_class)
+      garage.cars.should == Gorillib::ModelCollection.receive([cadzilla, wildcat, ford_39], key_method: :name, item_type: car_class)
     end
 
     it 'lazily autovivifies collection items' do
       garage.cars.should be_empty
       garage.car(:chimera).should be_a(car_class)
-      garage.cars.should == Gorillib::ModelCollection.receive([{:name => :chimera}], :name, car_class)
+      garage.cars.should == Gorillib::ModelCollection.receive([{:name => :chimera}], key_method: :name, item_type: car_class)
     end
 
     context 'collection getset method' do

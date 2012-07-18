@@ -1,11 +1,25 @@
 module Gorillib ;               module Test ;       end ; end
 module Meta ; module Gorillib ; module Test ; end ; end ; end
 
-shared_context 'model', :model_spec => true do
+shared_context 'model', :model_spec do
   after(:each){ Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
 
   let(:mock_val){ mock('mock value') }
 
+  let(:smurf_class) do
+    class Gorillib::Test::Smurf
+      include Gorillib::Model
+      field :smurfiness, Integer
+      field :weapon,     Symbol
+    end
+    Gorillib::Test::Smurf
+  end
+  let(:papa_smurf   ){ smurf_class.receive(:name => 'Papa Smurf', :smurfiness => 9,  :weapon => 'staff') }
+  let(:smurfette    ){ smurf_class.receive(:name => 'Smurfette',  :smurfiness => 11, :weapon => 'charm') }
+
+end
+
+shared_context 'builder', :model_spec, :builder_spec do
   let(:engine_class) do
     class Gorillib::Test::Engine
       include Gorillib::Builder
@@ -37,7 +51,7 @@ shared_context 'model', :model_spec => true do
     car_class
     class Gorillib::Test::Garage
       include Gorillib::Builder
-      collection :cars,       Gorillib::Test::Car
+      collection :cars,       Gorillib::Test::Car, key_method: :name
       self
     end
     Gorillib::Test::Garage
