@@ -263,11 +263,17 @@ module Gorillib
       def field(field_name, type, options={})
         options = options.symbolize_keys
         field_type = options.delete(:field_type){ ::Gorillib::Model::Field }
-        fld = field_type.new(field_name, type, self, options)
+        fld = field_type.new(self, field_name, type, options)
         @_own_fields[fld.name] = fld
         _reset_descendant_fields
         fld.send(:inscribe_methods, self)
         fld
+      end
+
+      def collection(field_name, collection_type, options={})
+        options[:item_type] = options[:of] if options.has_key?(:of)
+        field(field_name, collection_type, {
+            field_type: ::Gorillib::Model::SimpleCollectionField}.merge(options))
       end
 
       # @return [{Symbol => Gorillib::Model::Field}]
@@ -369,12 +375,31 @@ module Gorillib
       end
 
       def define_attribute_receiver(field_name, field_type, visibility)
+        # @param  [Object] val the raw value to type-convert and adopt
+        # @return [Object] the attribute's new value
         define_meta_module_method("receive_#{field_name}", visibility) do |val|
           begin
             val = field_type.receive(val)
             write_attribute(field_name, val)
-            self
           rescue StandardError => err ; err.polish("#{self.class}.#{field_name} type #{type} on #{val}") rescue nil ; raise ; end
+        end
+      end
+
+      #
+      # Collection receiver --
+      #
+      def define_collection_receiver(field)
+        collection_field_name = field.name; collection_type = field.type
+        # @param  [Array[Object],Hash[Object]] the collection to merge
+        # @return [Gorillib::Collection] the updated collection
+        define_meta_module_method("receive_#{collection_field_name}", true) do |coll, &block|
+          begin
+            if collection_type.native?(coll)
+              write_attribute(collection_field_name, coll)
+            else
+              read_attribute(collection_field_name).receive!(coll, &block)
+            end
+          rescue StandardError => err ; err.polish("#{self.class} #{collection_field_name} collection on #{args}'") rescue nil ; raise ; end
         end
       end
 

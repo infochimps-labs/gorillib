@@ -9,6 +9,7 @@ shared_context 'model', :model_spec do
   let(:smurf_class) do
     class Gorillib::Test::Smurf
       include Gorillib::Model
+      field :name,       String
       field :smurfiness, Integer
       field :weapon,     Symbol
     end
@@ -16,6 +17,28 @@ shared_context 'model', :model_spec do
   end
   let(:papa_smurf   ){ smurf_class.receive(:name => 'Papa Smurf', :smurfiness => 9,  :weapon => 'staff') }
   let(:smurfette    ){ smurf_class.receive(:name => 'Smurfette',  :smurfiness => 11, :weapon => 'charm') }
+
+  let(:smurf_collection_class) do
+    smurf_class
+    class Gorillib::Test::SmurfCollection < Gorillib::ModelCollection
+      include Gorillib::Collection::ItemsBelongTo
+      self.item_type        = Gorillib::Test::Smurf
+      self.parentage_method = :village
+    end
+    Gorillib::Test::SmurfCollection
+  end
+
+  let(:smurf_village_class) do
+    smurf_class ; smurf_collection_class
+    module Gorillib::Test
+      class SmurfVillage
+        include Gorillib::Model
+        field      :name,   Symbol
+        collection :smurfs, SmurfCollection, of: Smurf, key_method: :name
+      end
+    end
+    Gorillib::Test::SmurfVillage
+  end
 
 end
 

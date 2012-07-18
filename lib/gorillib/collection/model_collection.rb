@@ -35,12 +35,12 @@ module Gorillib
     end
 
     def update_or_add(label, attrs, &block)
-      if include?(label)
+      if label && include?(label)
         item = fetch(label)
         item.receive!(attrs, &block)
         item
       else
-        attrs = attrs.merge(key_method => label) if key_method
+        attrs = attrs.merge(key_method => label) if key_method && label
         receive_item(label, attrs, &block)
       end
     rescue StandardError => err ; err.polish("#{item_type} #{label} as #{attrs} to #{self}") rescue nil ; raise
@@ -57,6 +57,7 @@ module Gorillib
   end
 
   class Collection
+
     #
     #
     #     class ClusterCollection < ModelCollection
@@ -78,7 +79,7 @@ module Gorillib
 
       def initialize(options={})
         super
-        @common_attrs = self.class.common_attrs.merge(options[:common_attrs]) if options.include?(:common_attrs)
+        @common_attrs = self.common_attrs.merge(options[:common_attrs]) if options.include?(:common_attrs)
       end
 
       #
@@ -96,6 +97,60 @@ module Gorillib
       end
 
     end
-  end
 
+    #
+    # @example
+    #   class Smurf
+    #     include Gorillib::Model
+    #   end
+    #
+    #   # Sets the 'village' attribute on each item it receives to the object
+    #   # this collection belongs to.
+    #   class SmurfCollection < ModelCollection
+    #     include Gorillib::Collection::ItemsBelongTo
+    #     self.item_type        = Smurf
+    #     self.parentage_method = :village
+    #   end
+    #
+    #   # SmurfVillage makes sure its SmurfCollection knows that it `belongs_to` the village
+    #   class SmurfVillage
+    #     include Gorillib::Model
+    #     field :name,   Symbol
+    #     field :smurfs, SmurfCollection, default: ->{ SmurfCollection.new(belongs_to: self) }
+    #   end
+    #
+    #   # all the normal stuff works as you'd expect
+    #   smurf_town = SmurfVillage.new('smurf_town')   # #<SmurfVillage name=smurf_town>
+    #   smurf_town.smurfs                             # c{ }
+    #   smurf_town.smurfs.belongs_to                  # #<SmurfVillage name=smurf_town>
+    #
+    #   # when a new smurf moves to town, it knows what village it belongs_to
+    #   smurf_town.smurfs.receive_item(:novel_smurf, smurfiness: 10)
+    #   # => #<Smurf name=:novel_smurf smurfiness=10 village=#<SmurfVillage name=smurf_town>>
+    #
+    module ItemsBelongTo
+      extend Gorillib::Concern
+      include Gorillib::Collection::CommonAttrs
+
+      included do
+        # [Class, #receive] Name of the attribute to set on
+        class_attribute :parentage_method, :instance_writer => false
+        singleton_class.send(:protected, :common_attrs=)
+      end
+
+      # add this collection's belongs_to to the common attrs, so that a
+      # newly-created object knows its parentage from birth.
+      def initialize(*args)
+        super
+        @common_attrs = self.common_attrs.merge(parentage_method => self.belongs_to)
+      end
+
+      def add(item, *args)
+        item.send("#{parentage_method}=", belongs_to)
+        super
+      end
+
+    end
+
+  end
 end

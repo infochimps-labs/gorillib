@@ -70,9 +70,9 @@ describe Gorillib::Model, :model_spec do
       example_inst.should_receive(:write_attribute).with(:my_field, mock_val)
       (example_inst.my_field = mock_val).should == mock_val
     end
-    it "supplies a receiver method #receive_foo to call write_attribute(:foo) and return self" do
-      example_inst.should_receive(:write_attribute).with(:my_field, mock_val)
-      (example_inst.receive_my_field(mock_val)).should == example_inst
+    it "supplies #receive_foo, which does write_attribute(:foo) and returns the new value " do
+      example_inst.should_receive(:write_attribute).with(:my_field, mock_val).and_return('okey doke!')
+      (example_inst.receive_my_field(mock_val)).should == 'okey doke!'
     end
     it "sets visibility of reader with :reader => ()" do
       described_class.field :test_field, Integer, :reader => :private, :writer => false

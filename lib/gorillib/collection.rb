@@ -62,9 +62,12 @@ module Gorillib
   #
   #
   class Collection
-    # [{Symbol => Object}] The actual store of items, but not for you to mess with
+    # [{Symbol => Object}] The actual store of items -- not for you to mess with
     attr_reader :clxn
     protected   :clxn
+
+    # Object that owns this collection, if any
+    attr_reader :belongs_to
 
     # [String, Symbol] Method invoked on a new item to generate its collection key; :to_key by default
     class_attribute :key_method, :instance_writer => false
@@ -73,7 +76,8 @@ module Gorillib
     # include Gorillib::Model
     def initialize(options={})
       @clxn       = Hash.new
-      @key_method = options[:key_method] if options.has_key?(:key_method)
+      @key_method = options[:key_method] if options[:key_method]
+      @belongs_to = options[:belongs_to] if options[:belongs_to]
     end
 
     # Adds an item in-place. Items added to the collection (via `add`, `[]=`,
@@ -156,7 +160,9 @@ module Gorillib
     end
 
     # Create a new collection and add the given items to it
+    # (if given an existing collection, just returns it directly)
     def self.receive(items, *args)
+      return items if native?(items)
       coll = new(*args)
       coll.receive!(items)
       coll
@@ -167,7 +173,7 @@ module Gorillib
     #
     # @param  obj [Object] the object that will be received
     # @return [true, false] true if the item does not need conversion
-    def native?(obj)
+    def self.native?(obj)
       obj.is_a?(self)
     end
 
