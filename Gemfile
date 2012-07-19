@@ -1,35 +1,36 @@
 source "http://rubygems.org"
 
-gem     'multi_json', "~> 1.1"
-gem     'json'
+gem   'multi_json',  ">= 1.1"
 
-gem     'wukong', :path => '../wukong'
-
-# Add dependencies to develop your gem here.
-# Include everything needed to run rake, tests, features, etc.
+# Only gems that you want listed as development dependencies in the gemspec
 group :development do
-  gem   'bundler',    "~> 1"
-  gem   'pry'
-  gem 'jeweler',    "~> 1.6"
+  gem 'bundler',     "~> 1.1"
+  gem 'rake'
+  gem 'oj',          ">= 1.2"
+  gem 'json',                  :platform => :jruby
+end
+
+# Gems you would use if hacking on this gem (rather than with it)
+group :support do
+  gem 'jeweler',     ">= 1.6"
+  gem 'pry'
 end
 
 group :docs do
-  gem   'yard',       "~> 0.7"
-  gem   'redcarpet',  "~> 2.1"
+  gem 'yard',        ">= 0.7"
+  gem 'redcarpet',   ">= 2.1"
 end
 
+# Gems for testing and coverage
 group :test do
-  gem   'rspec',      "~> 2.5"
+  gem 'rspec',       "~> 2.8"
+  gem 'simplecov',   ">= 0.5", :platform => :ruby_19
+  #
+  gem 'guard',       ">= 1.0"
+  gem 'guard-rspec', ">= 0.6"
+  gem 'guard-yard'
+  #
   if RUBY_PLATFORM.include?('darwin')
-    gem 'rb-fsevent', "~> 0.9"
-    # gem 'growl',      "~> 1"
-    # gem 'ruby_gntp'
+    gem 'rb-fsevent', ">= 0.9"
   end
-
-  gem   'guard',      "~> 1"
-  gem   'guard-rspec'
-  gem   'guard-yard'
-  gem   'guard-process'
-
-  # gem 'simplecov',  ">= 0.5",   :platform => :ruby_19
 end

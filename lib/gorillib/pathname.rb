@@ -9,15 +9,21 @@ module Gorillib
 
     def register_path(handle, *pathsegs)
       ArgumentError.arity_at_least!(pathsegs, 1)
-      ROOT_PATHS[handle] = pathsegs
+      ROOT_PATHS[handle.to_sym] = pathsegs
     end
 
-    def register_paths(pairs = {})
-      pairs.each_pair{ |handle, pathsegs| register_path(handle, *pathsegs) }
+    def register_paths(handle_paths = {})
+      handle_paths.each_pair{|handle, pathsegs| register_path(handle, *pathsegs) }
     end
 
-    def unregister_path handle
-      ROOT_PATHS.delete handle
+    def register_default_paths(handle_paths = {})
+      handle_paths.each_pair do |handle, pathsegs|
+        register_path(handle, *pathsegs) unless ROOT_PATHS.has_key?(handle.to_sym)
+      end
+    end
+
+    def unregister_path(handle)
+      ROOT_PATHS.delete handle.to_sym
     end
 
     # Expand a path with late-evaluated segments.
@@ -47,7 +53,7 @@ module Gorillib
     # @return [Pathname] A single expanded Pathname
     #
     def path_to(*pathsegs)
-      relative_path_to(*pathsegs).expand_path
+      relpath_to(*pathsegs).expand_path
     end
 
     # Expand a path with late-evaluated segments
@@ -56,11 +62,12 @@ module Gorillib
     # Calls cleanpath (removing `//` double slashes and useless `..`s), but does
     # not reference the filesystem or make paths absolute
     #
-    def relative_path_to(*pathsegs)
+    def relpath_to(*pathsegs)
       ArgumentError.arity_at_least!(pathsegs, 1)
       pathsegs = pathsegs.map{|ps| expand_pathseg(ps) }.flatten
-      new(File.join(*pathsegs)).cleanpath(true)
+      self.new(File.join(*pathsegs)).cleanpath(true)
     end
+    alias_method :relative_path_to, :relpath_to
 
   protected
     # Recursively expand a path handle
@@ -75,4 +82,21 @@ end
 
 class Pathname
   extend Gorillib::Pathref
+  class << self ; alias_method :new_pathname, :new ; end
+
+  def self.receive(obj)
+    return obj if obj.nil?
+    obj.is_a?(self) ? obj : new(obj)
+  end
+
+  # @return the basename without extension (using self.extname as the extension)
+  def corename
+    basename(self.extname)
+  end
+
+  # @return [String] compact string rendering
+  def inspect_compact() to_path.dump ; end
+
+  # FIXME: find out if this is dangerous
+  alias_method :to_str, :to_path
 end

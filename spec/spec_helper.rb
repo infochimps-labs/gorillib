@@ -15,4 +15,6 @@ Dir[GORILLIB_ROOT_DIR('spec/support/matchers/*.rb')].each {|f| require f}
 
 RSpec.configure do |config|
   include Gorillib::TestHelpers
+
+  config.treat_symbols_as_metadata_keys_with_true_values = true
 end

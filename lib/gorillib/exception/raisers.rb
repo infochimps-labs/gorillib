@@ -11,8 +11,8 @@ Exception.class_eval do
   def polish(extra_info)
     filename, _, method_name = self.class.caller_parts
     method_name.gsub!(/rescue in /, '')
-    most_recent_line = backtrace.detect{|line| line.include?(filename) && line.include?(method_name) }
-    most_recent_line.sub!(/'$/, " for #{extra_info}'"[0..300])
+    most_recent_line = backtrace.detect{|line| line.include?(filename) && line.include?(method_name) && line[-1] == "'" }
+    most_recent_line.sub!(/'$/, "' for [#{extra_info.to_s[0..300]}]")
   end
 
 end
@@ -35,10 +35,11 @@ ArgumentError.class_eval do
   #   @param [Array]     args splat args as handed to the caller
   #   @param [#include?] val  expected range/list/set of lengths
   # @raise ArgumentError when there are
-  def self.check_arity!(args, val)
+  def self.check_arity!(args, val, &block)
     allowed_arity = val.is_a?(Integer) ? (val..val) : val
     return true if allowed_arity.include?(args.length)
-    raise self.new("wrong number of arguments (#{args.length} for #{val})")
+    info = " #{block.call}" rescue nil if block_given?
+    raise self.new("wrong number of arguments (#{args.length} for #{val})#{info}")
   end
 
   # Raise an error just like Ruby's native message if there are fewer arguments

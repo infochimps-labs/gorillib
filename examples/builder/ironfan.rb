@@ -7,7 +7,7 @@ module Gorillib::Test
 
   class IronfanBuilder
     include Gorillib::FancyBuilder
-    field           :name,        Symbol
+    magic           :name,        Symbol
 
   end
   class ComputeBuilder < IronfanBuilder; end
@@ -38,7 +38,7 @@ module Gorillib::Test
 
 
   class ComputeBuilder < IronfanBuilder
-    field         :environment, Symbol
+    magic         :environment, Symbol
     collection    :clouds,      Cloud
     collection    :volumes,    Volume
     collection    :components, Component
@@ -72,7 +72,7 @@ module Gorillib::Test
   class Facet          < ComputeBuilder
     belongs_to    :cluster,   Cluster
     collection    :servers,   Server
-    field         :instances, Integer, :doc => 'number of servers to instantiate for this machine'
+    magic         :instances, Integer, :doc => 'number of servers to instantiate for this machine'
   end
 
   class Server         < ComputeBuilder
@@ -89,7 +89,7 @@ module Gorillib::Test
   end
 
   class Component      < IronfanBuilder
-    field :discovers, Array, :of => :whatever, :doc => 'components this one discovers. Can be used to intelligently generate security groups, add client components, etc'
+    magic :discovers, Array, :of => :whatever, :doc => 'components this one discovers. Can be used to intelligently generate security groups, add client components, etc'
   end
 
   class SecurityGroup  < IronfanBuilder

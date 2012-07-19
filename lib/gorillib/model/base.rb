@@ -1,4 +1,3 @@
-
 module Gorillib
 
   # Provides a set of class methods for defining a field schema and instance
@@ -19,10 +18,15 @@ module Gorillib
   module Model
     extend Gorillib::Concern
 
+    def initialize(*args, &block)
+      attrs = self.class.attrs_hash_from_args(args)
+      receive!(attrs, &block)
+    end
+
     # Returns a Hash of all attributes
     #
     # @example Get attributes
-    #   person.attributes # => { :name => "Ben Poweski" }
+    #   person.attributes # => { :name => "Emmet Brown", :title => "Dr" }
     #
     # @return [{Symbol => Object}] The Hash of all attributes
     def attributes
@@ -30,6 +34,11 @@ module Gorillib
         hsh[fn] = read_attribute(fn)
         hsh
       end
+    end
+
+    # @return [Array[Object]] all the attributes, in field order, with `nil` where unset
+    def attribute_values
+      self.class.field_names.map{|fn| read_attribute(fn) }
     end
 
     # Returns a Hash of all attributes *that have been set*
@@ -55,17 +64,22 @@ module Gorillib
     # or some such. Use `#update_attributes` if your data is already type safe.
     #
     # @param [{Symbol => Object}] hsh The values to receive
-    # @return [Gorillib::Model] the object itself
+    # @return [nil] nothing
     def receive!(hsh={})
-      if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash for #{self.inspect}", hsh)
-      hsh = hsh.symbolize_keys
-      self.class.fields.each do |field_name, field|
-        next unless hsh.has_key?(field_name)
-        self.public_send(:"receive_#{field_name}", hsh[field_name])
+      if hsh.respond_to?(:attributes)
+        hsh = hsh.attributes
+      else
+        Gorillib::Model::Validate.hashlike!(hsh){ "attributes for #{self.inspect}" }
+        hsh = hsh.dup
       end
-      handle_extra_attributes( hsh.reject{|field_name,val| self.class.has_field?(field_name) } )
-      self
+      self.class.field_names.each do |field_name|
+        if    hsh.has_key?(field_name)      then val = hsh.delete(field_name)
+        elsif hsh.has_key?(field_name.to_s) then val = hsh.delete(field_name.to_s)
+        else next ; end
+        self.send("receive_#{field_name}", val)
+      end
+      handle_extra_attributes(hsh)
+      nil
     end
 
     def handle_extra_attributes(attrs)
@@ -83,12 +97,12 @@ module Gorillib
     # @return [Gorillib::Model] the object itself
     def update_attributes(hsh)
       if hsh.respond_to?(:attributes) then hsh = hsh.attributes ; end
-      Gorillib::Model::Validate.hashlike!("attributes hash", hsh)
-      self.class.fields.each do |attr, field|
-        if    hsh.has_key?(attr)      then val = hsh[attr]
-        elsif hsh.has_key?(attr.to_s) then val = hsh[attr.to_s]
+      Gorillib::Model::Validate.hashlike!(hsh){ "attributes for #{self.inspect}" }
+      self.class.field_names.each do |field_name|
+        if    hsh.has_key?(field_name)      then val = hsh[field_name]
+        elsif hsh.has_key?(field_name.to_s) then val = hsh[field_name.to_s]
         else next ; end
-        write_attribute(attr, val)
+        write_attribute(field_name, val)
       end
       self
     end
@@ -103,9 +117,9 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [Object] The value of the attribute, or nil if it is unset
     def read_attribute(field_name)
-      check_field(field_name)
-      if instance_variable_defined?("@#{field_name}")
-        instance_variable_get("@#{field_name}")
+      attr_name = "@#{field_name}"
+      if instance_variable_defined?(attr_name)
+        instance_variable_get(attr_name)
       else
         read_unset_attribute(field_name)
       end
@@ -122,7 +136,6 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [Object] the attribute's value
     def write_attribute(field_name, val)
-      check_field(field_name)
       instance_variable_set("@#{field_name}", val)
     end
 
@@ -140,7 +153,6 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [Object] the former value if it was set, nil if it was unset
     def unset_attribute(field_name)
-      check_field(field_name)
       if instance_variable_defined?("@#{field_name}")
         val = instance_variable_get("@#{field_name}")
         remove_instance_variable("@#{field_name}")
@@ -159,7 +171,6 @@ module Gorillib
     # @raise [UnknownAttributeError] if the attribute is unknown
     # @return [true, false]
     def attribute_set?(field_name)
-      check_field(field_name)
       instance_variable_defined?("@#{field_name}")
     end
 
@@ -177,39 +188,37 @@ module Gorillib
       attributes == other.attributes
     end
 
-    # override inspect_helper (not this) in your descendant class
+    # override to_inspectable (not this) in your descendant class
     # @return [String] Human-readable presentation of the attributes
-    def inspect(detailed=true)
-      inspect_helper(detailed, compact_attributes)
+    def inspect
+      str = '#<' << self.class.name.to_s
+      attrs = to_inspectable
+      if attrs.present?
+        str << '(' << attrs.map{|attr, val| "#{attr}=#{val.respond_to?(:inspect_compact) ? val.inspect_compact : val.inspect}" }.join(", ") << ')'
+      end
+      str << '>'
+    end
+
+    def inspect_compact
+      str = "#<#{self.class.name.to_s}>"
     end
 
     # assembles just the given attributes into the inspect string.
     # @return [String] Human-readable presentation of the attributes
-    def inspect_helper(detailed, attrs)
-      str = "#<" << self.class.name.to_s
-      if detailed && attrs.present?
-        str << " "
-        str << attrs.map do |attr, val|
-          "#{attr}=#{val.is_a?(Gorillib::Model) || val.is_a?(Gorillib::Collection) ? val.inspect(false) : val.inspect}"
-        end.join(", ")
-      end
-      str << ">"
+    def to_inspectable
+      compact_attributes
     end
-    private :inspect_helper
+    private :to_inspectable
 
   protected
 
-    # @return [true] if the field exists
-    # @raise [UnknownFieldError] if the field is missing
-    def check_field(field_name)
-      return true if self.class.has_field?(field_name)
-      raise UnknownFieldError, "unknown field: #{field_name} for #{self}"
-    end
-
     module ClassMethods
 
+      #
+      # A readable handle for this field
+      #
       def typename
-        Gorillib::Inflector.underscore(self.name).gsub(%r{/}, '.')
+        @typename ||= Gorillib::Inflector.underscore(self.name||'anon').gsub(%r{/}, '.')
       end
 
       #
@@ -218,13 +227,22 @@ module Gorillib
       # @return [Gorillib::Model] the new object
       def receive(attrs={}, &block)
         return nil if attrs.nil?
-        return attrs if attrs.is_a?(self)
-        Gorillib::Model::Validate.hashlike!("attributes for #{self}", attrs)
+        return attrs if native?(attrs)
+        #
+        Gorillib::Model::Validate.hashlike!(attrs){ "attributes for #{self.inspect}" }
         klass = attrs.has_key?(:_type) ? Gorillib::Factory(attrs[:_type]) : self
-        warn "factory #{self} doesn't match type specified in #{attrs}" unless klass <= self
-        obj = klass.new
-        obj.receive!(attrs, &block)
-        obj
+        warn "factory #{klass} is not a type of #{self} as specified in #{attrs}" unless klass <= self
+        #
+        klass.new(attrs, &block)
+      end
+
+      # A `native` object does not need any transformation; it is accepted directly.
+      # By default, an object is native if it `is_a?` this class
+      #
+      # @param  obj [Object] the object that will be received
+      # @return [true, false] true if the item does not need conversion
+      def native?(obj)
+        obj.is_a?(self)
       end
 
       # Defines a new field
@@ -260,12 +278,46 @@ module Gorillib
 
       # @return [true, false] true if the field is defined on this class
       def has_field?(field_name)
-        fields.has_key?(field_name.to_sym)
+        fields.has_key?(field_name)
       end
 
       # @return [Array<Symbol>] The attribute names
       def field_names
-        fields.keys
+        @_field_names ||= fields.keys
+      end
+
+      def positionals
+        @_positionals ||= assemble_positionals
+      end
+
+      def assemble_positionals
+        positionals = fields.values.keep_if{|fld| fld.position? }.sort_by!{|fld| fld.position }
+        return [] if positionals.empty?
+        if (positionals.map(&:position) != (0..positionals.length-1).to_a) then raise ConflictingPositionError, "field positions #{positionals.map(&:position).join(",")} for #{positionals.map(&:name).join(",")} aren't in strict minimal order"  ; end
+        positionals.map!(&:name)
+      end
+
+      # turn model constructor args (`*positional_args, {attrs}`) into a combined
+      # attrs hash. positional_args are mapped to the set of attribute names in
+      # order -- by default, the class' field names.
+      #
+      # Notes:
+      #
+      # * Positional args always clobber elements of the attribute hash.
+      # * Nil positional args are treated as present-and-nil (this might change).
+      # * Raises an error if positional args
+      #
+      # @param [Array[Symbol]] attr_names list of attributes, in order, to map.
+      #
+      # @return [Hash] a combined, reconciled hash of attributes to set
+      def attrs_hash_from_args(args)
+        attrs = args.extract_options!
+        if args.present?
+          ArgumentError.check_arity!(args, 0..positionals.length){ "extracting args #{args} for #{self}" }
+          positionals_to_map = positionals[0..(args.length-1)]
+          attrs = attrs.merge(Hash[positionals_to_map.zip(args)])
+        end
+        attrs
       end
 
       # @return Class name and its attributes
@@ -273,8 +325,10 @@ module Gorillib
       # @example Inspect the model's definition.
       #   Person.inspect #=> Person[first_name, last_name]
       def inspect
-        "#{self.name || 'anon'}[#{ field_names.join(", ") }]"
+        "#{self.name || 'anon'}[#{ field_names.join(",") }]"
       end
+      def inspect_compact() self.name || inspect ; end
+
 
     protected
 
@@ -284,7 +338,9 @@ module Gorillib
       # are added after the child class is defined.
       def _reset_descendant_fields
         ObjectSpace.each_object(::Class) do |klass|
-          klass.__send__(:remove_instance_variable, '@_fields') if klass <= self && klass.instance_variable_defined?('@_fields')
+          klass.__send__(:remove_instance_variable, '@_fields')      if (klass <= self) && klass.instance_variable_defined?('@_fields')
+          klass.__send__(:remove_instance_variable, '@_field_names') if (klass <= self) && klass.instance_variable_defined?('@_field_names')
+          klass.__send__(:remove_instance_variable, '@_positionals') if (klass <= self) && klass.instance_variable_defined?('@_positionals')
         end
       end
 
@@ -306,8 +362,9 @@ module Gorillib
 
       # define the present method `#foo?` for a field named `:foo`
       def define_attribute_tester(field_name, field_type, visibility)
+        field = fields[field_name]
         define_meta_module_method("#{field_name}?", visibility) do
-          attribute_set?(field_name)
+          attribute_set?(field_name) || field.has_default?
         end
       end
 

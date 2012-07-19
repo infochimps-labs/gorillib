@@ -1,21 +1,18 @@
 require 'gorillib/string/simple_inflector'
 require 'gorillib/model'
+require 'gorillib/collection/model_collection'
 
 module Gorillib
   module Builder
     extend  Gorillib::Concern
     include Gorillib::Model
 
-    def initialize(attrs={}, &block)
-      receive!(attrs, &block)
-    end
-
+    # @return [Object, nil] the return value of the block, or nil if no block given
     def receive!(*args, &block)
       super(*args)
       if block_given?
         (block.arity == 1) ? block.call(self) : self.instance_eval(&block)
       end
-      self
     end
 
     def getset(field, *args, &block)
@@ -75,7 +72,9 @@ module Gorillib
     end
 
     def set_collection_item(plural_name, item_key, item)
-      collection_of(plural_name)[item_key] = item
+      collection = collection_of(plural_name)
+      collection[item_key] = item
+      collection[item_key]
     end
 
     def has_collection_item?(plural_name, item_key)
@@ -87,13 +86,11 @@ module Gorillib
     end
 
     def to_key
-      self.read_attribute(key_method)
+      self.send(key_method)
     end
 
-    def inspect_helper(detailed, attrs)
-      attrs.delete(:owner)
-      # detailed ? str : ([str[0..-2], " #{to_key}>"].join)
-      str = super(detailed, attrs)
+    def to_inspectable
+      super.tap{|attrs| attrs.delete(:owner) }
     end
 
     def collection_of(plural_name)
@@ -103,19 +100,16 @@ module Gorillib
     module ClassMethods
       include Gorillib::Model::ClassMethods
 
-      def field(field_name, type, options={})
-        super(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField}.merge(options))
+      def magic(field_name, type, options={})
+        field(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField}.merge(options))
       end
       def member(field_name, type, options={})
         field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField}.merge(options))
       end
       def collection(field_name, item_type, options={})
-        field(field_name, Gorillib::Collection, {
+        field(field_name, Gorillib::ModelCollection, {
             :item_type => item_type,
             :field_type => ::Gorillib::Builder::CollectionField}.merge(options))
-      end
-      def simple_field(field_name, type, options={})
-        field(field_name, type, {:field_type => ::Gorillib::Model::Field}.merge(options))
       end
 
     protected
@@ -178,14 +172,14 @@ module Gorillib
     include Gorillib::Builder
 
     included do |base|
-      base.field :name,  Symbol
+      base.magic :name,  Symbol
     end
 
     module ClassMethods
       include Gorillib::Builder::ClassMethods
 
       def belongs_to(field_name, type, options={})
-        field = field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField }.merge(options))
+        field = member(field_name, type)
         define_meta_module_method "#{field.name}_name" do
           val = getset_member(field) or return nil
           val.name
@@ -195,7 +189,7 @@ module Gorillib
 
       def option(field_name, options={})
         type = options.delete(:type){ Whatever }
-        field(field_name, type, {:field_type => ::Gorillib::Builder::GetsetField }.merge(options))
+        magic(field_name, type)
       end
 
       def collects(type, clxn_name)
@@ -243,7 +237,7 @@ module Gorillib
 
       def inscribe_methods(model)
         item_type      = self.item_type
-        self.default   = ->{ Gorillib::Collection.new(item_type) }
+        self.default   = ->{ Gorillib::ModelCollection.new(key_method: key_method, item_type: item_type) }
         raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
         #
         @visibilities[:writer] = false

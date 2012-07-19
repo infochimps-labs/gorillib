@@ -22,18 +22,24 @@ describe '', :model_spec => true do
         ff = Gorillib::Factory( ->(obj){ "bob says #{obj}" } )
         ff.receive(3).should == "bob says 3"
       end
-      it 'uses a factory directly' do
+      it 'returns anything that responds to #receive directly' do
+        ff = Object.new ; ff.define_singleton_method(:receive){}
+        Gorillib::Factory(ff).should equal(ff)
+      end
+      it 'returns a factory directly' do
         ff = Gorillib::Factory::SymbolFactory.new
-        Gorillib::Factory(ff).should == ff
-        Gorillib::Factory(Gorillib::Factory::SymbolFactory).should == Gorillib::Factory::SymbolFactory
+        Gorillib::Factory(ff).should equal(ff)
+      end
+      it 'does not look up factory **classes**' do
+        ->{ Gorillib::Factory(Gorillib::Factory::SymbolFactory) }.should raise_error(ArgumentError, /Don\'t know which factory makes/)
       end
       it 'looks up factories by typename' do
-        Gorillib::Factory(:symbol   ).should == Gorillib::Factory::SymbolFactory
-        Gorillib::Factory(:identical).should == Gorillib::Factory::IdenticalFactory
+        Gorillib::Factory(:symbol   ).should be_a(Gorillib::Factory::SymbolFactory)
+        Gorillib::Factory(:identical).should == (::Whatever)
       end
       it 'looks up factories by class' do
-        Gorillib::Factory(Symbol).should == Gorillib::Factory::SymbolFactory
-        Gorillib::Factory(String).should == Gorillib::Factory::StringFactory
+        Gorillib::Factory(Symbol).should be_a(Gorillib::Factory::SymbolFactory)
+        Gorillib::Factory(String).should be_a(Gorillib::Factory::StringFactory)
       end
       it 'calls Gorillib::Factory.receive' do
         x = mock
@@ -86,9 +92,10 @@ describe '', :model_spec => true do
   shared_examples_for :it_is_registered_as do |*keys|
     it "the factory for #{keys}" do
       keys.each do |key|
-        Gorillib::Factory(key).should == described_class
+        Gorillib::Factory(key).should be_a(described_class)
       end
-      Gorillib::Factory.send(:factories).to_hash.select{|key,val| val == described_class }.keys.should == keys
+      its_factory = Gorillib::Factory(keys.first)
+      Gorillib::Factory.send(:factories).to_hash.select{|key,val| val.equal?(its_factory) }.keys.should == keys
     end
   end
 
@@ -177,12 +184,19 @@ describe '', :model_spec => true do
     its(:typename){ should == :boolean }
   end
 
-  describe Gorillib::Factory::IdenticalFactory do
-    it_behaves_like :it_considers_native,   true, false, nil, 3, '', 'a string', :a_symbol, [], {}, ->(){ 'a proc' }, Module.new, Complex(1,3), Object.new
-    it_behaves_like :it_is_registered_as, :identical, :whatever
-  end
   describe ::Whatever do
-    it{ described_class.should equal(Gorillib::Factory::IdenticalFactory) }
+    it_behaves_like :it_considers_native,   true, false, nil, 3, '', 'a string', :a_symbol, [], {}, ->(){ 'a proc' }, Module.new, Complex(1,3), Object.new
+    it "it is itself the factory for :identical and :whatever" do
+      keys = [Whatever, :identical, :whatever]
+      keys.each do |key|
+        Gorillib::Factory(key).should equal(described_class)
+      end
+      its_factory = ::Whatever
+      Gorillib::Factory.send(:factories).to_hash.select{|key,val| val.equal?(its_factory) }.keys.should == keys
+    end
+  end
+  describe Gorillib::Factory::IdenticalFactory do
+    it{ described_class.should equal(Whatever) }
   end
 
   describe Gorillib::Factory::ModuleFactory do

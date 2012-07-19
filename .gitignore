@@ -1,8 +1,10 @@
 ## OS
 .DS_Store
-Icon?
+Icon
 nohup.out
 .bak
+
+*.pem
 
 ## EDITORS
 \#*
@@ -31,6 +33,11 @@ a.out
 .svn
 
 ## PROJECT::GENERAL
+
+log/*
+tmp/*
+pkg/*
+
 coverage
 rdoc
 doc
@@ -38,17 +45,11 @@ pkg
 .rake_test_cache
 .bundle
 .yardoc
-*_private.*
-*.pem
-
-log/*
-tmp/*
-pkg/*
-
-## PROJECT::SPECIFIC
-*.rdb
 
 .vendor
-.bundle
+
+## PROJECT::SPECIFIC
+
 Gemfile.lock
-old/*
+.rvmrc
+.rbenv-version

@@ -1,15 +1,13 @@
 require 'spec_helper'
 require 'model_test_helpers'
 
-require 'json'
-
 require 'multi_json'
 #
 require 'gorillib/model'
 require 'gorillib/builder'
 require 'gorillib/model/serialization'
 
-describe Gorillib::Model, :model_spec => true do
+describe Gorillib::Model, :model_spec, :builder_spec do
   subject do
     garage.cars << wildcat
     garage.cars << ford_39
@@ -17,13 +15,13 @@ describe Gorillib::Model, :model_spec => true do
   end
   let :wired_garage_hash do
     { :cars => [
-        {:name=>:wildcat, :make_model=>"Buick Wildcat",    :year=>1968, :doors=>2, :engine=>{:name=>" engine", :carburetor=>:stock, :volume=>455, :cylinders=>8, :owner=>nil}},
-        {:name=>:ford_39, :make_model=>"Ford Tudor Sedan", :year=>1939, :doors=>2, :engine=>nil}, ] }
+        {:name=>:wildcat, :make_model=>"Buick Wildcat",    :year=>1968, :doors=>2, :engine=>{:name=>" engine", :carburetor=>:stock, :volume=>455, :cylinders=>8, :owner=>nil, :_type => "gorillib.test.engine"}, :_type => "gorillib.test.car"},
+        {:name=>:ford_39, :make_model=>"Ford Tudor Sedan", :year=>1939, :doors=>2, :engine=>nil, :_type => "gorillib.test.car"}, ], :_type => "gorillib.test.garage" }
   end
 
   describe 'to_json' do
     it 'recursively serializes' do
-      MultiJson.load(wildcat.to_json).should == {"name"=>"wildcat","make_model"=>"Buick Wildcat","year"=>1968,"doors"=>2,"engine"=>{"name"=>" engine","carburetor"=>"stock","volume"=>455,"cylinders"=>8,"owner"=>nil}}
+      MultiJson.load(wildcat.to_json).should == {"name"=>"wildcat","make_model"=>"Buick Wildcat","year"=>1968,"doors"=>2,"engine"=>{"name"=>" engine","carburetor"=>"stock","volume"=>455,"cylinders"=>8,"owner"=>nil,"_type"=>"gorillib.test.engine"},"_type"=>"gorillib.test.car"}
     end
     it 'recursively serializes' do
       subject.to_json.should == MultiJson.dump(wired_garage_hash)

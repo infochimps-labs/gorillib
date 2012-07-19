@@ -17,7 +17,7 @@ module Gorillib
     # @param [String, Symbol, #to_s] field_name Name of the attribute to unset.
     # @return [nil] Ze goggles! Zey do nussing!
     def read_unset_attribute(field_name)
-      field = self.class.fields[field_name]
+      field = self.class.fields[field_name] or return nil
       return unless field.has_default?
       write_attribute(field.name, attribute_default(field))
     end
@@ -57,8 +57,10 @@ module Gorillib
       return unless field.has_default?
       val = field.default
       case
-      when (val.is_a?(Proc) || val.is_a?(UnboundMethod)) && (val.arity == 0)
+      when val.is_a?(Proc) && (val.arity == 0)
         self.instance_exec(&val)
+      when val.is_a?(UnboundMethod) && (val.arity == 0)
+        val.bind(self).call
       when val.respond_to?(:call)
         val.call(self, field.name)
       else

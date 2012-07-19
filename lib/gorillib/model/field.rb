@@ -28,7 +28,6 @@ module Gorillib
       class_attribute :visibilities, :instance_writer => false
       self.visibilities = { :reader => :public, :writer => :public, :receiver => :public, :tester => false }
 
-
       # @param [#to_sym]                name    Field name
       # @param [#receive]               type    Factory for field values. To accept any object as-is, specify `Object` as the type.
       # @param [Gorillib::Model]       model   Field's owner
@@ -62,8 +61,11 @@ module Gorillib
 
       # @return [String] Human-readable presentation of the field definition
       def inspect
-        args = [name.inspect, type.to_s]
+        args = [name.inspect, type.to_s, attributes.reject{|k,v| k =~ /^(name|type)$/}.inspect[1..-2] ]
         "field(#{args.join(", ")})"
+      end
+      def inspect_compact
+        "field(#{name})"
       end
 
       def to_hash
@@ -121,6 +123,8 @@ module Gorillib
 
       # Field's description
       field :doc, String
+
+      field :position, Integer, :tester => true, :doc => "Indicates this is a positional initialization arg -- you can pass it as a plain value in the given slot to #initialize"
 
       # remove the attr_reader method (needed for scaffolding), leaving the meta_module method to remain
       remove_possible_method(:name)

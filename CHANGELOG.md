@@ -1,6 +1,55 @@
 ## Version 1.0
 
-### 2012-04 - Version 1.0.0: DSL Magic
+**positional args**:
+
+* You must explicitly declare the field to be positional in its definition: 
+
+      class Smurf
+        include Gorillib::Model
+        field :smurfiness, Integer, :position => 0
+        field :weapon, String, :position => 1
+      end
+    
+    Positions must be non-conflicting and in minimal order: if a subclass would bomb out if it declared `field :foo, Whatever, :position => 1` (or any position besides `2`).
+
+* Builder's `receive!` method returns the *block*'s return value, not `self`.
+
+
+### 2012-06 - Version 1.0.1-pre: First wave of refactors
+
+**model**: 
+
+* `receive!` is now called from the initiailizer.
+
+* the initializer now takes `(*positional_args, attrs)`, assembles the `positional_args` into the attrs, and hands them to `receive!`.
+
+* the way you get a "magic get-set attribute" in builder is by saying `magic`, not `field` -- `field` means the same thing as it does in model.
+
+**collection**: 
+
+Gorillib::Collection has been broken up as follows:
+
+* A generic collection stores objects uniquely, in the order added. It responds to:
+  - receive!, values, to_a, each and each_value;
+  - length, size, empty?, blank?
+
+* `Gorillib::Collection` additionally lets you store and retrieve things by label:
+  - [], []=, include?, fetch, delete, each_pair, to_hash.
+
+* `Gorillib::ModelCollection` adds:
+  - `key_method`: called on objects to get their key; `to_key` by default.
+  - `factory`: generates new objects, converts received objects
+  - `<<`: adds object under its `key_method` key
+  - `receive!`s an array by auto-keying the elements, or a hash by trusting what you give it
+  - `update_or_create: if absent, creates object with given attributes and
+    `key_method => key`; if present, updates with given attributes.
+
+what this means for you:
+* `Collection` no longer has factory functionality -- that is now in `ModelCollection`. 
+* The signature of `ModelCollection#initialize` is `initialize(key_meth, factory)` -- the reverse of what was.
+
+
+### 2012-04 - Version 1.0.0-pre: DSL Magic
 
 #### New functionality
 

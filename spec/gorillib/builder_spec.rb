@@ -3,23 +3,28 @@ require 'spec_helper'
 # libs under test
 require 'gorillib/builder'
 require 'gorillib/builder/field'
+require 'gorillib/collection/model_collection'
 
 # testing helpers
 require 'gorillib/hash/compact'
 require 'model_test_helpers'
 
 describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
-  let(:example_val  ){ mock('example val') }
-  subject{ car_class }
+
+  #
+  # IT BEHAVES LIKE A MODEL
+  # (maybe you wouldn't notice if it was just one little line)
+  #
+  it_behaves_like 'a model'
 
   context 'examples:' do
-    subject{ car_class }
+    let(:subject_class  ){ car_class }
     it 'type-converts values' do
-      obj = subject.receive(     :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2" )
+      obj = subject_class.receive(     :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2" )
       obj.attributes.should == { :name => :wildcat,  :make_model => 'Buick Wildcat', :year =>  1968,  :doors =>  2, :engine => nil }
     end
     it 'handles nested structures' do
-      obj = subject.receive(
+      obj = subject_class.receive(
         :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2",
         :engine => { :carburetor => 'edelbrock', :volume => "455", :cylinders => '8' })
       obj.attributes.values_at(:name, :make_model, :year, :doors).should == [:wildcat, 'Buick Wildcat', 1968,  2 ]
@@ -41,18 +46,28 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
   end
 
   context 'receive!' do
-    it 'accepts a configurate block' do
+    it 'with a block, instance evals the block' do
       expect_7 = nil ; expect_obj = nil
       wildcat.receive!({}){    expect_7 = 7 ; expect_obj = self }
       expect_7.should == 7 ; expect_obj.should  == wildcat
+    end
+    it 'with a block of arity 1, calls the block passing self' do
       expect_7 = nil ; expect_obj = nil
       wildcat.receive!({}){|c| expect_7 = 7 ; expect_obj = c }
       expect_7.should    == 7 ; expect_obj.should  == wildcat
     end
+    it 'with a block, returns its return value' do
+      val = mock_val
+      wildcat.receive!{      val }.should == val
+      wildcat.receive!{|obj| val }.should == val
+    end
+    it 'with no block, returns nil' do
+      wildcat.receive!.should be_nil
+    end
   end
 
-  context ".field" do
-
+  context ".magic" do
+    let(:subject_class){ car_class }
     context do
       subject{ car_class.new }
       let(:sample_val){ 'fiat' }
@@ -61,29 +76,28 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
       it("#read_attribute is nil if never set"){ subject.read_attribute(:make_model).should == nil }
     end
 
+    it "does not create a writer method #foo=" do
+      subject_class.should     be_method_defined(:doors)
+      subject_class.should_not be_method_defined(:doors=)
+    end
+
     context 'calling the getset "#foo" method' do
       subject{ wildcat }
 
       it "with no args calls read_attribute(:foo)" do
-        subject.write_attribute(:doors, example_val)
-        subject.should_receive(:read_attribute).with(:doors).at_least(:once).and_return(example_val)
-        subject.doors.should == example_val
+        subject.write_attribute(:doors, mock_val)
+        subject.should_receive(:read_attribute).with(:doors).at_least(:once).and_return(mock_val)
+        subject.doors.should == mock_val
       end
       it "with an argument calls write_attribute(:foo)" do
         subject.write_attribute(:doors, 'gone')
-        subject.should_receive(:write_attribute).with(:doors, example_val).and_return('returned')
-        result = subject.doors(example_val)
+        subject.should_receive(:write_attribute).with(:doors, mock_val).and_return('returned')
+        result = subject.doors(mock_val)
         result.should == 'returned'
       end
       it "with multiple arguments is an error" do
         expect{ subject.doors(1, 2) }.to raise_error(ArgumentError, "wrong number of arguments (2 for 0..1)")
       end
-    end
-
-    it "does not create a writer method #foo=" do
-      subject{ car_class }
-      subject.should     be_method_defined(:doors)
-      subject.should_not be_method_defined(:doors=)
     end
   end
 
@@ -95,14 +109,14 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
     it("#read_attribute is nil if never set"){ subject.read_attribute(:engine).should == nil }
 
     it "calling the getset method #foo with no args calls read_attribute(:foo)" do
-      wildcat.write_attribute(:doors, example_val)
-      wildcat.should_receive(:read_attribute).with(:doors).at_least(:once).and_return(example_val)
-      wildcat.doors.should == example_val
+      wildcat.write_attribute(:doors, mock_val)
+      wildcat.should_receive(:read_attribute).with(:doors).at_least(:once).and_return(mock_val)
+      wildcat.doors.should == mock_val
     end
     it "calling the getset method #foo with an argument calls write_attribute(:foo)" do
       wildcat.write_attribute(:doors, 'gone')
-      wildcat.should_receive(:write_attribute).with(:doors, example_val).and_return('returned')
-      result = wildcat.doors(example_val)
+      wildcat.should_receive(:write_attribute).with(:doors, mock_val).and_return('returned')
+      result = wildcat.doors(mock_val)
       result.should == 'returned'
     end
     it "calling the getset method #foo with multiple arguments is an error" do
@@ -116,10 +130,10 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
   context 'collections' do
     subject{ garage }
-    let(:sample_val){ Gorillib::Collection.receive([wildcat], car_class, :name) }
+    let(:sample_val){ Gorillib::ModelCollection.receive([wildcat], key_method: :name, item_type: car_class) }
     let(:raw_val   ){ [ wildcat.attributes ] }
     it_behaves_like "a model field", :cars
-    it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::Collection.new }
+    it("#read_attribute is an empty collection if never set"){ subject.read_attribute(:cars).should == Gorillib::ModelCollection.new(key_method: :to_key) }
 
     it 'a collection holds named objects' do
       garage.cars.should be_empty
@@ -140,12 +154,13 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 
       # examine the whole collection
       garage.cars.keys.should == [:cadzilla, :wildcat, :ford_39]
-      garage.cars.should == Gorillib::Collection.receive([cadzilla, wildcat, ford_39], car_class, :name)
+      garage.cars.should == Gorillib::ModelCollection.receive([cadzilla, wildcat, ford_39], key_method: :name, item_type: car_class)
     end
+
     it 'lazily autovivifies collection items' do
       garage.cars.should be_empty
       garage.car(:chimera).should be_a(car_class)
-      garage.cars.should == Gorillib::Collection.receive([{:name => :chimera}], car_class, :name)
+      garage.cars.should == Gorillib::ModelCollection.receive([{:name => :chimera}], key_method: :name, item_type: car_class)
     end
 
     context 'collection getset method' do
