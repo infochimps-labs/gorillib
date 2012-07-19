@@ -36,7 +36,7 @@ module Gorillib
         if val.present?
           # existing item: update it with args and block
           val.receive!(*args, &block) if args.present?
-        elsif attrs.blank?
+        elsif attrs.blank? and block.nil?
           # missing item (read): return nil
           return nil
         else
