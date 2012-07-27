@@ -67,7 +67,7 @@ module Gorillib
     # @return [nil] nothing
     def receive!(hsh={})
       if hsh.respond_to?(:attributes)
-        hsh = hsh.attributes
+        hsh = hsh.compact_attributes
       else
         Gorillib::Model::Validate.hashlike!(hsh){ "attributes for #{self.inspect}" }
         hsh = hsh.dup
