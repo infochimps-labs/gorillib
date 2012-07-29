@@ -58,6 +58,35 @@ ArgumentError.class_eval do
   end
 end
 
+class TypeMismatchError < ArgumentError
+  #
+  #
+  # @example
+  #   TypeMismatchError.expected!(foo)
+  def self.expected!(obj, types=[], message=nil, *args)
+    types = Array(types)
+    message ||= "Type mismatch"
+    message << ": got " <<  (obj.inspect rescue '(uninspectable object)')
+    if types.present?
+      message << 'expected ' << types.map{|type| type.is_a?(Symbol) ? "#{type}" : type.to_s }.join(" or ")
+    end
+    raise self, message, *args
+  end
+
+  def self.check_type!(obj, types, *args)
+    types = Array(types)
+    return true if types.any? do |type|
+      case type
+      when Module then obj.is_a?(type)
+      when Symbol then obj.respond_to?(type)
+      else raise StandardError, "Can't check type #{type} -- this is an error in the call to the type-checker, not in the object the type-checker is checking"
+      end
+    end
+    self.expected!(obj, types, *args)
+  end
+
+end
+
 NoMethodError.class_eval do
   MESSAGE = "undefined method `%s' for %s:%s"
 
