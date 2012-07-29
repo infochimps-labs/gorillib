@@ -37,7 +37,7 @@ module Gorillib
       # @option options [true, false, :public, :protected, :private] :writer   Visibility for the writer (`#foo=`) method; `false` means don't create one.
       # @option options [true, false, :public, :protected, :private] :receiver Visibility for the receiver (`#receive_foo`) method; `false` means don't create one.
       #
-      def initialize(name, type, model, options={})
+      def initialize(model, name, type, options={})
         Validate.identifier!(name)
         @model            = model
         @name             = name.to_sym
@@ -80,7 +80,7 @@ module Gorillib
         name  = hsh.fetch(:name)
         type  = hsh.fetch(:type)
         model = hsh.fetch(:model)
-        new(name, type, model, hsh)
+        new(model, name, type, hsh)
       end
 
       #
@@ -112,24 +112,43 @@ module Gorillib
       # Now we can construct the actual fields.
       #
 
+      field :position, Integer, :tester => true,       :doc => "Indicates this is a positional initialization arg -- you can pass it as a plain value in the given slot to #initialize"
+
       # Name of this field. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]` (required)
       # @macro [attach] field
       #   @attribute $1
       #   @return [$2] the $1 field $*
-      field :name, String, :writer => false, :doc => "The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]` (required)"
+      field :name, String, position: 0, writer: false, doc: "The field name. Must start with `[A-Za-z_]` and subsequently contain only `[A-Za-z0-9_]` (required)"
 
-      # Factory for the field's values
-      field :type, Class
+      field :type, Class,  position: 1,                doc: "Factory to generate field's values"
 
-      # Field's description
-      field :doc, String
-
-      field :position, Integer, :tester => true, :doc => "Indicates this is a positional initialization arg -- you can pass it as a plain value in the given slot to #initialize"
+      field :doc,  String,                             doc: "Field's description"
 
       # remove the attr_reader method (needed for scaffolding), leaving the meta_module method to remain
       remove_possible_method(:name)
 
     end
+
+
+    class SimpleCollectionField < Gorillib::Model::Field
+      field :item_type,        Class, default: Whatever, doc: "Factory for collection items"
+      # field :collection_attrs, Hash,  default: Hash.new, doc: "Extra attributes to pass to the collection on creation -- eg. key_method"
+
+      def initialize(model, name, type, options={})
+        super
+        collection_type = self.type
+        item_type       = self.item_type
+        key_method      = options[:key_method] if options[:key_method]
+        raise "Please supply an item type for #{self.inspect} -- eg 'collection #{name.inspect}, of: FooClass'" unless item_type
+        self.default ||= ->{ collection_type.new(item_type: item_type, belongs_to: self, key_method: key_method) }
+      end
+
+      def inscribe_methods(model)
+        super
+        model.__send__(:define_collection_receiver, self)
+      end
+    end
+
   end
 end
 

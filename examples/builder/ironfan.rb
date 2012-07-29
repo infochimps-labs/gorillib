@@ -24,8 +24,6 @@ module Gorillib::Test
   class Aspect         < IronfanBuilder ; end
   class Machine        < IronfanBuilder ; end
   class ChefNode       < IronfanBuilder ; def save() ; end ; end
-  class ChefClient     < IronfanBuilder ; def save() ; end ; end
-  class ChefRole       < IronfanBuilder ; def save() ; end ; end
 
   module Ironfan
     class << self
@@ -39,7 +37,7 @@ module Gorillib::Test
 
   class ComputeBuilder < IronfanBuilder
     magic         :environment, Symbol
-    collection    :clouds,      Cloud
+    collection    :clouds,     Cloud
     collection    :volumes,    Volume
     collection    :components, Component
 
@@ -51,22 +49,6 @@ module Gorillib::Test
     belongs_to    :organization, Organization
 
     def servers() organization.servers.where(:cluster_name => self.name) ; end
-  end
-
-  module ComputeBuilder::Deprecated
-    def bogosity() ; end
-    def bogus?()   ; end
-    def raid_group() ; end
-    def root_volume() ; end
-    def role() ; end
-    def recipe() ; end
-    def role_implication() ; end
-  end
-  module Cluster::Deprecated
-    attr_accessor :chef_roles
-    def find_facet(facet_name)
-      facets.fetch(facet_name){ raise("Facet '#{facet_name}' is not defined in cluster '#{self.name}'") }
-    end
   end
 
   class Facet          < ComputeBuilder

@@ -138,8 +138,8 @@ shared_examples_for "a model field" do |field_name|
   end
 
   context "#receive_XX" do
-    it('returns the model itself') do
-      subject.send("receive_#{field_name}", raw_val).should == subject
+    it('returns the new attribute') do
+      subject.send("receive_#{field_name}", raw_val).should == sample_val
     end
     it('type-converts the object') do
       subject.send("receive_#{field_name}", raw_val)

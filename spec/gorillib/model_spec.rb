@@ -70,9 +70,9 @@ describe Gorillib::Model, :model_spec do
       example_inst.should_receive(:write_attribute).with(:my_field, mock_val)
       (example_inst.my_field = mock_val).should == mock_val
     end
-    it "supplies a receiver method #receive_foo to call write_attribute(:foo) and return self" do
-      example_inst.should_receive(:write_attribute).with(:my_field, mock_val)
-      (example_inst.receive_my_field(mock_val)).should == example_inst
+    it "supplies #receive_foo, which does write_attribute(:foo) and returns the new value " do
+      example_inst.should_receive(:write_attribute).with(:my_field, mock_val).and_return('okey doke!')
+      (example_inst.receive_my_field(mock_val)).should == 'okey doke!'
     end
     it "sets visibility of reader with :reader => ()" do
       described_class.field :test_field, Integer, :reader => :private, :writer => false
@@ -222,12 +222,12 @@ describe Gorillib::Model, :model_spec do
   end
 
   context '.inspect' do
-    it('is pretty'){ smurf_class.inspect.should == 'Gorillib::Test::Smurf[smurfiness,weapon]' }
-    it('is pretty even if class is anonymous'){ Class.new(smurf_class).inspect.should == 'anon[smurfiness,weapon]' }
+    it('is pretty'){ smurf_class.inspect.should == 'Gorillib::Test::Smurf[name,smurfiness,weapon]' }
+    it('is pretty even if class is anonymous'){ Class.new(smurf_class).inspect.should == 'anon[name,smurfiness,weapon]' }
   end
   context '.inspect_compact' do
     it('is just the class name'){ smurf_class.inspect_compact.should == "Gorillib::Test::Smurf" }
-    it('is detailed if class is anonymous'){ Class.new(smurf_class).inspect_compact.should == "anon[smurfiness,weapon]" }
+    it('is detailed if class is anonymous'){ Class.new(smurf_class).inspect_compact.should == "anon[name,smurfiness,weapon]" }
   end
 
   describe Gorillib::Model::NamedSchema do
