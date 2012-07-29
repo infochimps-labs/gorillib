@@ -179,9 +179,18 @@ describe '', :model_spec => true do
     it_behaves_like :it_considers_native,   true, false
     it_behaves_like :it_considers_blankish, nil
     it_behaves_like :it_converts,           "false" => false, :false => false
-    it_behaves_like :it_converts,           "true" => true,   :true  => true, [] => true, :foo => true, [] => true, Complex(1.5,3) => true, Object.new => true
+    it_behaves_like :it_converts,           "true" => true,   :true  => true, "0" => true, 0 => true, [] => true, :foo => true, [] => true, Complex(1.5,3) => true, Object.new => true
     it_behaves_like :it_is_registered_as, :boolean
     its(:typename){ should == :boolean }
+  end
+
+  describe Gorillib::Factory::Boolean10Factory do
+    it_behaves_like :it_considers_native,   true, false
+    it_behaves_like :it_considers_blankish, nil
+    it_behaves_like :it_converts,           "false" => false, :false => false, "0" => false, 0 => false
+    it_behaves_like :it_converts,           "true" => true,   :true  => true,  "1" => true,  [] => true, :foo => true, [] => true, Complex(1.5,3) => true, Object.new => true
+    it_behaves_like :it_is_registered_as, :boolean_10
+    its(:typename){ should == :boolean_10 }
   end
 
   describe ::Whatever do

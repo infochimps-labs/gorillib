@@ -9,6 +9,9 @@ class ::Guid      < ::String  ; end
 class ::IpAddress < ::String  ; end
 class ::Hostname  < ::String  ; end
 
+class ::Boolean10
+end
+
 # require 'gorillib/metaprogramming/delegation'
 #
 # class ::Boolean < ::Object

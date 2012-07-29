@@ -266,12 +266,24 @@ module Gorillib
     end
 
     class BooleanFactory < ConvertingFactory
+      register_factory!   :boolean
+      def self.typename() :boolean ; end
       self.product       = [TrueClass, FalseClass]
-      def blankish?(obj)    obj.nil? ; end
+      def blankish?(obj)   obj.nil? ; end
       def native?(obj)     obj.equal?(true) || obj.equal?(false) ; end
       def convert(obj)     (obj.to_s == "false") ? false : true ; end
-      register_factory!(:boolean)
-      def self.typename() :boolean ; end
+    end
+
+    class Boolean10Factory < BooleanFactory
+      register_factory!   :boolean_10
+      def self.typename() :boolean_10 ; end
+      def convert(obj)
+        case obj.to_s
+        when "0" then false
+        when "1" then true
+        else        super
+        end
+      end
     end
 
     #

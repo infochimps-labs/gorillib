@@ -126,6 +126,8 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
       wildcat.should     respond_to(:doors)
       wildcat.should_not respond_to(:doors=)
     end
+
+
   end
 
   context 'collections' do
