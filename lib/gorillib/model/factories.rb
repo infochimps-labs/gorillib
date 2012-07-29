@@ -1,5 +1,6 @@
 require 'pathname'
 require 'gorillib/type/extended'
+require 'gorillib/exception/raisers'
 
 def Gorillib::Factory(*args)
   ::Gorillib::Factory.receive(*args)
@@ -8,7 +9,7 @@ end
 module Gorillib
 
   module Factory
-    class FactoryMismatchError < ArgumentError ; end
+    class FactoryMismatchError < TypeMismatchError ; end
 
     def self.receive(type)
       case
@@ -101,8 +102,7 @@ module Gorillib
       # Raises a FactoryMismatchError.
       def mismatched!(obj, message=nil, *args)
         message ||= "item cannot be converted to #{product}"
-        message <<  (" got #{obj.inspect}" rescue ' (and is uninspectable)')
-        raise FactoryMismatchError, message, *args
+        FactoryMismatchError.expected!(obj, message, *args)
       end
 
       def self.register_factory!(*typenames)
@@ -236,14 +236,37 @@ module Gorillib
 
     class TimeFactory < ConvertingFactory
       self.product = Time
+      FLAT_TIME_RE = /\A\d{14}Z?\z/
+      def native?(obj) super(obj) && obj.utc_offset == 0 ; end
       def convert(obj)
         case obj
-        when String
-          Time.parse(obj).utc
-        when Numeric
-          Time.at(obj).utc
+        when FLAT_TIME_RE  then product.utc(obj[0..3].to_i, obj[4..5].to_i, obj[6..7].to_i, obj[8..9].to_i, obj[10..11].to_i, obj[12..13].to_i)
+        when Time          then obj.getutc
+        when Date          then product.utc(obj.year, obj.month, obj.day)
+        when String        then product.parse(obj).utc
+        when Numeric       then product.at(obj)
+        else                    mismatched!(obj)
         end
       rescue ArgumentError => err
+        raise if err.is_a?(TypeMismatchError)
+        warn "Cannot parse time #{obj}: #{err}"
+        return nil
+      end
+      register_factory!
+    end
+
+    class DateFactory  < ConvertingFactory
+      self.product = Date
+      FLAT_DATE_RE = /\A\d{8}Z?\z/
+      def convert(obj)
+        case obj
+        when FLAT_DATE_RE  then product.new(obj[0..3].to_i, obj[4..5].to_i, obj[6..7].to_i)
+        when Time          then Date.new(obj.year, obj.month, obj.day)
+        when String        then Date.parse(obj)
+        else                    mismatched!(obj)
+        end
+      rescue ArgumentError => err
+        raise if err.is_a?(TypeMismatchError)
         warn "Cannot parse time #{obj}: #{err}"
         return nil
       end

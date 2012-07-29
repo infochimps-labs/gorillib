@@ -175,6 +175,40 @@ describe '', :model_spec => true do
     its(:typename){ should == :rational }
   end
 
+  describe Gorillib::Factory::TimeFactory do
+    fuck_wit_dre_day   = Time.new(1993, 2, 18, 8, 8, 0, '-08:00')  # and Everybody's Celebratin'
+    p fuck_wit_dre_day.object_id
+    ice_cubes_good_day = Time.utc(1992, 1, 20, 0, 0, 0)
+    it_behaves_like :it_considers_native,   Time.now.utc, ice_cubes_good_day
+    it_behaves_like :it_converts,           fuck_wit_dre_day => fuck_wit_dre_day.getutc
+    it_behaves_like :it_converts,           '19930218160800' => fuck_wit_dre_day.getutc, '19920120000000Z' => ice_cubes_good_day
+    it_behaves_like :it_converts,           Date.new(1992, 1, 20) => ice_cubes_good_day
+    before('behaves like it_converts "an unparseable time" to nil'){ subject.stub(:warn) }
+    it_behaves_like :it_converts,           "an unparseable time" => nil, :non_native_ok => true
+    it_behaves_like :it_considers_blankish, nil, ""
+    it_behaves_like :it_is_a_mismatch_for,  :foo, false, []
+    it_behaves_like :it_is_registered_as,   :time, Time
+    it('always returns a UTC timezoned time') do
+      subject.convert(fuck_wit_dre_day).utc_offset.should == 0
+      fuck_wit_dre_day.utc_offset.should == (-8 * 3600)
+    end
+    its(:typename){ should == :time }
+  end
+
+  describe Gorillib::Factory::DateFactory do
+    fuck_wit_dre_day   = Date.new(1993, 2, 18)  # and Everybody's Celebratin'
+    ice_cubes_good_day = Date.new(1992, 1, 20)
+    it_behaves_like :it_considers_native,   Date.today, fuck_wit_dre_day, ice_cubes_good_day
+    it_behaves_like :it_converts,           '19930218' => fuck_wit_dre_day, '19920120' => ice_cubes_good_day
+    it_behaves_like :it_converts,           Time.utc(1992, 1, 20, 8, 8, 8) => ice_cubes_good_day
+    before('behaves like it_converts "an unparseable date" to nil'){ subject.stub(:warn) }
+    it_behaves_like :it_converts,           "an unparseable date" => nil, :non_native_ok => true
+    it_behaves_like :it_considers_blankish, nil, ""
+    it_behaves_like :it_is_a_mismatch_for,  :foo, false, []
+    it_behaves_like :it_is_registered_as,   :date, Date
+    its(:typename){ should == :date }
+  end
+
   describe Gorillib::Factory::BooleanFactory do
     it_behaves_like :it_considers_native,   true, false
     it_behaves_like :it_considers_blankish, nil
