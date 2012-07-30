@@ -1,4 +1,3 @@
-
 class Array
   def to_tsv
     join("\t")
