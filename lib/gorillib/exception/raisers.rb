@@ -65,8 +65,8 @@ class TypeMismatchError < ArgumentError
   #   TypeMismatchError.expected!(foo)
   def self.expected!(obj, types=[], msg=nil, *args)
     types = Array(types)
-    message = "Type Mismatch:"
-    message << ' ' << msg if msg
+    message = "Type Mismatch"
+    message << ': ' << msg if msg
     if types.present?
       message << '; expected ' << types.map{|type| type.is_a?(Symbol) ? "#{type}" : type.to_s }.join(" or ")
     end
