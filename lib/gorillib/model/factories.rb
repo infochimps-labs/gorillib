@@ -1,9 +1,12 @@
 require 'pathname'
-require 'gorillib/type/extended'
+require 'time'
+require 'gorillib/metaprogramming/class_attribute'
+require 'gorillib/string/inflector'
 require 'gorillib/exception/raisers'
+require 'gorillib/hash/compact'
 
 def Gorillib::Factory(*args)
-  ::Gorillib::Factory.receive(*args)
+  ::Gorillib::Factory.find(*args)
 end
 
 module Gorillib
@@ -11,7 +14,7 @@ module Gorillib
   module Factory
     class FactoryMismatchError < TypeMismatchError ; end
 
-    def self.receive(type)
+    def self.find(type)
       case
       when factories.include?(type)               then return factories[type]
       when type.respond_to?(:receive)             then return type
@@ -20,6 +23,12 @@ module Gorillib
         return( factories[type] = Gorillib::Inflector.constantize(Gorillib::Inflector.camelize(type.gsub(/\./, '/'))) )
       else raise ArgumentError, "Don't know which factory makes a #{type}"
       end
+    end
+
+    def self.factory_for(type, options={})
+      return find(type) if options.compact.blank?
+      klass = factory_klasses[type] or raise "You can only supply options #{options} to a Factory-mapped class"
+      klass.new(options)
     end
 
     # Manufactures objects from their raw attributes hash
@@ -35,25 +44,35 @@ module Gorillib
       end
     end
 
-    private
-    def self.factories
-      @factories ||= Hash.new
-    end
-    public
-
     def self.register_factory(factory, typenames)
       typenames.each{|typename| factories[typename] = factory }
     end
 
+    def self.register_factory_klass(factory_klass, typenames)
+      typenames.each{|typename| factory_klasses[typename] = factory_klass }
+    end
+
+    private
+    def self.factories()       @factories       ||= Hash.new end
+    def self.factory_klasses() @factory_klasses ||= Hash.new end
+    public
+
+    #
+    # A gorillib Factory should answer to the following:
+    #
+    # * `typename`  -- a handle (symbol, lowercased-underscored) naming this type
+    # * `native?`   -- native objects do not need type-conversion
+    # * `blankish?` -- blankish objects are type-converted to a `nil` value
+    # * `product`   -- the class of objects produced when non-blank
+    # * `receive`   -- performs the actual conversion
+    #
     class BaseFactory
       # [Class] The type of objects produced by this factory
       class_attribute :product
 
       def initialize(options={})
         @product       = options.delete(:product){ self.class.product }
-        if options[:blankish]
-          define_singleton_method(:blankish, options.delete(:blankish))
-        end
+        define_blankish_method(options.delete(:blankish)) if options.has_key?(:blankish)
         redefine(:convert, options.delete(:convert)) if options.has_key?(:convert)
         warn "Unknown options #{options.keys}" unless options.empty?
       end
@@ -84,7 +103,20 @@ module Gorillib
         obj.nil? || (obj == "")
       end
 
+      # performs the actual conversion
+      def receive(*args)
+        NoMethodError.unimplemented_method(self)
+      end
+
     protected
+
+      def define_blankish_method(blankish)
+        TypeMismatchError.check_type!(blankish, [Proc, Method, :include?])
+        if   blankish.respond_to?(:include?)
+        then meth = ->(val){ blankish.include?(val) }
+        else meth = blankish ; end
+        define_singleton_method(:blankish?, meth)
+      end
 
       def redefine(meth, *args, &block)
         if args.present?
@@ -102,12 +134,13 @@ module Gorillib
       # Raises a FactoryMismatchError.
       def mismatched!(obj, message=nil, *args)
         message ||= "item cannot be converted to #{product}"
-        FactoryMismatchError.expected!(obj, message, *args)
+        FactoryMismatchError.expected!(obj, product, message, *args)
       end
 
       def self.register_factory!(*typenames)
         typenames = [typename, product] if typenames.empty?
-        Gorillib::Factory.register_factory(self.new, typenames)
+        Gorillib::Factory.register_factory_klass(self,     typenames)
+        Gorillib::Factory.register_factory(      self.new, typenames)
       end
     end
 
@@ -180,10 +213,6 @@ module Gorillib
       register_factory!
     end
 
-    class GuidFactory      < StringFactory ; self.product = ::Guid      ; register_factory! ; end
-    class HostnameFactory  < StringFactory ; self.product = ::Hostname  ; register_factory! ; end
-    class IpAddressFactory < StringFactory ; self.product = ::IpAddress ; register_factory! ; end
-
     class BinaryFactory < StringFactory
       def convert(obj)
         super.force_encoding("BINARY")
@@ -236,7 +265,7 @@ module Gorillib
 
     class TimeFactory < ConvertingFactory
       self.product = Time
-      FLAT_TIME_RE = /\A\d{14}Z?\z/
+      FLAT_TIME_RE = /\A\d{14}Z?\z/ unless defined?(Gorillib::Factory::TimeFactory::FLAT_TIME_RE)
       def native?(obj) super(obj) && obj.utc_offset == 0 ; end
       def convert(obj)
         case obj
@@ -245,24 +274,6 @@ module Gorillib
         when Date          then product.utc(obj.year, obj.month, obj.day)
         when String        then product.parse(obj).utc
         when Numeric       then product.at(obj)
-        else                    mismatched!(obj)
-        end
-      rescue ArgumentError => err
-        raise if err.is_a?(TypeMismatchError)
-        warn "Cannot parse time #{obj}: #{err}"
-        return nil
-      end
-      register_factory!
-    end
-
-    class DateFactory  < ConvertingFactory
-      self.product = Date
-      FLAT_DATE_RE = /\A\d{8}Z?\z/
-      def convert(obj)
-        case obj
-        when FLAT_DATE_RE  then product.new(obj[0..3].to_i, obj[4..5].to_i, obj[6..7].to_i)
-        when Time          then Date.new(obj.year, obj.month, obj.day)
-        when String        then Date.parse(obj)
         else                    mismatched!(obj)
         end
       rescue ArgumentError => err
@@ -297,18 +308,6 @@ module Gorillib
       def convert(obj)     (obj.to_s == "false") ? false : true ; end
     end
 
-    class Boolean10Factory < BooleanFactory
-      register_factory!   :boolean_10
-      def self.typename() :boolean_10 ; end
-      def convert(obj)
-        case obj.to_s
-        when "0" then false
-        when "1" then true
-        else        super
-        end
-      end
-    end
-
     #
     #
     #
@@ -318,7 +317,7 @@ module Gorillib
       attr_reader :items_factory
 
       def initialize(options={})
-        @items_factory = Gorillib::Factory.receive( options.delete(:items){ Gorillib::Factory(:identical) } )
+        @items_factory = Gorillib::Factory( options.delete(:items){ :identical } )
         redefine(:empty_product, options.delete(:empty_product)) if options.has_key?(:empty_product)
         super(options)
       end
@@ -341,11 +340,6 @@ module Gorillib
 
     class ArrayFactory < EnumerableFactory
       self.product = Array
-      register_factory!
-    end
-
-    class SetFactory < EnumerableFactory
-      self.product = Set
       register_factory!
     end
 

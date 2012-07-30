@@ -34,7 +34,7 @@ shared_context 'model', :model_spec do
       class SmurfVillage
         include Gorillib::Model
         field      :name,   Symbol
-        collection :smurfs, SmurfCollection, of: Smurf, key_method: :name
+        collection :smurfs, SmurfCollection, item_type: Smurf, key_method: :name
       end
     end
     Gorillib::Test::SmurfVillage

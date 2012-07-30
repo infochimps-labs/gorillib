@@ -66,7 +66,7 @@ describe 'raisers' do
 
   describe TypeMismatchError do
     context '.expected!' do
-      let(:error_message){ /Type mismatch: got / }
+      let(:error_message){ /Type Mismatch: got / }
       it 'raises an error' do
         should_raise_my_error{ described_class.expected!("string", Integer) }
         should_raise_my_error{ described_class.expected!(Object.new) }
@@ -74,7 +74,7 @@ describe 'raisers' do
     end
 
     context '.check_type!' do
-      let(:error_message){ /Type mismatch.*got / }
+      let(:error_message){ /Type Mismatch:.*got / }
       it 'raises true if any type matches' do
         should_return_true{    described_class.check_type!("string", [Integer, String]) }
       end

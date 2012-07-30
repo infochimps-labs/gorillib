@@ -83,8 +83,8 @@ module Gorillib
     end
 
     def handle_extra_attributes(attrs)
-      @extra_attributes ||= Hash.new
-      @extra_attributes.merge!(attrs)
+      @_extra_attributes ||= Hash.new
+      @_extra_attributes.merge!(attrs)
     end
 
     #

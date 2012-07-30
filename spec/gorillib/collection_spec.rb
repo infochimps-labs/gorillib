@@ -292,9 +292,6 @@ describe 'collections:', :model_spec, :collection_spec do
           smurfs: [
             { name: 'whatever_smurf', smurfiness: 20},
           ]})
-        p [subject]
-        p [subject.smurfs]
-        p [subject.smurfs.belongs_to]
         subject.smurfs['whatever_smurf'].village.should == subject
       end
     end

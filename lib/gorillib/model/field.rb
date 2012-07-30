@@ -15,7 +15,7 @@ module Gorillib
       attr_reader :model
 
       # [Hash] all options passed to the field not recognized by one of its own current fields
-      attr_reader :extra_attributes
+      attr_reader :_extra_attributes
 
       # Note: `Gorillib::Model::Field` is assembled in two pieces, so that it
       # can behave as a model itself. Defining `name` here, along with some
@@ -39,9 +39,12 @@ module Gorillib
       #
       def initialize(model, name, type, options={})
         Validate.identifier!(name)
+        type_opts         = options.extract!(:blankish, :empty_product, :items, :keys, :of)
+        type_opts[:items] = type_opts.delete(:of) if type_opts.has_key?(:of)
+        #
         @model            = model
         @name             = name.to_sym
-        @type             = self.factory_for(type)
+        @type             = Gorillib::Factory.factory_for(type, type_opts)
         default_visabilities = visibilities
         @visibilities     = default_visabilities.merge( options.extract!(*default_visabilities.keys) )
         @doc              = options.delete(:name){ "#{name} field" }
@@ -55,10 +58,6 @@ module Gorillib
         name.to_s
       end
 
-      def factory_for(type)
-        Gorillib::Factory(type)
-      end
-
       # @return [String] Human-readable presentation of the field definition
       def inspect
         args = [name.inspect, type.to_s, attributes.reject{|k,v| k =~ /^(name|type)$/}.inspect[1..-2] ]
@@ -69,11 +68,11 @@ module Gorillib
       end
 
       def to_hash
-        attributes.merge!(@visibility).merge!(@extra_attributes)
+        attributes.merge!(@visibility).merge!(@_extra_attributes)
       end
 
       def ==(val)
-        super && (val.extra_attributes == self.extra_attributes) && (val.model == self.model)
+        super && (val._extra_attributes == self._extra_attributes) && (val.model == self.model)
       end
 
       def self.receive(hsh)
