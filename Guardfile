@@ -7,7 +7,7 @@
 
 
 format  = "progress"         # '--format doc'     for more verbose, --format progress for less
-tags    = %w[   ]         # '--tag record_spec' to only run tests tagged :record_spec
+tags    = %w[ only  ]         # '--tag record_spec' to only run tests tagged :record_spec
 
 guard 'rspec', :version => 2, :cli => "--format #{format} #{ tags.map{|tag| "--tag #{tag}"}.join(" ")  }" do
   watch(%r{^spec/.+_spec\.rb$})

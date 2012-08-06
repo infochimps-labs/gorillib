@@ -7,10 +7,10 @@ shared_examples_for :it_converts do |conversion_mapping|
   non_native_ok = conversion_mapping.delete(:non_native_ok)
   conversion_mapping.each do |obj, expected_result|
     it "#{obj.inspect} to #{expected_result.inspect}" do
-      subject.native?(  obj).should be_false
-      subject.blankish?(obj).should be_false
       actual_result = subject.receive(obj)
       actual_result.should  eql(expected_result)
+      subject.native?(  obj).should be_false
+      subject.blankish?(obj).should be_false
       unless non_native_ok then subject.native?(actual_result).should be_true  ; end
     end
   end

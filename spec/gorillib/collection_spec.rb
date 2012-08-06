@@ -230,7 +230,7 @@ describe 'collections:', :model_spec, :collection_spec do
       end
     end
 
-    context '#update_or_add', :only do
+    context '#update_or_add' do
       it "if absent, creates item with given attrs" do
         test_proc = ->{ 'test' };
         subject.should_receive(:receive_item).with('truffula', test_attrs.merge(name: 'truffula'), &test_proc).and_return(test_item)
@@ -269,8 +269,8 @@ describe 'collections:', :model_spec, :collection_spec do
   end
 
 
-  describe Gorillib::Model, :only do
-    describe '.collection', :only do
+  describe Gorillib::Model do
+    describe '.collection' do
       let(:described_class){ smurf_village_class }
       subject{ described_class.new(name: :smurf_town) }
       before do

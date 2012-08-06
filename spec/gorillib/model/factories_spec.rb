@@ -11,7 +11,7 @@ require 'gorillib/model/factories'
 
 require 'factory_test_helpers'
 
-describe '', :model_spec, :factory_spec do
+describe '', :model_spec, :factory_spec, :only do
 
   describe Gorillib::Factory do
     describe 'Factory()' do
@@ -77,35 +77,110 @@ describe '', :model_spec, :factory_spec do
   end
 
   describe Gorillib::Factory::IntegerFactory do
-    it_behaves_like :it_considers_native,   1, -1
-    it_behaves_like :it_converts,           'one' => 0, '3blindmice' => 3, "0x10" => 0
-    it_behaves_like :it_converts,           '1.0' => 1, '1'  => 1,    "0" => 0, "0L" => 0, "1_234_567" => 1234567, "1_234_567.0" => 1234567
-    it_behaves_like :it_converts,            1.0  => 1, 1.234567e6 => 1234567, Complex(1,0) => 1
-    it_behaves_like :it_considers_blankish, nil, ""
-    it_behaves_like :it_is_a_mismatch_for,  :foo, false, [], Complex(1,3)
+    it_behaves_like :it_considers_native,   1, -1, 123_456_789_123_456_789_123_456_789_123_456_789
+    #
+    it_behaves_like :it_converts,           '1'   => 1,   '0'   => 0,   '1234567'   => 1234567
+    it_behaves_like :it_converts,           '123456789123456789123456789123456789' => 123_456_789_123_456_789_123_456_789_123_456_789
+    it_behaves_like :it_converts,           '1_234_567'  => 1234567
+    it_behaves_like :it_converts,            1.0  => 1,   1.99  => 1,   -0.9 =>  0
+    it_behaves_like :it_converts,            Complex(1,0) => 1, Complex(1.0,0) => 1, Rational(5,2) => 2
+    #
+    it_behaves_like :it_considers_blankish,  nil, ''
+    it_behaves_like :it_is_a_mismatch_for,   Complex(1,0.0), Complex(0,3), :foo, false, []
+    it_behaves_like :it_is_a_mismatch_for,  '8_',          'one',         '3blindmice',        '_8_'
+    it_behaves_like :it_is_a_mismatch_for,   Float::INFINITY, Float::NAN
+    # Does not accept floating-point-ish
+    it_behaves_like :it_is_a_mismatch_for,  '1.0',       '0.0',       '1234567.0'
+    it_behaves_like :it_is_a_mismatch_for,  '1e5',       '1_234_567e-3',         '1_234_567.0', '+11.123E+12'
+    # Handles hex
+    it_behaves_like :it_converts,           '011' =>  9,   '0x10' => 16
+    # Intolerant of cruft, unlike GraciousIntegerFactory
+    it_behaves_like :it_is_a_mismatch_for,  '0L',          '1_234_567L',              '1_234_567e-3f', '1,234,567'
+    #
     it_behaves_like :it_is_registered_as, :int, :integer, Integer
     its(:typename){ should == :integer }
   end
 
+  describe Gorillib::Factory::GraciousIntegerFactory do
+    it_behaves_like :it_considers_native,   1, -1, 123_456_789_123_456_789_123_456_789_123_456_789
+    #
+    it_behaves_like :it_converts,           '1'   => 1,    '0'   => 0,   '1234567'   => 1234567
+    it_behaves_like :it_converts,           '123456789123456789123456789123456789' => 123_456_789_123_456_789_123_456_789_123_456_789
+    it_behaves_like :it_converts,           '1_234_567'  => 1234567
+    it_behaves_like :it_converts,            1.0  => 1,   1.99  => 1,   -0.9 =>  0
+    it_behaves_like :it_converts,            Complex(1,0) => 1, Complex(1.0,0) => 1, Rational(5,2) => 2
+    #
+    it_behaves_like :it_considers_blankish,  nil, ''
+    it_behaves_like :it_is_a_mismatch_for,   Complex(1,0.0), Complex(0,3), :foo, false, []
+    it_behaves_like :it_is_a_mismatch_for,  '8_',          'one',         '3blindmice',        '_8_'
+    it_behaves_like :it_is_a_mismatch_for,   Float::INFINITY, Float::NAN
+    # Handles floating-point well
+    it_behaves_like :it_converts,           '1.0' => 1,    '0.0' => 0,   '1234567.0' => 1234567
+    it_behaves_like :it_converts,           '1e5' => 100000, '1_234_567e-3' => 1234,  '1_234.5e3' => 1_234_500, '+11.123E+12' => 11_123_000_000_000
+    # Silently confuses hex and octal
+    it_behaves_like :it_converts,           '011' =>  9,   '0x10' => 16, '0x1.999999999999ap4' => 25
+    # Tolerates some cruft, unlike IntegerFactory
+    it_behaves_like :it_converts,           '0L'  => 0,    '1_234_567L' => 1234567,    '1234.5e3f' => 1_234_500,    '1234567e-3f' => 1_234
+    it_behaves_like :it_converts,           '1,234,567'  => 1234567
+    #
+    it_behaves_like :it_is_registered_as, :gracious_int
+    its(:typename){ should == :integer }
+  end
+
   describe Gorillib::Factory::FloatFactory do
-    it_behaves_like :it_considers_native,   1.0, 1.234567e6
-    it_behaves_like :it_converts,           'one' => 0.0, '3blindmice' => 3.0, "0x10" => 0.0
-    it_behaves_like :it_converts,           '1.0' => 1.0, '1' => 1.0, "0" => 0.0, "0L" => 0.0, "1_234_567" => 1234567.0, "1_234_567.0" => 1234567.0
-    it_behaves_like :it_converts,                          1  => 1.0, -1 => -1.0, Complex(1,0) => 1.0
-    it_behaves_like :it_considers_blankish, nil, ""
-    it_behaves_like :it_is_a_mismatch_for,  :foo, false, []
+    it_behaves_like :it_considers_native,   1.0, 1.234567e6, 123_456_789_123_456_789_123_456_789_123_456_789.0
+    it_behaves_like :it_considers_native,   Float::INFINITY, Float::NAN, Float('0x1p-1074')
+    it_behaves_like :it_converts,           '1'   => 1.0, '0'   => 0.0, '1234567'   => 1234567.0
+    it_behaves_like :it_converts,           '1.0' => 1.0, '0.0' => 0.0, '1234567.0' => 1234567.0
+    it_behaves_like :it_converts,           '123456789123456789123456789123456789' => 123_456_789_123_456_789_123_456_789_123_456_789.0
+    it_behaves_like :it_converts,           '1_234_567'  => 1234567.0
+    it_behaves_like :it_converts,            1    => 1.0
+    it_behaves_like :it_converts,            Complex(1,0) => 1.0, Complex(1.0,0) => 1.0, Rational(5,2) => 2.5
+    it_behaves_like :it_converts,           '1e5' => 1e5,  '1_234_567e-3' => 1234.567, '1_234_567.0' => 1234567.0, '+11.123E+700' => 11.123e700
+    #
+    it_behaves_like :it_considers_blankish,  nil, ''
+    it_behaves_like :it_is_a_mismatch_for,   Complex(1,0.0), Complex(0,3), :foo, false, []
+    #
+    # Different from GraciousFloatFactory
+    it_behaves_like :it_converts,           '011' => 11.0, '0x10' => 16.0, '0x1.999999999999ap4' => 25.6
+    it_behaves_like :it_is_a_mismatch_for,  '0L',          '1_234_567L',              '1_234_567e-3f'
+    it_behaves_like :it_is_a_mismatch_for,  '8_',          'one',         '3blindmice',        '_8_'
+    #
     it_behaves_like :it_is_registered_as, :float, Float
     its(:typename){ should == :float }
   end
 
+  # describe Gorillib::Factory::GraciousFloatFactory do
+  #   it_behaves_like :it_considers_native,   1.0, 1.234567e6, 123_456_789_123_456_789_123_456_789_123_456_789.0
+  #   it_behaves_like :it_converts,           '1'   => 1.0, '0'   => 0.0, '1234567'   => 1234567.0
+  #   it_behaves_like :it_converts,           '1.0' => 1.0, '0.0' => 0.0, '1234567.0' => 1234567.0
+  #   it_behaves_like :it_converts,           '123456789123456789123456789123456789' => 123_456_789_123_456_789_123_456_789_123_456_789.0
+  #   it_behaves_like :it_converts,           '8_'  => 8.0, '1_234_567'  => 1234567.0
+  #   it_behaves_like :it_converts,            1    => 1.0
+  #   it_behaves_like :it_converts,            Complex(1,0) => 1.0, Complex(1.0,0) => 1.0, Rational(5,2) => 2.5
+  #   it_behaves_like :it_converts,           '1e5' => 1e5,  '1_234_567e-3' => 1234.567, '1_234_567.0' => 1234567.0, '+11.123E+700' => 11.123e700
+  #   #
+  #   it_behaves_like :it_considers_blankish,  nil, ''
+  #   it_behaves_like :it_is_a_mismatch_for,   Complex(1,0.0), Complex(0,3), :foo, false, []
+  #   #
+  #   # Different from stricter FloatFactory
+  #   it_behaves_like :it_converts,           '011' => 11.0, '0x10' => 0.0, '0x1.999999999999ap4' => 0.0
+  #   it_behaves_like :it_converts,           '0L'  => 0.0,  '1_234_567L' => 1234567.0, '1_234_567e-3f' => 1234.567
+  #   it_behaves_like :it_converts,           'one' => 0.0,  '3blindmice' => 3.0, '_8_' => 0.0
+  #   #
+  #   it_behaves_like :it_is_registered_as, :gracious_float
+  #   its(:typename){ should == :float }
+  # end
+
   describe Gorillib::Factory::ComplexFactory do
-    cplx0 = Complex(0) ; cplx1 = Complex(1) ; cplx1f = Complex(1.0) ;
+    cplx0 = Complex(0) ; cplx1 = Complex(1) ; cplx1234500 = Complex(1_234_500,0) ; cplx1234500f = Complex(1_234_500.0,0) ;
     it_behaves_like :it_considers_native,   Complex(1,3), Complex(1,0)
-    it_behaves_like :it_converts,           'one' => cplx0,  '3blindmice' => Complex(3), "0x10" => cplx0
-    it_behaves_like :it_converts,           '1.0' => cplx1f, '1' => cplx1, '0' => cplx0, '0L' => cplx0, '1_234_567' => Complex(1234567), '1_234_567.0' => Complex(1234567.0)
-    it_behaves_like :it_converts,            1.0 => cplx1f,   1 => cplx1,  -1 => Complex(-1), Rational(3,2) => Complex(Rational(3,2),0)
-    it_behaves_like :it_considers_blankish, nil, ""
-    it_behaves_like :it_is_a_mismatch_for,  :foo, false, []
+    it_behaves_like :it_converts,           '1234.5e3' => cplx1234500f, '1234500' => cplx1234500, '0' => cplx0
+    it_behaves_like :it_converts,           1234.5e3 => cplx1234500f,   1 => cplx1,  -1 => Complex(-1), Rational(3,2) => Complex(Rational(3,2),0)
+    it_behaves_like :it_converts,           [1,0] => Complex(1),       [1,2] => Complex(1,2)
+    it_behaves_like :it_converts,           ['1234.5e3','98.6'] => Complex(1234.5e3, 98.6)
+    it_behaves_like :it_considers_blankish, nil, ''
+    it_behaves_like :it_is_a_mismatch_for,  'one', '3blindmice', '0x10', '1234.5e3f', '1234L', :foo, false, []
     it_behaves_like :it_is_registered_as, :complex, Complex
     its(:typename){ should == :complex }
   end
@@ -113,11 +188,10 @@ describe '', :model_spec, :factory_spec do
   describe Gorillib::Factory::RationalFactory do
     rat_0 = Rational(0) ; rat1 = Rational(1) ; rat3_2 = Rational(3, 2) ;
     it_behaves_like :it_considers_native,   Rational(1, 3), Rational(1, 7)
-    it_behaves_like :it_converts,           'one' => rat_0,  '3blindmice' => Rational(3), "0x10" => rat_0
-    it_behaves_like :it_converts,           '1.5' => rat3_2, '1' => rat1, '0' => rat_0, '0L' => rat_0, '1_234_567' => Rational(1234567), '1_234_567.0' => Rational(1234567)
+    it_behaves_like :it_converts,           '1.5' => rat3_2, '1' => rat1, '0' => rat_0, '1_234_567' => Rational(1234567), '1_234_567.0' => Rational(1234567)
     it_behaves_like :it_converts,            1.5  => rat3_2,  1  => rat1,  -1 => Rational(-1), Complex(1.5) => rat3_2
-    it_behaves_like :it_considers_blankish, nil, ""
-    it_behaves_like :it_is_a_mismatch_for,  :foo, false, [], Complex(1.5,3)
+    it_behaves_like :it_considers_blankish, nil, ''
+    it_behaves_like :it_is_a_mismatch_for,  'one', '3blindmice', '0x10', '1234.5e3f', '1234L', :foo, false, [], Complex(1.5,3)
     it_behaves_like :it_is_registered_as, :rational, Rational
     its(:typename){ should == :rational }
   end
@@ -131,7 +205,7 @@ describe '', :model_spec, :factory_spec do
     it_behaves_like :it_converts,           Date.new(1992, 1, 20) => ice_cubes_good_day
     before('behaves like it_converts "an unparseable time" to nil'){ subject.stub(:warn) }
     it_behaves_like :it_converts,           "an unparseable time" => nil, :non_native_ok => true
-    it_behaves_like :it_considers_blankish, nil, ""
+    it_behaves_like :it_considers_blankish, nil, ''
     it_behaves_like :it_is_a_mismatch_for,  :foo, false, []
     it_behaves_like :it_is_registered_as,   :time, Time
     it('always returns a UTC timezoned time') do
@@ -144,15 +218,15 @@ describe '', :model_spec, :factory_spec do
   describe Gorillib::Factory::BooleanFactory do
     it_behaves_like :it_considers_native,   true, false
     it_behaves_like :it_considers_blankish, nil
-    it_behaves_like :it_converts,           "false" => false, :false => false
-    it_behaves_like :it_converts,           "true" => true,   :true  => true, "0" => true, 0 => true, [] => true, :foo => true, [] => true, Complex(1.5,3) => true, Object.new => true
+    it_behaves_like :it_converts,           'false' => false, :false => false
+    it_behaves_like :it_converts,           'true' => true,   :true  => true, '0' => true, 0 => true, [] => true, :foo => true, [] => true, Complex(1.5,3) => true, Object.new => true
     it_behaves_like :it_is_registered_as, :boolean
     its(:typename){ should == :boolean }
   end
 
   describe ::Whatever do
     it_behaves_like :it_considers_native,   true, false, nil, 3, '', 'a string', :a_symbol, [], {}, ->(){ 'a proc' }, Module.new, Complex(1,3), Object.new
-    it "it is itself the factory for :identical and :whatever" do
+    it 'it is itself the factory for :identical and :whatever' do
       keys = [Whatever, :identical, :whatever]
       keys.each do |key|
         Gorillib::Factory(key).should equal(described_class)
