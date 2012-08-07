@@ -1,21 +1,18 @@
 source "http://rubygems.org"
 
-gem     'multi_json', "~> 1.1"
+gem     'multi_json', '~> 1.1'
 gem     'json'
+gem     'configliere', '>= 0.4.13'
 
-gem     'wukong', :path => '../wukong'
-
-# Add dependencies to develop your gem here.
-# Include everything needed to run rake, tests, features, etc.
 group :development do
-  gem   'bundler',    "~> 1"
+  gem   'bundler',    '~> 1'
   gem   'pry'
-  gem 'jeweler',    "~> 1.6"
+  gem   'jeweler',    '~> 1.6'
 end
 
 group :docs do
-  gem   'yard',       "~> 0.7"
-  gem   'redcarpet',  "~> 2.1"
+  gem   'yard',       '~> 0.7'
+  gem   'redcarpet',  '~> 2.1'
 end
 
 group :test do
