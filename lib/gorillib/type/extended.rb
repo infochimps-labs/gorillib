@@ -39,19 +39,6 @@ module Gorillib
       end
     end
 
-    class Boolean10Factory < BooleanFactory
-      def self.typename() :boolean_10 ; end
-      register_factory!   :boolean_10
-      #
-      def convert(obj)
-        case obj.to_s
-        when "0" then false
-        when "1" then true
-        else        super
-        end
-      end
-    end
-
     class EpochTimeFactory < ConvertingFactory
       self.product = Integer
       def self.typename() :epoch_time ; end
@@ -74,6 +61,19 @@ module Gorillib
       def convert(obj)
         result = super
         result.nil? ? nil : result.to_i
+      end
+    end
+
+    class Boolean10Factory < BooleanFactory
+      def self.typename() :boolean_10 ; end
+      register_factory!   :boolean_10
+      #
+      def convert(obj)
+        case obj.to_s
+        when "0" then false
+        when "1" then true
+        else          super
+        end
       end
     end
 

@@ -245,8 +245,8 @@ module Gorillib
     #     "0x1.999999999999ap-4".to_f   # => 0
     #
 
-    NUMBER_STRING_RE   = Regexp.new(%r{\A[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?\z})
-    PIG_NUM_RE         = /[FfLl]\z/
+    FLT_CRUFT_CHARS  = ',fFlL'
+    FLT_NOT_INT_RE   = /[\.eE]/
 
     #
     # Converts arg to a Fixnum or Bignum.
@@ -311,11 +311,13 @@ module Gorillib
     #
     # @note returns Bignum or Fixnum (instances of either are `is_a?(Integer)`)
     class GraciousIntegerFactory < IntegerFactory
+      # See examples/benchmark before 'improving' this method.
       def convert(obj)
-        if /[\.\,EeFfLl]/ === obj
-          obj = Float(obj.gsub(PIG_NUM_RE,'').gsub(/,/,''))
+        if ::String === obj then
+          obj = obj.to_s.tr(::Gorillib::Factory::FLT_CRUFT_CHARS, '') ;
+          obj = ::Kernel::Float(obj) if ::Gorillib::Factory::FLT_NOT_INT_RE === obj ;
         end
-        super(obj)
+        ::Kernel::Integer(obj)
       end
       register_factory!(:gracious_int)
     end
@@ -333,6 +335,7 @@ module Gorillib
     # * Numeric types are converted directly
     # * Strings strictly conform to numeric representation or an error is raised (which differs from the behavior of String#to_f)
     # * Strings in radix format (an exact hexadecimal encoding of a number) are properly interpreted.
+    # * Octal is not interpreted! This means an IntegerFactory receiving '011' will get 9, a FloatFactory 11.0
     # * Other types are converted using obj.to_f.
     #
     # @example
@@ -341,11 +344,11 @@ module Gorillib
     #   FloatFactory.receive("0x1.999999999999ap-4" #=> 0.1
     #
     # @example FloatFactory is strict in some cases where GraciousFloatFactory is not
-    #   FloatFactory.receive("1_23e9f")  #=> (error)
+    #   FloatFactory.receive("1_23e9f")             #=> (error)
     #
     # @example FloatFactory() is not as gullible as GraciousFloatFactory
-    #   FloatFactory.receive("7eleven")  #=> (error)
-    #   FloatFactory.receive("nonzero")  #=> (error)
+    #   FloatFactory.receive("7eleven")             #=> (error)
+    #   FloatFactory.receive("nonzero")             #=> (error)
     #
     class FloatFactory < ConvertingFactory
       self.product = Float
@@ -355,57 +358,36 @@ module Gorillib
 
     # Returns arg converted to a float.
     # * Numeric types are converted directly
-    # * Strings strictly conform to numeric representation or an error is raised (which differs from the behavior of String#to_f)
+    # * Strings can have ',' (which are removed) or end in `/LlFf/` (pig format);
+    #   they should other conform to numeric representation or an error is raised.
+    #   (this differs from the behavior of String#to_f)
     # * Strings in radix format (an exact hexadecimal encoding of a number) are properly interpreted.
+    # * Octal is not interpreted! This means an IntegerFactory receiving '011' will get 9, a FloatFactory 11.0
     # * Other types are converted using obj.to_f.
     #
     # @example
-    #   FloatFactory.receive(1)                     #=> 1.0
-    #   FloatFactory.receive("123.456")             #=> 123.456
-    #   FloatFactory.receive("0x1.999999999999ap-4" #=> 0.1
+    #   GraciousFloatFactory.receive(1)                     #=> 1.0
+    #   GraciousFloatFactory.receive("123.456")             #=> 123.456
+    #   GraciousFloatFactory.receive("0x1.999999999999ap-4" #=> 0.1
+    #   GraciousFloatFactory.receive("1_234.5")             #=> 1234.5
     #
-    # @example FloatFactory is strict in some cases where GraciousFloatFactory is not
-    #   FloatFactory.receive("1_23e9f")  #=> (error)
+    # @example GraciousFloatFactory is generous in some cases where FloatFactory is not
+    #   GraciousFloatFactory.receive("1234.5f")             #=> 1234.5
+    #   GraciousFloatFactory.receive("1,234.5")             #=> 1234.5
+    #   GraciousFloatFactory.receive("1234L")               #=> 1234.0
     #
-    # @example FloatFactory() is not as gullible as GraciousFloatFactory
-    #   FloatFactory.receive("7eleven")  #=> (error)
-    #   FloatFactory.receive("nonzero")  #=> (error)
+    # @example GraciousFloatFactory is not as gullible as #to_f
+    #   GraciousFloatFactory.receive("7eleven")             #=> (error)
+    #   GraciousFloatFactory.receive("nonzero")             #=> (error)
     #
-    class PigFloatFactory < FloatFactory
+    class GraciousFloatFactory < FloatFactory
       self.product = Float
       def convert(obj)
-        obj = Float(obj.to_s.gsub(PIG_NUM_RE,'')) if (PIG_NUM_RE === obj)
+        if String === obj then obj = obj.to_s.tr(FLT_CRUFT_CHARS,'') ; end
         super(obj)
       end
-      register_factory!(:pig_float)
+      register_factory!(:gracious_float)
     end
-
-    # # Returns arg converted to a float.
-    # # * Numeric types are converted directly
-    # # * Strings are interpreted very generously
-    # # * Strings in radix format (an exact hexadecimal encoding of a number) are not interpreted, and silently convert to `0`.
-    # # * Other types are converted using obj.to_f.
-    # #
-    # # @example
-    # #   GraciousFloatFactory.receive(1)                     #=> 1.0
-    # #   GraciousFloatFactory.receive("123.456")             #=> 123.456
-    # #   GraciousFloatFactory.receive("0x1.999999999999ap-4" #=> 0.1
-    # #   GraciousFloatFactory.receive("1_234.5")  #=> 1234.5
-    # #
-    # # @example GraciousFloatFactory is generous in some cases where FloatFactory is not
-    # #   GraciousFloatFactory.receive("1234.5f")  #=> 1234.5
-    # #
-    # # @example GraciousFloatFactory is somewhat gullible
-    # #   GraciousFloatFactory.receive("7eleven")  #=> 7.0
-    # #   GraciousFloatFactory.receive("nonzero")  #=> 0.0
-    # #
-    # class GraciousFloatFactory < FloatFactory
-    #   self.product = Float
-    #   def convert(obj)
-    #     obj.to_f
-    #   end
-    #   register_factory!(:gracious_float)
-    # end
 
     class ComplexFactory < ConvertingFactory
       self.product = Complex

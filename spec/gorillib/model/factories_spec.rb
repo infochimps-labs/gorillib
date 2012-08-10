@@ -121,7 +121,7 @@ describe '', :model_spec, :factory_spec, :only do
     it_behaves_like :it_converts,           '011' =>  9,   '0x10' => 16, '0x1.999999999999ap4' => 25
     # Tolerates some cruft, unlike IntegerFactory
     it_behaves_like :it_converts,           '0L'  => 0,    '1_234_567L' => 1234567,    '1234.5e3f' => 1_234_500,    '1234567e-3f' => 1_234
-    it_behaves_like :it_converts,           '1,234,567'  => 1234567
+    it_behaves_like :it_converts,           '1,234,567'  => 1234567, ',,,,1,23,45.67e,-1,' => 1234
     #
     it_behaves_like :it_is_registered_as, :gracious_int
     its(:typename){ should == :integer }
@@ -141,36 +141,37 @@ describe '', :model_spec, :factory_spec, :only do
     it_behaves_like :it_considers_blankish,  nil, ''
     it_behaves_like :it_is_a_mismatch_for,   Complex(1,0.0), Complex(0,3), :foo, false, []
     #
-    # Different from GraciousFloatFactory
+    # Different from #to_f
     it_behaves_like :it_converts,           '011' => 11.0, '0x10' => 16.0, '0x1.999999999999ap4' => 25.6
     it_behaves_like :it_is_a_mismatch_for,  '0L',          '1_234_567L',              '1_234_567e-3f'
-    it_behaves_like :it_is_a_mismatch_for,  '8_',          'one',         '3blindmice',        '_8_'
+    it_behaves_like :it_is_a_mismatch_for,  '_8_',          'one',         '3blindmice',        '8_'
     #
     it_behaves_like :it_is_registered_as, :float, Float
     its(:typename){ should == :float }
   end
 
-  # describe Gorillib::Factory::GraciousFloatFactory do
-  #   it_behaves_like :it_considers_native,   1.0, 1.234567e6, 123_456_789_123_456_789_123_456_789_123_456_789.0
-  #   it_behaves_like :it_converts,           '1'   => 1.0, '0'   => 0.0, '1234567'   => 1234567.0
-  #   it_behaves_like :it_converts,           '1.0' => 1.0, '0.0' => 0.0, '1234567.0' => 1234567.0
-  #   it_behaves_like :it_converts,           '123456789123456789123456789123456789' => 123_456_789_123_456_789_123_456_789_123_456_789.0
-  #   it_behaves_like :it_converts,           '8_'  => 8.0, '1_234_567'  => 1234567.0
-  #   it_behaves_like :it_converts,            1    => 1.0
-  #   it_behaves_like :it_converts,            Complex(1,0) => 1.0, Complex(1.0,0) => 1.0, Rational(5,2) => 2.5
-  #   it_behaves_like :it_converts,           '1e5' => 1e5,  '1_234_567e-3' => 1234.567, '1_234_567.0' => 1234567.0, '+11.123E+700' => 11.123e700
-  #   #
-  #   it_behaves_like :it_considers_blankish,  nil, ''
-  #   it_behaves_like :it_is_a_mismatch_for,   Complex(1,0.0), Complex(0,3), :foo, false, []
-  #   #
-  #   # Different from stricter FloatFactory
-  #   it_behaves_like :it_converts,           '011' => 11.0, '0x10' => 0.0, '0x1.999999999999ap4' => 0.0
-  #   it_behaves_like :it_converts,           '0L'  => 0.0,  '1_234_567L' => 1234567.0, '1_234_567e-3f' => 1234.567
-  #   it_behaves_like :it_converts,           'one' => 0.0,  '3blindmice' => 3.0, '_8_' => 0.0
-  #   #
-  #   it_behaves_like :it_is_registered_as, :gracious_float
-  #   its(:typename){ should == :float }
-  # end
+  describe Gorillib::Factory::GraciousFloatFactory do
+    it_behaves_like :it_considers_native,   1.0, 1.234567e6, 123_456_789_123_456_789_123_456_789_123_456_789.0
+    it_behaves_like :it_converts,           '1'   => 1.0, '0'   => 0.0, '1234567'   => 1234567.0
+    it_behaves_like :it_converts,           '1.0' => 1.0, '0.0' => 0.0, '1234567.0' => 1234567.0
+    it_behaves_like :it_converts,           '123456789123456789123456789123456789' => 123_456_789_123_456_789_123_456_789_123_456_789.0
+    it_behaves_like :it_converts,           '1_234_567'  => 1234567.0
+    it_behaves_like :it_converts,            1    => 1.0
+    it_behaves_like :it_converts,            Complex(1,0) => 1.0, Complex(1.0,0) => 1.0, Rational(5,2) => 2.5
+    it_behaves_like :it_converts,           '1e5' => 1e5,  '1_234_567e-3' => 1234.567, '1_234_567.0' => 1234567.0, '+11.123E+700' => 11.123e700
+    #
+    it_behaves_like :it_considers_blankish,  nil, ''
+    it_behaves_like :it_is_a_mismatch_for,   Complex(1,0.0), Complex(0,3), :foo, false, []
+    #
+    # Different from stricter FloatFactory or laxer #to_f
+    it_behaves_like :it_converts,           '011' => 11.0, '0x10' => 16.0, '0x1.999999999999ap4' => 25.6
+    it_behaves_like :it_converts,           '0L'  => 0.0,  '1_234_567L' => 1234567.0, '1_234_567e-3f' => 1234.567
+    it_behaves_like :it_is_a_mismatch_for,  '_8_',         'one',         '3blindmice',        '8_'
+    it_behaves_like :it_converts,           '1,234,567e-3' => 1234.567, ',,,,1,23,45.67e,-1,' => 1234.567, '+11.123E+700' => 11.123e700
+    #
+    it_behaves_like :it_is_registered_as, :gracious_float
+    its(:typename){ should == :float }
+  end
 
   describe Gorillib::Factory::ComplexFactory do
     cplx0 = Complex(0) ; cplx1 = Complex(1) ; cplx1234500 = Complex(1_234_500,0) ; cplx1234500f = Complex(1_234_500.0,0) ;
