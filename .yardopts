@@ -1,5 +1,6 @@
 --readme   README.md
 --markup   markdown
+--verbose
 -
 VERSION
 CHANGELOG.md
