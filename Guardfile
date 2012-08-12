@@ -1,12 +1,12 @@
 # -*- ruby -*-
 
-require 'guard/notifiers/emacs'
-::Guard::Notifier::Emacs::DEFAULTS.merge!(
-  :success => '#e7fde4',
-  :failed  => '#faeedc',
-  :default => '#eee8d6',
-  )
-p ['emacs notifier:', ::Guard::Notifier::Emacs::DEFAULTS]
+# require 'guard/notifiers/emacs'
+# ::Guard::Notifier::DEFAULTS.merge!(
+#   :success => '#e7fde4',
+#   :failed  => '#faeedc',
+#   :default => '#eee8d6',
+#   )
+# p ['emacs notifier:', ::Guard::Notifier::DEFAULTS]
 
 format  = "progress"         # '--format doc'     for more verbose, --format progress for less
 tags    = %w[   ]         # '--tag record_spec' to only run tests tagged :record_spec

@@ -12,6 +12,7 @@ def GORILLIB_ROOT_DIR *paths
 end
 
 $LOAD_PATH.unshift(GORILLIB_ROOT_DIR('lib'))
+$LOAD_PATH.unshift(GORILLIB_ROOT_DIR('spec/support'))
 
 require_relative 'support/gorillib_test_helpers'
 Dir[GORILLIB_ROOT_DIR('spec/support/matchers/*.rb')].each{|f| require f}
