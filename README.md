@@ -9,27 +9,27 @@ What gorillib gives you is clarity over what features are brought in. If you wan
 * Upwards compatible with `active_record` and `extlib`
   - the `active_support` components have significantly more robust internationalization, and some functions have rich option sets in `active_support` vs. basic functionality in `gorillib`.  So the rule is if you were happy with `gorillib` you'll be happy with `active_support`, but not vice-versa.
 
-### require 'gorillib/receiver'
+### require 'gorillib/model
 
-Gorillib has at least one powerful addition to the canon: the receiver mixin.
+Gorillib has at least one powerful addition to the canon: the `Gorillib::Model` mixin.
+
+Think of it like 'An ORM for JSON'. It's designed for data that spends as much time on the wire as it does in action -- things like API handlers or clients, data processing scripts, wukong jobs.
 
 * lightweight
-* gives you weak type safety but doesn't jack around with setters/getters.
-* object/hash semantics
+* serializes to/from JSON, TSV or plain hashes
+* type converts when you need it, but doesn't complicate normal accessors
+* upward compatible with ActiveModel
 
 ### require 'gorillib'
 
-* `require 'gorrillib/base'`
+Requires only the following minimal set of libraries:
 
-### require 'gorillib/base'
-
-requires the following libraries:
-
-* `gorillib/object/blank`
-* `gorillib/hash/reverse_merge`
+* `gorillib/object/blank`          -- fluent boolean methods `foo.blank?` & `foo.present?`
+* `gorillib/array/extract_options` -- get optional keyword args from a `*args` signature
+* `gorillib/hash/reverse_merge`    -- 
 * `gorillib/hash/compact`
 * `gorillib/array/compact_blank`
-* `gorillib/object/try`
+* `gorillib/exception/raisers`     -- DRY exceptions: `ArgumentError.check_arity!`, `TypeMismatchError`, 
 
 ### require 'gorillib/some'
 
