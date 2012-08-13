@@ -24,14 +24,15 @@ end
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name        = "gorillib"
-  gem.homepage    = "http://infochimps.com/labs"
-  gem.license     = "MIT"
+  Bundler.setup(:default, :development, :test)
+  gem.name        = 'gorillib'
+  gem.homepage    = 'https://github.com/infochimps-labs/gorillib'
+  gem.license     = 'Apache 2.0'
+  gem.email       = 'coders@infochimps.org'
+  gem.authors     = ['Infochimps']
+
   gem.summary     = %Q{include only what you need. No dependencies, no creep}
   gem.description = %Q{Gorillib: infochimps lightweight subset of ruby convenience methods}
-  gem.email       = "coders@infochimps.org"
-  gem.authors     = ["Infochimps"]
 
   ignores = File.readlines(".gitignore").grep(/^[^#]\S+/).map{|s| s.chomp }
   dotfiles = [".gemtest", ".gitignore", ".rspec", ".yardopts"]

@@ -1,4 +1,4 @@
-source "http://rubygems.org"
+source 'http://rubygems.org'
 
 gem   'multi_json',  ">= 1.1"
 
@@ -9,9 +9,6 @@ group :development do
   gem 'yard',        ">= 0.7"
   gem 'rspec',       "~> 2.8"
   gem 'jeweler',     ">= 1.6"
-  #
-  gem 'oj',          ">= 1.2",   :platform => :ruby
-  gem 'json',                    :platform => :jruby
 end
 
 group :docs do
@@ -21,6 +18,9 @@ end
 # Gems for testing and coverage
 group :test do
   gem 'simplecov',   ">= 0.5", :platform => :ruby_19
+  #
+  gem 'oj',          ">= 1.2",   :platform => :ruby
+  gem 'json',                    :platform => :jruby
 end
 
 # Gems you would use if hacking on this gem (rather than with it)
