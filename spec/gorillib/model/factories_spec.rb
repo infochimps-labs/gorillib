@@ -1,11 +1,12 @@
 require 'spec_helper'
+# require 'support/factory_test_helpers'
 
 require 'gorillib/object/blank'
 require 'gorillib/object/try_dup'
 require 'gorillib/hash/slice'
 require 'gorillib/metaprogramming/class_attribute'
 require 'gorillib/string/inflector'
-#
+
 require 'gorillib/collection'
 require 'gorillib/model/factories'
 
@@ -129,7 +130,7 @@ describe '', :model_spec, :factory_spec, :only do
 
   describe Gorillib::Factory::FloatFactory do
     it_behaves_like :it_considers_native,   1.0, 1.234567e6, 123_456_789_123_456_789_123_456_789_123_456_789.0
-    it_behaves_like :it_considers_native,   Float::INFINITY, Float::NAN, Float('0x1p-1074')
+    it_behaves_like :it_considers_native,   Float::INFINITY, Float::NAN
     it_behaves_like :it_converts,           '1'   => 1.0, '0'   => 0.0, '1234567'   => 1234567.0
     it_behaves_like :it_converts,           '1.0' => 1.0, '0.0' => 0.0, '1234567.0' => 1234567.0
     it_behaves_like :it_converts,           '123456789123456789123456789123456789' => 123_456_789_123_456_789_123_456_789_123_456_789.0
