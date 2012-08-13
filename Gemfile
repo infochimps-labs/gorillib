@@ -7,17 +7,18 @@ group :development do
   gem 'bundler',     "~> 1.1"
   gem 'rake'
   gem 'yard',        ">= 0.7"
-  gem 'rspec',       "~> 2.8"
+  gem 'rspec',       ">= 2.8"
   gem 'jeweler',     ">= 1.6"
 end
 
 group :docs do
-  gem 'redcarpet',   ">= 2.1"
+  gem 'redcarpet',   ">= 2.1",   :platform => :ruby
+  gem 'kramdown',                :platform => :jruby
 end
 
 # Gems for testing and coverage
 group :test do
-  gem 'simplecov',   ">= 0.5", :platform => :ruby_19
+  gem 'simplecov',   ">= 0.5",   :platform => :ruby_19
   #
   gem 'oj',          ">= 1.2",   :platform => :ruby
   gem 'json',                    :platform => :jruby
