@@ -35,8 +35,8 @@ module Gorillib
         val = read_attribute(field.name)
         if val.present?
           # existing item: update it with args and block
-          val.receive!(*args, &block) if args.present?
-        elsif attrs.blank?
+          val.receive!(*args, &block) if args.present? or block_given?
+        elsif attrs.blank? and not block_given?
           # missing item (read): return nil
           return nil
         else
