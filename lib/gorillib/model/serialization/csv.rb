@@ -1,4 +1,5 @@
 require 'csv'
+require 'gorillib/pathname'
 
 module Gorillib
   module Model
@@ -18,6 +19,7 @@ module Gorillib
         # @raise [Gorillib::Model::RawDataMismatchError] if a line has too many or too few fields
         # @yield an object instantiated from each line in the file.
         def each_in_csv(filename, options={})
+          filename = Pathname.path_to(filename)
           options = csv_options.merge(options)
           pop_headers = options.delete(:pop_headers)
           num_fields  = options.delete(:num_fields){ (fields.length .. fields.length) }
@@ -39,7 +41,7 @@ module Gorillib
         # returns. As opposed to the with-a-block case, the memory footprint of
         # this increases as the filesize does, so use caution with large files.
         #
-        # @returns with a block, returns nil; with no block, an array of this class' instances
+        # @return with a block, returns nil; with no block, an array of this class' instances
         def load_csv(*args)
           if block_given?
             each_in_csv(*args, &Proc.new)
