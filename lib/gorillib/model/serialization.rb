@@ -24,7 +24,7 @@ module Gorillib
 
     module ClassMethods
       def from_tuple(*vals)
-        receive Hash[field_names[0..vals.length].zip(vals)]
+        receive Hash[field_names[0..vals.length-1].zip(vals)]
       end
     end
 
