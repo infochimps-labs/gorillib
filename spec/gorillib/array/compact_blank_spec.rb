@@ -1,37 +1,52 @@
 require 'spec_helper'
 require 'gorillib/array/compact_blank'
 
-describe Array, :simple_spec => true do
+describe Array, :simple_spec do
+  let(:blankish){ mock('blankish', :blank? => true) }
+  let(:nonblank){ mock('nonblank', :blank? => false) }
 
   describe '#compact_blank' do
-    it 'with empty' do
-      [ [nil], [nil, false, {}, ""] ].each do |arr|
-        arr.compact_blank.should == []
-        arr.length.should_not    == 0
-      end
+    it 'omits nils, like #compact' do
+      arr = [nil]
+      arr.compact_blank.should == []
+      arr.length.should == 1
+    end
+    it "also omits false, {}, '' and anything else #blank\?" do
+      arr = [nil, false, {}, "", blankish]
+      arr.compact_blank.should == []
+      arr.length.should == 5
     end
 
-    it 'with full' do
-      [ [nil, 1, nil, 2], [nil, 1, false, 2, {}, ""] ].each do |arr|
-        arr.compact_blank.should == [1, 2]
-      end
+    it 'preserves non-blank elements' do
+      arr = [nil, 1, nil, 2]
+      arr.compact_blank.should == [1, 2]
+      arr.length.should == 4
+      arr = [nil, 1, false, 2, {}, ""]
+      arr.compact_blank.should == [1, 2]
+      arr.length.should == 6
     end
   end
 
   describe '#compact_blank!' do
-    it 'with empty' do
-      [].compact_blank!.should == []
-      [ [nil], [nil, false, {}, ""] ].each do |arr|
-        arr.compact_blank!.should == []
-        arr.length.should         == 0
-      end
+    it 'removes nils in-place, like #compact!' do
+      arr = [nil]
+      arr.compact_blank!.should == []
+      arr.length.should == 0
+    end
+    it "removes false, {}, '' and anything else #blank\?" do
+      arr = [nil, false, {}, "", blankish]
+      arr.compact_blank!.should == []
+      arr.length.should == 0
     end
 
-    it 'with full' do
-      [ [nil, 1, nil, 2], [nil, 1, false, 2, {}, ""] ].each do |arr|
-        arr.compact_blank!.should == [1, 2]
-      end
+    it 'preserves non-blank elements' do
+      arr = [nil, 1, nil, 2]
+      arr.compact_blank!.should == [1, 2]
+      arr.length.should == 2
+      arr = [nil, 1, false, 2, {}, ""]
+      arr.compact_blank!.should == [1, 2]
+      arr.length.should == 2
     end
-
   end
+
 end

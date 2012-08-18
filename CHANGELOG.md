@@ -1,4 +1,37 @@
+# Gorillib Changelog
+
 ## Version 1.0
+
+
+### 2012-08 - Version 1.0.3-pre
+
+#### Deprecations
+
+The following have been relocated to `gorillib/deprecated/{old name}`. So, if you were using `gorillib/array/random` and can't stand to migrate yet, just include `gorillib/deprecated/array/random` instead.
+
+* deprecated `Array#random_element` -- `Array#sample` exists.
+* combined `array/average`, `array/sorted_median` and `array/sorted_percentile` under `array/simple_statistics`. Just include that instead.
+  - `Array#average`, `Array#sorted_median` and `Array#sorted_percentile` are not deprecated, just moved.
+  - `Array#sorted_sample` is now `Array#sorted_nths`. There is a `sample` method on array with a non-similar purpose. Also modified it to land on the half-stride: `[1,2,3,4,5].sorted_nths(2)` is `[2,4]` not `[3,5]`.
+  - metaprogramming/aliasing.rb
+
+
+#### Organized files in `gorillib/model`
+
+* `gorillib/model/factories` is now `gorillib/factories.rb`
+* `gorillib/builder/field` was empty, removed it
+
+#### Questions
+
+* move `compact_blank`, `deep_compact` to `enumerable/compact`? 
+
+#### Other
+
+* stripping back the gem dependencies.
+  - `json` & `OJ` alongside bundler and rake in the `:development` group
+
+
+### 2012-06 - Version 1.0.2-pre: First wave of refactors
 
 **positional args**:
 

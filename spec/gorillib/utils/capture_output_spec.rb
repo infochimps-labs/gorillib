@@ -59,7 +59,7 @@ describe Gorillib::TestHelpers, :simple_spec => true do
     end
 
     it 'raises an error if no block is given' do
-      lambda{ Gorillib::TestHelpers.capture_output }.should raise_error(LocalJumpError, "no block given (yield)")
+      lambda{ Gorillib::TestHelpers.capture_output }.should raise_error(LocalJumpError, /no block given/)
     end
 
   end

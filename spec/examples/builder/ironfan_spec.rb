@@ -1,21 +1,16 @@
 require 'spec_helper'
-# related libs
-require 'gorillib/model'
-require 'gorillib/model/field'
-require 'gorillib/model/defaults'
-# libs under test
-require 'gorillib/builder'
-require 'gorillib/builder/field'
-require 'gorillib/string/simple_inflector'
-# testing helpers
 
-load GORILLIB_ROOT_DIR('examples/builder/ironfan.rb')
+require 'gorillib/builder'
 
 module Gorillib::Test       ; end
 module Meta::Gorillib::Test ; end
 
 describe Gorillib::Builder, :model_spec => true do
+  before do
+    require_relative '../../../examples/builder/ironfan.rb'
+  end
   after(:each){   Gorillib::Test.nuke_constants ; Meta::Gorillib::Test.nuke_constants }
+
   def example_cluster
     Gorillib::Test.cluster
   end
