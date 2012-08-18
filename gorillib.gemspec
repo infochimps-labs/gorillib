@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "gorillib"
-  s.version = ""
+  s.version = "0.4.2pre"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Infochimps"]
@@ -219,4 +219,3 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, [">= 1.6"])
   end
 end
-
