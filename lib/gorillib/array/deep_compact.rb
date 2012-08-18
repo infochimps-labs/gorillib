@@ -1,9 +1,10 @@
+require 'set'
 require 'gorillib/object/blank'
 
-#
-# deep_compact! removes all 'blank?' elements in the array in place, recursively
-#
 class Array
+  #
+  # deep_compact! removes all 'blank?' elements in the array in place, recursively
+  #
   def deep_compact!
     self.map! do |val|
       val.deep_compact! if val.respond_to?(:deep_compact!)
