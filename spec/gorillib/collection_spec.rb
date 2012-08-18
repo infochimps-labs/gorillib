@@ -2,7 +2,7 @@ require 'spec_helper'
 #
 require 'gorillib/model'
 require 'gorillib/collection/model_collection'
-require 'model_test_helpers'
+require 'support/model_test_helpers'
 
 shared_context :collection_spec do
   # a collection with the internal :clxn mocked out, and a method 'innards' to
@@ -98,6 +98,7 @@ shared_examples_for 'a keyed collection' do
   end
 
   context '#fetch' do
+    ABSENT_KEY_ERROR_RE =  /(key not found: 69|index 69 outside)/
     it 'retrieves an object if present' do
       subject[1] = mock_val
       subject.fetch(1).should equal(mock_val)
@@ -108,7 +109,7 @@ shared_examples_for 'a keyed collection' do
       got_here.should == 'yup'
     end
     it 'if absent and no block given: raises an error' do
-      ->{ subject.fetch(69) }.should raise_error IndexError, /(key not found: 69|index 69 outside)/
+      ->{ subject.fetch(69) }.should raise_error IndexError, ABSENT_KEY_ERROR_RE
     end
   end
 

@@ -1,13 +1,10 @@
 require 'spec_helper'
+require 'support/model_test_helpers'
+require 'gorillib/hash/compact'
 
 # libs under test
 require 'gorillib/builder'
-require 'gorillib/builder/field'
 require 'gorillib/collection/model_collection'
-
-# testing helpers
-require 'gorillib/hash/compact'
-require 'model_test_helpers'
 
 describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
 

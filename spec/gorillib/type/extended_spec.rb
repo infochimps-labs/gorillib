@@ -1,9 +1,8 @@
 require 'spec_helper'
-#
-require 'gorillib/type/extended'
+require 'support/factory_test_helpers'
 require 'gorillib/object/blank'
 #
-require 'factory_test_helpers'
+require 'gorillib/type/extended'
 
 describe ::Long do
   it "is_a?(Integer)" do ::Long.should < ::Integer ; end

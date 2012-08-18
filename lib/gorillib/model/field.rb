@@ -60,8 +60,8 @@ module Gorillib
 
       # @return [String] Human-readable presentation of the field definition
       def inspect
-        args = [name.inspect, type.to_s, attributes.reject{|k,v| k =~ /^(name|type)$/}.inspect[1..-2] ]
-        "field(#{args.join(", ")})"
+        args = [name.inspect, type.to_s, attributes.reject{|k,v| k =~ /^(name|type)$/}.inspect]
+        "field(#{args.join(",")})"
       end
       def inspect_compact
         "field(#{name})"

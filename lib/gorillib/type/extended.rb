@@ -1,7 +1,7 @@
 require 'pathname'
 require 'date'
 require 'set'
-require 'gorillib/model/factories'
+require 'gorillib/factories'
 
 class ::Long      < ::Integer ; end
 class ::Double    < ::Float   ; end

@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'model_test_helpers'
+require 'support/model_test_helpers'
 
 require 'gorillib/model'
 
