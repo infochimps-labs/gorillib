@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'gorillib/hash/deep_compact'
 require 'gorillib/array/deep_compact'
 
-describe Hash, :hashlike_spec => true do
+describe Hash, :hashlike_spec do
   describe 'array/deep_compact and hash/deep_compact' do
     it "should respond to the method deep_compact!" do
       { }.should respond_to :deep_compact!
@@ -13,13 +13,13 @@ describe Hash, :hashlike_spec => true do
     end
 
     it "should return a hash with all blank values removed recursively" do
-      @test_hash = {:e=>["", nil, [], {}, "foo", { :a=> [nil, {}, { :c=> ["","",[]] } ], :b => nil }]}
+      @test_hash = {:e => ["", nil, [], {}, "foo", { :a => [nil, {}, { :c => ["","",[]] } ], :b => nil }]}
       @test_hash.deep_compact!.should == {:e=>["foo"]}
     end
   end
 end
 
-describe Array, :hashlike_spec => true do
+describe Array, :hashlike_spec do
   describe 'array/deep_compact and hash/deep_compact' do
     it "should respond to the method deep_compact!" do
       [ ].should respond_to :deep_compact!
