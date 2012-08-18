@@ -52,9 +52,11 @@ module Gorillib
     #   any mixture of strings (literal sub-paths) and symbols (interpreted as references)
     # @return [Pathname] A single expanded Pathname
     #
-    def path_to(*pathsegs)
+    def of(*pathsegs)
       relpath_to(*pathsegs).expand_path
     end
+    alias_method :path_to, :of
+
 
     # Expand a path with late-evaluated segments
     # @see `.path_to`
