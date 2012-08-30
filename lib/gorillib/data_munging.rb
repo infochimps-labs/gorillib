@@ -1,0 +1,8 @@
+require 'gorillib'
+require 'gorillib/array/wrap'
+require 'gorillib/type/extended'
+require 'gorillib/hash/slice'
+require 'gorillib/pathname'
+require 'gorillib/logger/log'
+require 'gorillib/model'
+require 'gorillib/factories'
