@@ -1,25 +1,43 @@
 Exception.class_eval do
-  # @return [Array] __FILE__, __LINE__, description
-  def self.caller_parts
-    caller_line = caller[1]
-    mg = %r{\A([^:]+):(\d+):in \`([^\']+)\'\z}.match(caller_line) or return [caller_line, 1, 'unknown']
+  # @return [Array] file, line, method_name
+  def self.caller_parts(depth=1)
+    caller_line = caller(depth).first
+    mg = %r{\A([^:]+):(\d+):in \`([^\']+)\'\z}.match(caller_line) or return [caller_line, 1, '(unknown)']
     [mg[1], mg[2].to_i, mg[3]]
+  rescue
+    warn "problem in #{self}.caller_parts"
+    return [__FILE__, __LINE__, '(unknown)']
   end
 
   #
-  # @note !! Be sure to rescue the call to this method; few things suck worse than debugging your rescue blocks/
+  # Add context to the backtrace of exceptions ocurring downstream from caller.
+  # This is expecially useful in metaprogramming. Follow the implementation in
+  # the example.
+  #
+  # @note !! Be sure to rescue the call to this method; few things suck worse
+  # than debugging your rescue blocks.
+  #
+  # @example
+  #   define_method(:cromulate) do |level|
+  #     begin
+  #       adjust_cromulance(cromulator, level)
+  #     rescue StandardError => err ; err.polish("setting cromulance #{level} for #{cromulator}") rescue nil ; raise ; end
+  #   end
+  #
   def polish(extra_info)
     filename, _, method_name = self.class.caller_parts
     method_name.gsub!(/rescue in /, '')
-    most_recent_line = backtrace.detect{|line| line.include?(filename) && line.include?(method_name) && line[-1] == "'" }
+    most_recent_line = backtrace.detect{|line|
+      line.include?(filename) && line.include?(method_name) && line.end_with?("'") }
     most_recent_line.sub!(/'$/, "' for [#{extra_info.to_s[0..300]}]")
   end
 
 end
 
 ArgumentError.class_eval do
-  # Raise an error just like Ruby's native message if the array of arguments
-  # doesn't match the expected length or range of lengths.
+  # Raise an error if there are a different number of arguments than expected.
+  # The message will have the same format used by Ruby internal methods.
+  # @see #arity_at_least!
   #
   # @example want `getset(:foo)` to be different from `getset(:foo, nil)`
   #   def getset(key, *args)
@@ -42,8 +60,9 @@ ArgumentError.class_eval do
     raise self.new("wrong number of arguments (#{args.length} for #{val})#{info}")
   end
 
-  # Raise an error just like Ruby's native message if there are fewer arguments
-  # than expected
+  # Raise an error if there are fewer arguments than expected.  The message will
+  # have the same format used by Ruby internal methods.
+  # @see #check_arity!
   #
   # @example want to use splat args, requiring at least one
   #   def assemble_path(*pathsegs)
@@ -58,22 +77,72 @@ ArgumentError.class_eval do
   end
 end
 
+class TypeMismatchError < ArgumentError ; end
+
+class ArgumentError
+  #
+  # @param [Array[Symbol,Class,Module]] types
+  #
+  # @example simple
+  #   TypeMismatchError.mismatched!(:foo)
+  #     #=> "TypeMismatchError: :foo has mismatched type
+  #
+  # @example Can supply the types or duck-types that are expected:
+  #   TypeMismatchError.mismatched!(:foo, [:to_str, Integer])
+  #     #=> "TypeMismatchError: :foo has mismatched type; expected #to_str or Integer"
+  #
+  def self.mismatched!(obj, types=[], msg=nil, *args)
+    types = Array(types)
+    message = (obj.inspect rescue '(uninspectable object)')
+    message << " has mismatched type"
+    message << ': ' << msg if msg
+    unless types.empty?
+      message << '; expected ' << types.map{|type| type.is_a?(Symbol) ? "##{type}" : type.to_s }.join(" or ")
+    end
+    raise self, message, *args
+  end
+
+  #
+  # @param obj    [Object] Object to check
+  # @param types  [Array[Symbol,Class,Module]] Types or methods to compare
+  #
+  # @example simple
+  #   TypeMismatchError.mismatched!(:foo)
+  #     #=> "TypeMismatchError: :foo has mismatched type
+  #
+  # @example Can supply the types or duck-types that are expected:
+  #   TypeMismatchError.mismatched!(:foo, [:to_str, Integer])
+  #     #=> "TypeMismatchError: :foo has mismatched type; expected #to_str or Integer"
+  #
+  def self.check_type!(obj, types, *args)
+    types = Array(types)
+    return true if types.any? do |type|
+      case type
+      when Module then obj.is_a?(type)
+      when Symbol then obj.respond_to?(type)
+      else raise StandardError, "Can't check type #{type} -- this is an error in the call to the type-checker, not in the object the type-checker is checking"
+      end
+    end
+    self.mismatched!(obj, types, *args)
+  end
+
+end
+
+#
+class AbstractMethodError      < NoMethodError ; end
+
 NoMethodError.class_eval do
-  MESSAGE = "undefined method `%s' for %s:%s"
+  MESSAGE_FMT = "undefined method `%s' for %s:%s"
 
-  def self.undefined_method(obj)
+  # Raise an error with the same format used by Ruby internal methods
+  def self.undefined_method!(obj)
     file, line, meth = caller_parts
-    self.new(MESSAGE % [meth, obj, obj.class])
+    raise self.new(MESSAGE_FMT % [meth, obj, obj.class])
   end
 
-  def self.unimplemented_method(obj)
+  def self.abstract_method!(obj)
     file, line, meth = caller_parts
-    self.new("#{MESSAGE} -- not implemented yet" % [meth, obj, obj.class])
-  end
-
-  def self.abstract(obj)
-    file, line, meth = caller_parts
-    self.new("#{MESSAGE} -- must be implemented by the subclass" % [meth, obj, obj.class])
+    raise AbstractMethodError.new("#{MESSAGE} -- must be implemented by the subclass" % [meth, obj, obj.class])
   end
 
 end

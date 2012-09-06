@@ -1,5 +1,4 @@
 require 'gorillib/object/blank'
-require 'gorillib/object/try'
 require 'gorillib/array/extract_options'
 require 'gorillib/array/compact_blank'
 require 'gorillib/hash/reverse_merge'

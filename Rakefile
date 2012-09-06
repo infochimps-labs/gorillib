@@ -1,49 +1,20 @@
 require 'rubygems' unless defined?(Gem)
-require 'bundler'
-begin
-  Bundler.setup(:default, :development, :support, :test)
-rescue Bundler::BundlerError => e
-  $stderr.puts e.message
-  $stderr.puts "Run `bundle install` to install missing gems"
-  exit e.status_code
-end
+require 'bundler/setup'
+Bundler.setup(:default, :development)
 require 'rake'
 
-require 'jeweler'
-Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name        = "gorillib"
-  gem.homepage    = "http://infochimps.com/labs"
-  gem.license     = "MIT"
-  gem.summary     = %Q{include only what you need. No dependencies, no creep}
-  gem.description = %Q{Gorillib: infochimps lightweight subset of ruby convenience methods}
-  gem.email       = "coders@infochimps.org"
-  gem.authors     = ["Infochimps"]
+task :default => :rspec
 
-  ignores = File.readlines(".gitignore").grep(/^[^#]\S+/).map{|s| s.chomp }
-  dotfiles = [".gemtest", ".gitignore", ".rspec", ".yardopts"]
-  gem.files = dotfiles + Dir["**/*"].
-    reject{|f| f =~ %r{^(vendor|coverage)/} }.
-    reject{|f| File.directory?(f) }.
-    reject{|f| ignores.any?{|i| File.fnmatch(i, f) || File.fnmatch(i+'/**/*', f) || File.fnmatch(i+'/*', f) } }
-  gem.test_files = gem.files.grep(/^spec\//)
-  gem.require_paths = ['lib']
-end
-Jeweler::RubygemsDotOrgTasks.new
-
-require 'rspec/core'
 require 'rspec/core/rake_task'
-RSpec::Core::RakeTask.new(:spec) do |spec|
+RSpec::Core::RakeTask.new(:rspec) do |spec|
   Bundler.setup(:default, :development, :test)
-  spec.pattern = FileList['spec/**/*_spec.rb']
+  spec.pattern = 'spec/**/*_spec.rb'
 end
 
-# if rcov shits the bed with ruby 1.9, see
-#   https://github.com/relevance/rcov/issues/31
-RSpec::Core::RakeTask.new(:rcov) do |spec|
-  spec.pattern = 'spec/**/*_spec.rb'
-  spec.rcov = true
-  spec.rcov_opts = %w[ --exclude .rvm --no-comments --text-summary]
+desc "Run RSpec with code coverage"
+task :cov do
+  ENV['GORILLIB_COV'] = "yep"
+  Rake::Task[:rspec].execute
 end
 
 require 'yard'
@@ -51,7 +22,25 @@ YARD::Rake::YardocTask.new do
   Bundler.setup(:default, :development, :docs)
 end
 
-# App-specific tasks
-Dir[File.dirname(__FILE__)+'/lib/tasks/**/*.rake'].sort.each{|f| load f }
+require 'jeweler'
+Jeweler::Tasks.new do |gem|
+  Bundler.setup(:default, :development, :test)
+  gem.name        = 'gorillib'
+  gem.homepage    = 'https://github.com/infochimps-labs/gorillib'
+  gem.license     = 'Apache 2.0'
+  gem.email       = 'coders@infochimps.org'
+  gem.authors     = ['Infochimps']
 
-task :default => :spec
+  gem.summary     = %Q{include only what you need. No dependencies, no creep}
+  gem.description = %Q{Gorillib: infochimps lightweight subset of ruby convenience methods}
+
+  ignores = File.readlines(".gitignore").grep(/^[^#]\S+/).map{|s| s.chomp }
+  dotfiles = [".gemtest", ".gitignore", ".rspec", ".yardopts"]
+  gem.files = dotfiles + Dir["**/*"].
+    reject{|f| f =~ %r{^(vendor|coverage|old|away)/} }.
+    reject{|f| File.directory?(f) }.
+    reject{|f| ignores.any?{|i| File.fnmatch(i, f) || File.fnmatch(i+'/**/*', f) || File.fnmatch(i+'/*', f) } }
+  gem.test_files = gem.files.grep(/^spec\//)
+  gem.require_paths = ['lib']
+end
+Jeweler::RubygemsDotOrgTasks.new

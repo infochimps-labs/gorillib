@@ -1,28 +1,35 @@
 require 'gorillib/string/inflector'
 class String
 
-  # +constantize+ tries to find a declared constant with the name specified
-  # in the string. It raises a NameError when the name is not in CamelCase
-  # or is not initialized.  See Gorillib::Inflector.constantize
+  # Find a declared constant with the name specified in the string, or raise.
   #
-  # Examples
+  # @example
   #   "Module".constantize  # => Module
   #   "Class".constantize   # => Class
   #   "blargle".constantize # => NameError: wrong constant name blargle
+  #
+  # @raise [NameError] when the name is not in CamelCase or is not initialized.
+  # @return [Module,Class] the specified class
+  # @see Gorillib::Inflector.constantize
   def constantize
     Gorillib::Inflector.constantize(self)
-  end unless method_defined?(:constantize)
+  end
 
-  # +safe_constantize+ tries to find a declared constant with the name specified
-  # in the string. It returns nil when the name is not in CamelCase
-  # or is not initialized.  See Gorillib::Model::Inflector.safe_constantize
+  # Find a declared constant with the name specified in the string, or return nil.
   #
-  # Examples
+  # @return [Module,Class] the specified class, or nil when the name is not in
+  # CamelCase or is not initialized.
+  #
+  # @example
   #   "Module".safe_constantize  # => Module
   #   "Class".safe_constantize   # => Class
   #   "blargle".safe_constantize # => nil
+  #
+  # @see Gorillib::Model::Inflector.safe_constantize
+  # @return [Module,Class] the specified constant,
+  #   or nil when the name is not in CamelCase or is not initialized.
   def safe_constantize
     Gorillib::Inflector.safe_constantize(self)
-  end unless method_defined?(:safe_constantize)
+  end
 
 end

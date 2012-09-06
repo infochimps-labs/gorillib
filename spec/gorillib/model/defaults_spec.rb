@@ -1,6 +1,10 @@
 require 'spec_helper'
 
-require 'gorillib/model'
+require 'gorillib/metaprogramming/concern'
+require 'gorillib/metaprogramming/class_attribute'
+require 'gorillib/model/named_schema'
+require 'gorillib/model/base'
+require 'gorillib/model/schema_magic'
 require 'gorillib/model/field'
 require 'gorillib/model/defaults'
 

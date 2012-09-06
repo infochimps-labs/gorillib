@@ -1,18 +1,33 @@
 # -*- ruby -*-
 
-# guard 'yard', :stdout => '/dev/null' do
-#   watch(%r{lib/.+\.rb})
-#   watch(%r{notes/.+\.(md|txt)}) { "notes" }
-# end
-
+# require 'guard/notifiers/emacs'
+# ::Guard::Notifier::DEFAULTS.merge!(
+#   :success => '#e7fde4',
+#   :failed  => '#faeedc',
+#   :default => '#eee8d6',
+#   )
+# p ['emacs notifier:', ::Guard::Notifier::DEFAULTS]
 
 format  = "progress"         # '--format doc'     for more verbose, --format progress for less
-tags    = %w[  ]         # '--tag record_spec' to only run tests tagged :record_spec
+tags    = %w[   ]         # '--tag record_spec' to only run tests tagged :record_spec
 
-guard 'rspec', :version => 2, :cli => "--format #{format} #{ tags.map{|tag| "--tag #{tag}"}.join(" ")  }" do
+guard('rspec', version: 2, all_after_pass: false, all_on_start: false,
+  cli: "--format #{format} #{ tags.map{|tag| "--tag #{tag}"}.join(" ")  }") do
   watch(%r{^spec/.+_spec\.rb$})
   watch(%r{^(examples/.+)\.rb}){|m|      "spec/#{m[1]}_spec.rb" }
   watch(%r{^lib/gorillib/(.+)\.rb$}){|m| ["spec/gorillib/#{m[1]}_spec.rb", "spec/examples/builder/ironfan_spec.rb"] }
   watch('spec/spec_helper.rb'){           "spec" }
   watch(/spec\/support\/(.+)\.rb/){       "spec" }
+end
+
+if ENV['GORILLIB_YARD']
+
+  guard 'yard', use_cache: true, server: false, stdout: '/dev/null' do
+    watch(%r{lib/.+\.rb})
+    watch(%r{notes/.+\.(md|txt)}){ "notes" }
+  end
+
+  guard 'livereload' do
+    watch(/^doc\/(.*\.html)/) # {|match| [ match[1], "frames.html" ] }
+  end
 end

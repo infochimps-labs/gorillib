@@ -2,7 +2,7 @@ require 'spec_helper'
 #
 require 'gorillib/model'
 require 'gorillib/collection/model_collection'
-require 'model_test_helpers'
+require 'support/model_test_helpers'
 
 shared_context :collection_spec do
   # a collection with the internal :clxn mocked out, and a method 'innards' to
@@ -98,6 +98,7 @@ shared_examples_for 'a keyed collection' do
   end
 
   context '#fetch' do
+    ABSENT_KEY_ERROR_RE =  /(key not found: 69|index 69 outside)/
     it 'retrieves an object if present' do
       subject[1] = mock_val
       subject.fetch(1).should equal(mock_val)
@@ -108,7 +109,7 @@ shared_examples_for 'a keyed collection' do
       got_here.should == 'yup'
     end
     it 'if absent and no block given: raises an error' do
-      ->{ subject.fetch(69) }.should raise_error IndexError, /(key not found: 69|index 69 outside)/
+      ->{ subject.fetch(69) }.should raise_error IndexError, ABSENT_KEY_ERROR_RE
     end
   end
 
@@ -197,16 +198,6 @@ describe 'collections:', :model_spec, :collection_spec do
     end
   end
 
-  describe Gorillib::ModelCollectionOld, :model_spec, :only do
-    context do
-      let(:string_collection){ described_class.receive(%w[wocket in my pocket], :to_sym, String) }
-      let(:shouty_collection){ described_class.receive(%w[wocket in my pocket], :upcase, String) }
-      it_behaves_like 'a collection'
-      it_behaves_like 'a keyed collection'
-      it_behaves_like 'an auto-keyed collection'
-    end
-  end
-
   describe Gorillib::ModelCollection, :model_spec do
     context do
       let(:string_collection){ described_class.receive(%w[wocket in my pocket], key_method: :to_sym, item_type: String) }
@@ -262,12 +253,47 @@ describe 'collections:', :model_spec, :collection_spec do
         subject.update_or_add('truffula', hsh, &test_proc)
       end
       it "returns item" do
-        subject.update_or_add('truffula', test_attrs).should == test_item
-        subject.update_or_add('truffula', test_item ).should  == test_item
+        updated_item = test_item.dup ; updated_item.name = 'truffula'
+        subject.update_or_add('truffula', test_attrs).should == updated_item
+        subject.update_or_add('truffula', test_item ).should == test_item
+      end
+      it 'FIXME: does not behave right on existing bojects' do
+        updated_item = test_item.dup ; updated_item.name = 'truffula'
+        subject.update_or_add('truffula', test_item ).should == updated_item
       end
       it "adds item to collection" do
+        updated_item = test_item.dup ; updated_item.name = 'truffula'
         subject.update_or_add('truffula', test_attrs)
-        subject['truffula'].should == test_item
+        subject['truffula'].should == updated_item
+      end
+    end
+  end
+
+
+  describe Gorillib::Model do
+    describe '.collection' do
+      let(:described_class){ smurf_village_class }
+      subject{ described_class.new(name: :smurf_town) }
+      before do
+        smurf_collection_class ; smurf_village_class
+        smurf_class.field :village, smurf_village_class
+      end
+
+      it 'adds an eponymous field' do
+        described_class.should have_field(:smurfs)
+      end
+
+      it 'sets a default that auto-vivifies the collection field' do
+        subject.smurfs.should be_a(Gorillib::ModelCollection)
+        subject.smurfs.belongs_to.should == subject
+      end
+
+      it 'receives' do
+        subject = smurf_village_class.receive({name: :smurf_town,
+          smurfs: [
+            { name: 'whatever_smurf', smurfiness: 20},
+          ]})
+        subject.smurfs['whatever_smurf'].village.should == subject
       end
     end
 

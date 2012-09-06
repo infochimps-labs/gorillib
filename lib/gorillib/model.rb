@@ -11,13 +11,14 @@ require 'gorillib/exception/raisers'
 require 'gorillib/metaprogramming/concern'
 require 'gorillib/metaprogramming/class_attribute'
 #
-require 'gorillib/type/extended'
-require 'gorillib/model/factories'
+require 'gorillib/factories'
+# require 'gorillib/type/extended'
 require 'gorillib/model/named_schema'
 require 'gorillib/model/validate'
 require 'gorillib/model/errors'
 #
 require 'gorillib/model/base'
+require 'gorillib/model/schema_magic'
 require 'gorillib/model/field'
 require 'gorillib/model/defaults'
 #

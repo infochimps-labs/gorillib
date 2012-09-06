@@ -16,8 +16,10 @@ class Time
       when (dt.to_s =~ /\A\d{14}\z/)    then parse(dt.to_s+'Z', true)
       else                                   parse(dt.to_s,     true).utc
       end
-    rescue StandardError => e
-      Log.debug e
+    rescue StandardError => err
+      Log.debug "Can't parse a #{self} from #{dt.inspect}"
+      Log.debug err
+      return nil
     end
   end unless method_defined?(:parse_safely)
 end

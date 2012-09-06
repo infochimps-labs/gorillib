@@ -120,14 +120,16 @@ module Gorillib::Inflector
     Object.module_eval("::#{$1}", __FILE__, __LINE__)
   end
 
-  # Tries to find a constant with the name specified in the argument string:
+  # Tries to find a declared constant with the name specified in the string, or return nil.
   #
-  #   "Module".safe_constantize     # => Module
-  #   "Test::Unit".safe_constantize # => Test::Unit
+  # @example
+  #   "Module".safe_constantize  # => Module
+  #   "Class".safe_constantize   # => Class
   #
-  # The name is assumed to be the one of a top-level constant, no matter whether
+  # The `name` is assumed to be the one of a top-level constant, no matter whether
   # it starts with "::" or not. No lexical context is taken into account:
   #
+  # @example finds the top-level constant `::C`, not `::M::C`
   #   C = 'outside'
   #   module M
   #     C = 'inside'
@@ -135,13 +137,15 @@ module Gorillib::Inflector
   #     "C".safe_constantize # => 'outside', same as ::C
   #   end
   #
-  # nil is returned when the name is not in CamelCase or the constant (or part of it) is
-  # unknown.
-  #
+  # @example nil is returned when the name is not in CamelCase or the constant (or part of it) is unknown.
   #   "blargle".safe_constantize  # => nil
   #   "UnknownModule".safe_constantize  # => nil
   #   "UnknownModule::Foo::Bar".safe_constantize  # => nil
   #
+  #
+  # @see String.safe_constantize
+  # @return [Module,Class] the specified constant,
+  #   or nil when the name is not in CamelCase or is not initialized.
   def safe_constantize(camel_cased_word)
     begin
       constantize(camel_cased_word)

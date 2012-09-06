@@ -36,7 +36,7 @@ class ItsATrap < BasicObject
   alias_method :pretty_inspect, :inspect
   def methods() @obj.methods ; end
 
-  # @returns the proxied object
+  # @return the proxied object
   def __obj__ ; @obj ; end
 
   # These are defined on BasicObject, delegate them along with the rest
@@ -68,23 +68,6 @@ private
     $stderr.puts   "%s %-15s  -> %s"             % [pref, meth.to_s[0..14], ret.inspect] if @show_ret
     ret
   end
-end
-
-module Test
-  module_function
-
-  def create_class(name, *args, &block)
-    Object.class_eval do
-      remove_const(name) if self.const_defined?(name)
-      const_set(name, Class.new(*args, &block))
-    end
-  end
-
-  def example_singleton(name, *args)
-    require 'singleton'
-    create_class(name, *args){ include ::Singleton }
-  end
-
 end
 
 class Module

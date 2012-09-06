@@ -14,5 +14,11 @@ module Gorillib
       include Gorillib::Model::Error
     end
 
+    # Exception raised if deserialized attributes don't have the right shape:
+    # for example, a CSV line with too many/too few fields
+    class RawDataMismatchError < ::StandardError
+      include Gorillib::Model::Error
+    end
+
   end
 end

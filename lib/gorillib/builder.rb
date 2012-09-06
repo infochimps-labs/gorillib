@@ -86,7 +86,7 @@ module Gorillib
     end
 
     def to_key
-      self.read_attribute(key_method)
+      self.send(key_method)
     end
 
     def to_inspectable
@@ -106,10 +106,11 @@ module Gorillib
       def member(field_name, type, options={})
         field(field_name, type, {:field_type => ::Gorillib::Builder::MemberField}.merge(options))
       end
+
+      # FIXME: this interface is borked -- it should not take the item_type in the second slot.
       def collection(field_name, item_type, options={})
-        field(field_name, Gorillib::ModelCollection, {
-            :item_type => item_type,
-            :field_type => ::Gorillib::Builder::CollectionField}.merge(options))
+        super(field_name, Gorillib::ModelCollection, {
+            :item_type => item_type, :field_type => ::Gorillib::Builder::GetsetCollectionField }.merge(options))
       end
 
     protected
@@ -138,20 +139,6 @@ module Gorillib
           begin
             getset_collection_item(field, *args, &block)
           rescue StandardError => err ; err.polish("#{self.class}.#{field_name} c[#{item_type}] on #{args}'") rescue nil ; raise ; end
-        end
-      end
-
-      def define_collection_receiver(field)
-        plural_name = field.name; item_type = field.item_type; field_type = field.type
-        define_meta_module_method("receive_#{plural_name}", true) do |coll, &block|
-          begin
-            if coll.is_a?(field_type)
-              write_attribute(plural_name, coll)
-            else
-              read_attribute(plural_name).receive!(coll, &block)
-            end
-            self
-          rescue StandardError => err ; err.polish("#{self.class} #{plural_name} c[#{item_type}] on #{args}'") rescue nil ; raise ; end
         end
       end
 
@@ -223,9 +210,8 @@ module Gorillib
       end
     end
 
-    class CollectionField < Gorillib::Model::Field
+    class GetsetCollectionField < ::Gorillib::Model::SimpleCollectionField
       field :singular_name, Symbol, :default => ->{ Gorillib::Inflector.singularize(name.to_s).to_sym }
-      field :item_type, Class, :default => Whatever
 
       self.visibilities = visibilities.merge(:writer => false, :tester => false,
         :collection_getset => :public, :collection_tester => true)
@@ -236,8 +222,6 @@ module Gorillib
       end
 
       def inscribe_methods(model)
-        item_type      = self.item_type
-        self.default   = ->{ Gorillib::ModelCollection.new(key_method: key_method, item_type: item_type) }
         raise "Plural and singular names must differ: #{self.plural_name}" if (singular_name == plural_name)
         #
         @visibilities[:writer] = false
@@ -249,6 +233,7 @@ module Gorillib
         model.__send__(:define_collection_tester,   self)
       end
     end
+    CollectionField = GetsetCollectionField
 
   end
 end
