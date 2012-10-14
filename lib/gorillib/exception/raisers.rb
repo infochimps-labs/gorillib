@@ -25,7 +25,7 @@ Exception.class_eval do
   #   end
   #
   def polish(extra_info)
-    filename, _, method_name = self.class.caller_parts
+    filename, _, method_name = self.class.caller_parts(2)
     method_name.gsub!(/rescue in /, '')
     most_recent_line = backtrace.detect{|line|
       line.include?(filename) && line.include?(method_name) && line.end_with?("'") }
@@ -100,6 +100,11 @@ class ArgumentError
       message << '; expected ' << types.map{|type| type.is_a?(Symbol) ? "##{type}" : type.to_s }.join(" or ")
     end
     raise self, message, *args
+  end
+
+
+  def self.block_required!(block)
+    raise self.new("Block is required") unless block
   end
 
   #
