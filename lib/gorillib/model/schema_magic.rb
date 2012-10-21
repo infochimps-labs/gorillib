@@ -153,6 +153,7 @@ module Gorillib
 
       def inherited(base)
         base.instance_eval do
+          self.meta_module
           @_own_fields ||= {}
         end
         super

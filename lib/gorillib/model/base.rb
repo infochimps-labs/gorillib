@@ -31,6 +31,7 @@ module Gorillib
     # @return [{Symbol => Object}] The Hash of all attributes
     def attributes
       self.class.field_names.inject(Hash.new) do |hsh, fn|
+        # hsh[fn] = attribute_set?(fn) ? read_attribute(fn) : nil
         hsh[fn] = read_attribute(fn)
         hsh
       end
@@ -199,6 +200,10 @@ module Gorillib
       str << '>'
     end
 
+    def to_s
+      inspect
+    end
+
     def inspect_compact
       str = "#<#{self.class.name.to_s}>"
     end
@@ -208,7 +213,6 @@ module Gorillib
     def to_inspectable
       compact_attributes
     end
-    private :to_inspectable
 
   protected
 
@@ -260,6 +264,7 @@ module Gorillib
       base.instance_eval do
         extend Gorillib::Model::NamedSchema
         extend Gorillib::Model::ClassMethods
+        self.meta_module
         @_own_fields ||= {}
       end
     end

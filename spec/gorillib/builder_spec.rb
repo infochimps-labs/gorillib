@@ -17,8 +17,8 @@ describe Gorillib::Builder, :model_spec => true, :builder_spec => true do
   context 'examples:' do
     let(:subject_class  ){ car_class }
     it 'type-converts values' do
-      obj = subject_class.receive(     :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2" )
-      obj.attributes.should == { :name => :wildcat,  :make_model => 'Buick Wildcat', :year =>  1968,  :doors =>  2, :engine => nil }
+      obj = subject_class.receive( :name => 'wildcat', :make_model => 'Buick Wildcat', :year => "1968", :doors => "2" )
+      obj.attributes.should == {   :name => :wildcat,  :make_model => 'Buick Wildcat', :year =>  1968,  :doors =>  2, :engine => nil }
     end
     it 'handles nested structures' do
       obj = subject_class.receive(

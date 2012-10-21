@@ -32,19 +32,6 @@ module Gorillib
       klass.new(options)
     end
 
-    # Manufactures objects from their raw attributes hash
-    #
-    # A hash with a value for `:_type` is dispatched to the corresponding factory
-    # Everything else is returned directly
-    def self.make(obj)
-      if obj.respond_to?(:has_key?) && (obj.has_key?(:_type) || obj.has_key?('_type'))
-        factory = Gorillib::Factory(attrs[:_type])
-        factory.receive(obj)
-      else
-        obj
-      end
-    end
-
     def self.register_factory(factory, typenames)
       typenames.each{|typename| factories[typename] = factory }
     end
@@ -185,6 +172,14 @@ module Gorillib
       end
     end
 
+    # __________________________________________________________________________
+    #
+    #  Generic Factories
+    # __________________________________________________________________________
+
+    #
+    # Factory that accepts whatever given and uses it directly -- no nothin'
+    #
     class ::Whatever < BaseFactory
       def initialize(options={})
         options.slice!(:convert, :blankish)
@@ -199,6 +194,24 @@ module Gorillib
       Gorillib::Factory.register_factory(self, [self, :identical, :whatever])
     end
     IdenticalFactory = ::Whatever unless defined?(IdenticalFactory)
+
+
+    # Manufactures objects from their raw attributes hash
+    #
+    # The hash must have a value for `:_type`, used to retrieve the actual factory
+    #
+    class ::GenericModel < BaseFactory
+      def blankish?(obj) obj.nil? ; end
+      def native?(obj)   false  ; end
+      def receive(attrs, &block)
+        Gorillib::Model::Validate.hashlike!(attrs){ "attributes for typed object" }
+        klass = Gorillib::Factory(attrs.fetch(:_type){ attrs.fetch("_type") })
+        #
+        klass.new(attrs, &block)
+      end
+      def self.receive(obj) allocate.receive(obj) end
+      register_factory!(GenericModel, :generic)
+    end
 
     # __________________________________________________________________________
     #
