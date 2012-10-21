@@ -1,5 +1,5 @@
 require 'spec_helper'
-# require 'support/factory_test_helpers'
+require 'support/factory_test_helpers'
 
 require 'gorillib/object/blank'
 require 'gorillib/object/try_dup'
@@ -8,11 +8,9 @@ require 'gorillib/metaprogramming/class_attribute'
 require 'gorillib/string/inflector'
 
 require 'gorillib/collection'
-require 'gorillib/model/factories'
+require 'gorillib/factories'
 
-require 'factory_test_helpers'
-
-describe '', :model_spec, :factory_spec, :only do
+describe '', :model_spec, :factory_spec do
 
   describe Gorillib::Factory do
     describe 'Factory()' do
