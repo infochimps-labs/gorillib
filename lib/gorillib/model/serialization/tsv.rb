@@ -22,9 +22,10 @@ module Gorillib
         def _each_from_tsv(filename, options={})
           options = tsv_options.merge(options)
           num_fields  = options.delete(:num_fields){ (fields.length .. fields.length) }
+          max_fields  = num_fields.max # need to make sure "1\t2\t\t\t" becomes ["1","2","","",""]
           #
           _each_raw_line(filename, options) do |line|
-            tuple = line.split("\t")
+            tuple = line.split("\t", max_fields)
             unless num_fields.include?(tuple.length) then raise Gorillib::Model::RawDataMismatchError, "yark, spurious fields: #{tuple.inspect}" ; end
             yield from_tuple(*tuple)
           end
