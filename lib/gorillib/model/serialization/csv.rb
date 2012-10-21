@@ -21,9 +21,11 @@ module Gorillib
         def each_in_csv(filename, options={})
           filename = Pathname.path_to(filename)
           options = csv_options.merge(options)
+          #
           pop_headers = options.delete(:pop_headers)
           num_fields  = options.delete(:num_fields){ (fields.length .. fields.length) }
           raise ArgumentError, "The :headers option to CSV changes its internal behavior; use 'pop_headers: true' to ignore the first line" if options[:headers]
+          #
           CSV.open(filename, options) do |csv_file|
             csv_file.shift if pop_headers
             csv_file.each do |tuple|
