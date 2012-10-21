@@ -42,6 +42,7 @@ Jeweler::Tasks.new do |gem|
     reject{|f| File.directory?(f) }.
     reject{|f| ignores.any?{|i| File.fnmatch(i, f) || File.fnmatch(i+'/**/*', f) || File.fnmatch(i+'/*', f) } }
   gem.test_files = gem.files.grep(/^spec\//)
+  gem.extra_rdoc_files = [gem.files.grep(/^notes\//), gem.files.grep(/\.md$/)].flatten.uniq
   gem.require_paths = ['lib']
 end
 Jeweler::RubygemsDotOrgTasks.new
