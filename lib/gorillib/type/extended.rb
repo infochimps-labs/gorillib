@@ -2,6 +2,7 @@ require 'pathname'
 require 'date'
 require 'set'
 require 'gorillib/factories'
+require 'gorillib/type/ip_address'
 
 class ::Long      < ::Integer ; end
 class ::Double    < ::Float   ; end
