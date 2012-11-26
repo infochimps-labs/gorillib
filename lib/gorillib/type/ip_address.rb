@@ -22,8 +22,8 @@ module IpAddresslike
     packed | (ONES >> bitness)
   end
 
-  def hex_str
-    packed.to_s(16)
+  def to_hex
+    "%08x" % packed
   end
 
   def to_s
