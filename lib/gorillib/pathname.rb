@@ -66,7 +66,7 @@ module Gorillib
     #
     def relpath_to(*pathsegs)
       ArgumentError.arity_at_least!(pathsegs, 1)
-      pathsegs = pathsegs.map{|ps| expand_pathseg(ps) }.flatten
+      pathsegs = pathsegs.flatten.map{|ps| expand_pathseg(ps) }.flatten
       self.new(File.join(*pathsegs)).cleanpath(true)
     end
     alias_method :relative_path_to, :relpath_to
