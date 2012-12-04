@@ -40,6 +40,17 @@ shared_context 'model', :model_spec do
     Gorillib::Test::SmurfVillage
   end
 
+  let(:smurfhouse_class) do
+    module Gorillib::Test
+      class Smurfhouse
+        include Gorillib::Model
+        field   :shape, Symbol
+        field   :color, Symbol
+      end
+    end
+    Gorillib::Test::Smurfhouse
+  end
+
 end
 
 shared_context 'builder', :model_spec, :builder_spec do
