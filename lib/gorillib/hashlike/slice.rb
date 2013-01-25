@@ -16,6 +16,8 @@ module Gorillib
       #   valid_keys = [:mass, :velocity, :time]
       #   search(options.slice(*valid_keys))
       #
+      # Note: Compatible with Rails 4.0 Active Support
+      #
       # @return key/value pairs for keys in self and allowed
       def slice(*allowed)
         allowed.map!{|key| convert_key(key) } if respond_to?(:convert_key, true)
