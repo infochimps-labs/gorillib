@@ -14,6 +14,12 @@ class Pathname
     return self
   end
 
+  # Like find, but returns an enumerable
+  #
+  def find_all
+    Enumerator.new{|yielder| find{|path| yielder << path } }
+  end
+
   #
   # Executes the block (passing the opened file) if the file does not
   # exist. Ignores the block otherwise. The block is required.
