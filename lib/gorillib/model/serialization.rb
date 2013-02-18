@@ -1,13 +1,16 @@
+require_relative '../serialization/to_wire'
+
 class Array
   def to_tsv
-    join("\t")
+    to_wire.join("\t")
   end
 end
 
 module Gorillib
   module Model
+
     def to_wire(options={})
-      attributes.merge(:_type => self.class.typename).inject({}) do |acc, (key,attr)|
+      compact_attributes.merge(:_type => self.class.typename).inject({}) do |acc, (key,attr)|
         acc[key] = attr.respond_to?(:to_wire) ? attr.to_wire(options) : attr
         acc
       end
@@ -18,8 +21,10 @@ module Gorillib
       MultiJson.dump(to_wire(options), options)
     end
 
-    def to_tsv
-      attribute_values.map(&:to_s).join("\t")
+    def to_tsv(options={})
+      attributes.map do |key, attr|
+        attr.respond_to?(:to_wire) ? attr.to_wire(options) : attr
+      end.join("\t")
     end
 
     module ClassMethods
