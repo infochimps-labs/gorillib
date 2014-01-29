@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'gorillib/array/compact_blank'
 
 describe Array, :simple_spec do
-  let(:blankish){ mock('blankish', :blank? => true) }
-  let(:nonblank){ mock('nonblank', :blank? => false) }
+  let(:blankish){ double('blankish', :blank? => true) }
+  let(:nonblank){ double('nonblank', :blank? => false) }
 
   describe '#compact_blank' do
     it 'omits nils, like #compact' do

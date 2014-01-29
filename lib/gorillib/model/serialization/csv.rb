@@ -1,5 +1,6 @@
 require 'csv'
 require 'gorillib/pathname'
+require_relative '../serialization'
 
 module Gorillib
   module Model

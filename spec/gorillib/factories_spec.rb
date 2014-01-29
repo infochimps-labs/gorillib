@@ -38,7 +38,7 @@ describe '', :model_spec, :factory_spec do
         Gorillib::Factory(String).should be_a(Gorillib::Factory::StringFactory)
       end
       it 'calls Gorillib::Factory.lookup' do
-        x = mock
+        x = double
         Gorillib::Factory.should_receive(:find).with(x)
         Gorillib::Factory(x)
       end
@@ -304,7 +304,7 @@ describe '', :model_spec, :factory_spec do
     end
 
     it "accepts a factory for the keys" do
-      mock_factory = mock('factory')
+      mock_factory = double('factory')
       mock_factory.should_receive(:receive).with(3).and_return("converted!")
       factory = described_class.new(:keys => mock_factory)
       factory.receive( { 3 => 4 } ).should == { 'converted!' => 4 }

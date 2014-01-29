@@ -58,7 +58,7 @@ describe Gorillib::Model, :model_spec => true do
     end
     it "if the default is a value, returns it, dup'd if possible" do
       ford_39.attribute_default(style_field).should == :sedan
-      year_val = mock ; dupd_year_val = mock
+      year_val = double ; dupd_year_val = double
       year_val.should_receive(:try_dup).and_return(dupd_year_val)
       year_field.default = year_val
       ford_39.attribute_default(year_field).should equal(dupd_year_val)
@@ -74,7 +74,7 @@ describe Gorillib::Model, :model_spec => true do
       ford_39.attribute_default(year_field).should equal(ford_39)
     end
     it "if the default responds_to #call, call it, passing the instance and field name" do
-      callable = mock ; expected = mock
+      callable = double ; expected = double
       year_field.default = callable
       callable.should_receive(:respond_to?).with(:call).and_return(true)
       callable.should_receive(:call).with(ford_39, :year).and_return(expected)
@@ -82,7 +82,7 @@ describe Gorillib::Model, :model_spec => true do
       ford_39.attribute_default(year_field).should equal(expected)
     end
     it "if the default is a proc with args, call it in current context with the model and field name" do
-      this = self ; expected = mock
+      this = self ; expected = double
       year_field.default = ->(inst, field_name){ [self, inst, field_name, expected] }
       ford_39.attribute_default(year_field).should == [this, ford_39, :year, expected]
     end
