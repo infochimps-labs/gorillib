@@ -56,7 +56,7 @@ end
 # hand it a collection with entries 1, 2, 3 please
 shared_examples_for :an_enumerable_factory do
   it "accepts a factory for its items" do
-    mock_factory = mock('factory')
+    mock_factory = double('factory')
     mock_factory.should_receive(:receive).with(1)
     mock_factory.should_receive(:receive).with(2)
     mock_factory.should_receive(:receive).with(3)
@@ -67,7 +67,7 @@ shared_examples_for :an_enumerable_factory do
     subject.empty_product.should == empty_collection
   end
   it "lets you override the empty collection" do
-    ep = mock; ep.should_receive(:try_dup).and_return 'hey'
+    ep = double; ep.should_receive(:try_dup).and_return 'hey'
     subject = described_class.new(:empty_product => ep)
     subject.empty_product.should == 'hey'
     subject = described_class.new(:empty_product => ->{ 'yo' })

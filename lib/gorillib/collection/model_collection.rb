@@ -40,6 +40,7 @@ module Gorillib
         item.receive!(attrs, &block)
         item
       else
+        attrs = attrs.attributes if attrs.is_a? Gorillib::Model
         attrs = attrs.merge(key_method => label) if key_method && label
         receive_item(label, attrs, &block)
       end

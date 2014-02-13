@@ -66,21 +66,7 @@ module HashlikeFuzzingHelper
       obj.send(meth, *input)
     end
   end
-
-  # workaround: some errors have slightly different strings than Hash does
-  def err_regex err
-    err_str = err.to_s
-    err_str = Regexp.escape(err_str)
-    if err.is_a?(TypeError)
-      err_str.gsub!(/nil/,   '(nil|NilClass)')
-      err_str.gsub!(/false/, '(false|FalseClass)')
-    elsif err.is_a?(ArgumentError)
-      err_str.gsub!(/arguments(\\ )*\\\(/, 'arguments\s*\(')
-      err_str.gsub!(/for\\ (\d\\\.\\\.\d)/, 'for [\d\.]+')
-    end
-    Regexp.new(err_str)
-  end
-
+  
   def behaves_the_same obj_1, obj_2, method_to_test, input
     input.unshift(1) if [:cycle, :partition].include?(method_to_test) && input.last.is_a?(Proc)
 

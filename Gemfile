@@ -1,4 +1,4 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
 gem   'multi_json',  ">= 1.1"
 gem   'json'

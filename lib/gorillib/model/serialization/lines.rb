@@ -1,3 +1,5 @@
+require 'gorillib/pathname'
+
 module Gorillib
   module Model
 

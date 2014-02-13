@@ -80,7 +80,7 @@ shared_examples_for 'a model' do
         smurf_class.receive(my_attrs)
       end
       it 'complains if the given type is not right' do
-        mock_factory = mock ; mock_factory.stub(:receive! => {}, :receive => mock, :new => mock_factory)
+        mock_factory = double('factory') ; mock_factory.stub(:receive! => {}, :receive => double, :new => mock_factory)
         mock_factory.should_receive(:<=).and_return(false)
         smurf_class.should_receive(:warn).with(/factory .* is not a type of Gorillib::Test::Smurf/)
         smurf_class.receive(:my_field => 12, :acme => 3, :_type => mock_factory)
@@ -103,7 +103,7 @@ shared_examples_for "a model field" do |field_name|
       subject.read_attribute(field_name).should == mock_val
     end
     it "does **not** raise an error if the field does not exist (require 'model/lint' if you want it to)" do
-      ->{ subject.read_attribute(:fnord) }.should_not raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
+       expect { subject.read_attribute(:fnord) }.not_to raise_error
     end
   end
 
@@ -116,7 +116,7 @@ shared_examples_for "a model field" do |field_name|
       subject.write_attribute(field_name, sample_val).should == sample_val
     end
     it "does **not** raise an error if the field does not exist (require 'model/lint' if you want it to)" do
-      ->{ subject.write_attribute(:fnord, 8) }.should_not raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
+      expect { subject.write_attribute(:fnord, 8) }.not_to raise_error
     end
   end
 
@@ -133,7 +133,7 @@ shared_examples_for "a model field" do |field_name|
       subject.attribute_set?(field_name).should be_false
     end
     it "does **not** raise an error if the field does not exist (require 'model/lint' if you want it to)" do
-      ->{ subject.attribute_set?(:fnord) }.should_not raise_error(Gorillib::Model::UnknownFieldError, /unknown field: fnord/)
+      expect { subject.attribute_set?(:fnord) }.not_to raise_error
     end
   end
 

@@ -9,7 +9,7 @@ shared_context :collection_spec do
   # let you access it.
   let(:collection_with_mock_innards) do
     coll = described_class.new
-    coll.send(:instance_variable_set, :@clxn, mock('clxn hash') )
+    coll.send(:instance_variable_set, :@clxn, double('clxn hash') )
     coll.send(:define_singleton_method, :innards){ @clxn }
   end
 end
@@ -19,9 +19,9 @@ shared_examples_for 'a collection' do |options={}|
 
   context '.receive' do
     it 'makes a new collection, has it #receive! the cargo, returns it' do
-      mock_collection = mock('collection')
-      mock_cargo      = mock('cargo')
-      mock_args       = {key_method: mock, item_type: mock}
+      mock_collection = double('collection')
+      mock_cargo      = double('cargo')
+      mock_args       = {key_method: double, item_type: double}
       described_class.should_receive(:new).with(mock_args).and_return(mock_collection)
       mock_collection.should_receive(:receive!).with(mock_cargo)
       described_class.receive(mock_cargo, mock_args).should == mock_collection
@@ -211,7 +211,7 @@ describe 'collections:', :model_spec, :collection_spec do
     let(:smurf_collection){ described_class.receive([], key_method: :name, item_type: smurf_class) }
     let(:test_item){  papa_smurf }
     let(:test_attrs){ test_item.attributes }
-    let(:mock_factory){ mf = mock('factory'); mf.stub!(:native? => true) ; mf }
+    let(:mock_factory){ mf = double('factory'); mf.stub(:native? => true) ; mf }
 
     context '#receive_item' do
       before do
@@ -257,7 +257,7 @@ describe 'collections:', :model_spec, :collection_spec do
         subject.update_or_add('truffula', test_attrs).should == updated_item
         subject.update_or_add('truffula', test_item ).should == test_item
       end
-      it 'FIXME: does not behave right on existing bojects' do
+      it "returns item" do
         updated_item = test_item.dup ; updated_item.name = 'truffula'
         subject.update_or_add('truffula', test_item ).should == updated_item
       end

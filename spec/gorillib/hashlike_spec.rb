@@ -279,7 +279,8 @@ describe Gorillib::Hashlike, :hashlike_spec => true do
       ({}.methods.map(&:to_sym) -
         (@hshlike.methods.map(&:to_sym) +
           HashlikeHelper::OMITTED_METHODS_FROM_HASH +
-          HashlikeHelper::FANCY_HASHLIKE_METHODS
+          HashlikeHelper::FANCY_HASHLIKE_METHODS +
+          [:merge_resultset] # simplecov helper method added to Hash
           )
         ).should == []
     end

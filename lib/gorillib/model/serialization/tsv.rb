@@ -1,4 +1,5 @@
 require_relative './lines'
+require_relative '../serialization'
 
 module Gorillib
   module Model

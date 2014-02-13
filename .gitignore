@@ -53,5 +53,8 @@ pkg
 Gemfile.lock
 .rvmrc
 .rbenv-version
+.rbenv-gemsets
+.ruby-version
+.buildpath
 
 .rbx
