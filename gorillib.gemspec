@@ -32,6 +32,7 @@ Gem::Specification.new do |gem|
   end
 
   gem.add_development_dependency('bundler', ["~> 1.1"])
+  gem.add_development_dependency('log4r', ["~> 1.1.10"])
   gem.add_development_dependency('pry', [">= 0"])
   gem.add_development_dependency('rspec', [">= 2.8"])
   gem.add_development_dependency('rake', [">= 0"])

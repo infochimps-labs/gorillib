@@ -15,8 +15,6 @@ def Log.dump *args
     ].join("\t"))
 end unless Log.respond_to?(:dump)
 
-
-
 # TODO: allow swappable loggers more cleanly
 
   # unless defined?(Log)
