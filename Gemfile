@@ -1,17 +1,6 @@
 source 'https://rubygems.org'
 
-gem   'multi_json',  ">= 1.1"
-gem   'configliere', '>= 0.4.13'
-
-# Only gems that you want listed as development dependencies in the gemspec
-group :development do
-  gem 'bundler',     "~> 1.1"
-  gem 'jeweler',     ">= 1.6",   :require => false
-  gem 'pry'
-  gem 'rspec',       ">= 2.8",   :require => false
-  gem 'rake',                    :require => false
-  gem 'yard',        ">= 0.7",   :require => false
-end
+gemspec
 
 group :docs do
   gem 'redcarpet',   ">= 2.1",   :platform => [:ruby]
