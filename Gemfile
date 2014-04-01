@@ -1,7 +1,6 @@
 source 'https://rubygems.org'
 
 gem   'multi_json',  ">= 1.1"
-gem   'json'
 gem   'configliere', '>= 0.4.13'
 
 # Only gems that you want listed as development dependencies in the gemspec
@@ -22,12 +21,10 @@ end
 # Gems for testing and coverage
 group :test do
   gem 'simplecov',   ">= 0.5",   :platform => [:ruby_19],   :require => false
-  gem 'json'
 end
 
 # Gems you would use if hacking on this gem (rather than with it)
 group :support do
-  gem 'pry'
   # gem 'perftools.rb',            :platform => [:mri]
   #
   gem 'guard',       ">= 1.0",   :platform => [:ruby_19]
